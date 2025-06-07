@@ -25,8 +25,6 @@ export function LoginForm() {
         setError("")
 
         try {
-            console.log("Enviando dados de login:", formData.email)
-
             const response = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: {
@@ -35,11 +33,8 @@ export function LoginForm() {
                 body: JSON.stringify(formData),
             })
 
-            console.log("Status da resposta:", response.status)
-
             if (response.ok) {
                 const data = await response.json()
-                console.log("Login bem-sucedido, dados recebidos:", data)
 
                 // Armazenar token e dados do usuário
                 localStorage.setItem("token", data.token)
@@ -52,13 +47,12 @@ export function LoginForm() {
                     window.location.href = "/dashboard"
                 }
             } else {
-                const errorData = await response.json().catch(() => ({ message: "Erro desconhecido" }))
-                console.log("Erro de login:", errorData)
-                setError(errorData.message || "Erro ao fazer login")
+                const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
+                setError(errorData.message || "Login error")
             }
         } catch (err) {
-            console.error("Erro de conexão:", err)
-            setError("Erro de conexão. Verifique se o servidor está funcionando e tente novamente.")
+            console.error("Connection error:", err)
+            setError("Connection error. Please check if the server is running and try again.")
         } finally {
             setIsLoading(false)
         }
@@ -75,7 +69,7 @@ export function LoginForm() {
         <Card className="w-full max-w-md">
             <CardHeader>
                 <CardTitle>Login</CardTitle>
-                <CardDescription>Entre com suas credenciais para acessar o sistema</CardDescription>
+                <CardDescription>Enter your credentials to access the system</CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>
                 <CardContent className="space-y-4">
@@ -91,7 +85,7 @@ export function LoginForm() {
                             id="email"
                             name="email"
                             type="email"
-                            placeholder="seu@email.com"
+                            placeholder="your@email.com"
                             value={formData.email}
                             onChange={handleChange}
                             required
@@ -111,16 +105,16 @@ export function LoginForm() {
                     </div>
                 </CardContent>
 
-                <CardFooter className="flex flex-col space-y-4">
+                <CardFooter className="flex flex-col space-y-4 mt-3">
                     <Button type="submit" className="w-full" disabled={isLoading}>
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Entrar
+                        Login
                     </Button>
 
                     <div className="text-center text-sm">
-                        Não tem conta?{" "}
+                        Don't have an account?{" "}
                         <Link href="/register" className="text-primary hover:underline">
-                            Registar-se
+                            Register
                         </Link>
                     </div>
                 </CardFooter>

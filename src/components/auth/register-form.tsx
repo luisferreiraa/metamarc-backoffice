@@ -34,7 +34,7 @@ export function RegisterForm() {
         }
 
         try {
-            const response = await fetch("/api/auth/register", {
+            const response = await fetch("http://89.28.236.11:3000/api/auth/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -147,7 +147,7 @@ export function RegisterForm() {
                     </div>
                 </CardContent>
 
-                <CardFooter className="flex flex-col space-y-4">
+                <CardFooter className="flex flex-col space-y-4 mt-3">
                     <Button type="submit" className="w-full" disabled={isLoading}>
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Create Account
