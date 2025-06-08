@@ -59,7 +59,7 @@ export function Navigation() {
                         <span className="text-sm text-gray-600">Olá, {user.name}</span>
 
                         {/* Menu para Admins */}
-                        <RoleGuard allowedRoles={["ADMIN"]}>
+                        <RoleGuard allowedRoles={["ADMIN"]} mode="silent">
                             <Link href="/admin">
                                 <Button variant="ghost" size="sm">
                                     <Shield className="mr-2 h-4 w-4" />
@@ -83,6 +83,6 @@ export function Navigation() {
                     </div>
                 </div>
             </div>
-        </nav>
+        </nav >
     )
 }

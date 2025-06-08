@@ -8,9 +8,10 @@ interface RoleGuardProps {
     children: React.ReactNode
     allowedRoles: string[]
     fallback?: React.ReactNode
+    mode?: "default" | "silent"
 }
 
-export function RoleGuard({ children, allowedRoles, fallback }: RoleGuardProps) {
+export function RoleGuard({ children, allowedRoles, fallback, mode = "default" }: RoleGuardProps) {
     const [hasPermission, setHasPermission] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
 
@@ -44,6 +45,9 @@ export function RoleGuard({ children, allowedRoles, fallback }: RoleGuardProps) 
     }
 
     if (!hasPermission) {
+        if (mode === "silent") {
+            return null
+        }
         return fallback || <div>You don't have permission to access this content.</div>
     }
 
