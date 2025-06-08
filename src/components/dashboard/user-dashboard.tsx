@@ -34,7 +34,7 @@ export function UserDashboard() {
     const handleRenewApiKey = async () => {
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch("/api/user/renew-api-key", {
+            const response = await fetch("http://89.28.236.11:3000/api/apiKey/renew-api-key", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
