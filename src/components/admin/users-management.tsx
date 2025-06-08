@@ -31,15 +31,18 @@ export function UsersManagement() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
     const [showCreateDialog, setShowCreateDialog] = useState(false)
     const [showEditDialog, setShowEditDialog] = useState(false)
+    const [page, setPage] = useState(1)
+    const [limit] = useState(20)
+    const [totalPages, setTotalPages] = useState(1)
 
     useEffect(() => {
         fetchUsers()
-    }, [])
+    }, [page])
 
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch("http://89.28.236.11:3000/api/admin/users", {
+            const response = await fetch(`http://89.28.236.11:3000/api/admin/users?page=${page}&limit=${limit}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -48,6 +51,7 @@ export function UsersManagement() {
             if (response.ok) {
                 const data = await response.json()
                 setUsers(data.data || [])
+                setTotalPages(data.meta?.pages || 1)
             }
         } catch (error) {
             console.error("Error loading users:", error)
@@ -143,7 +147,14 @@ export function UsersManagement() {
     )
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid mb-4"></div>
+                    <p className="text-gray-600">Loading users...</p>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -272,6 +283,31 @@ export function UsersManagement() {
                                 ))}
                             </TableBody>
                         </Table>
+
+                        {/* Pagination */}
+                        <div className="flex items-center justify-center mt-4 space-x-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={page === 1}
+                                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                            >
+                                Previous
+                            </Button>
+
+                            <span className="text-sm">
+                                Page {page} of {totalPages}
+                            </span>
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={page === totalPages}
+                                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                            >
+                                Next
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
 
