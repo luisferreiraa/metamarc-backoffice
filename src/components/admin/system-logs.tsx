@@ -189,7 +189,7 @@ export function SystemLogsManagement() {
                                 onClick={handleDeleteSelected}
                                 disabled={selectedLogIds.length === 0}
                             >
-                                Delete selected ({selectedLogIds.length})
+                                Delete ({selectedLogIds.length})
                             </Button>
                         </div>
 

@@ -15,6 +15,7 @@ interface UserData {
     tier: string
     isActive: boolean
     apiKey: string
+    apiKeyExpiresAt: string
     createdAt: string
 }
 
@@ -63,6 +64,8 @@ export function UserDashboard() {
     if (!user) {
         return <div>User not found</div>
     }
+
+    console.log(user)
 
     return (
 
@@ -118,6 +121,7 @@ export function UserDashboard() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="p-3 bg-muted rounded-md font-mono text-sm break-all">{user.apiKey}</div>
+                            <div className="p-3 bg-muted rounded-md font-mono text-sm break-all">{user.apiKeyExpiresAt ? new Date(user.apiKeyExpiresAt).toLocaleString() : "N/A"}</div>
                             <Button onClick={handleRenewApiKey} variant="outline" className="w-full">
                                 <RefreshCw className="mr-2 h-4 w-4" />
                                 Renovate API Key

@@ -1,18 +1,38 @@
-import { LoginForm } from "@/components/auth/login-form"
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export default function HomePage() {
-  // Se já estiver autenticado, redirecionar para o dashboard
-  // Esta lógica é implementada pelo sistema de auth
+  const router = useRouter()
+
+  useEffect(() => {
+    // Verificar se já está logado
+    const token = localStorage.getItem("token")
+    const userStr = localStorage.getItem("user")
+
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr)
+        // Redirecionar baseado no role
+        if (user.role === "ADMIN") {
+          router.push("/admin")
+        } else {
+          router.push("/dashboard")
+        }
+      } catch (error) {
+        // Se houver erro, redirecionar para landing
+        router.push("/landing")
+      }
+    } else {
+      // Se não estiver logado, mostrar landing page
+      router.push("/landing")
+    }
+  }, [router])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Metamarc API</h2>
-          <p className="mt-2 text-sm text-gray-600">Login to access the dashboard</p>
-        </div>
-        <LoginForm />
-      </div>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
     </div>
   )
 }
