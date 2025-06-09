@@ -31,6 +31,7 @@ export function SystemLogsManagement() {
     const [page, setPage] = useState(1)
     const [limit] = useState(20)
     const [totalPages, setTotalPages] = useState(1)
+    const [selectedLogIds, setSelectedLogIds] = useState<string[]>([])
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -69,6 +70,7 @@ export function SystemLogsManagement() {
                 const data = await response.json()
                 setLogs(data.data || [])
                 setTotalPages(data.meta.pages || 1)
+                setSelectedLogIds([])
             } else {
                 console.error("Failed to fetch logs:", response.status)
             }
@@ -90,6 +92,52 @@ export function SystemLogsManagement() {
 
     const handleNextPage = () => {
         if (page < totalPages) setPage(page + 1)
+    }
+
+    const toggleSelectLog = (logId: string) => {
+        setSelectedLogIds((prevSelected) =>
+            prevSelected.includes(logId)
+                ? prevSelected.filter((id) => id !== logId)
+                : [...prevSelected, logId]
+        )
+    }
+
+    const toggleSelectAll = () => {
+        if (selectedLogIds.length === logs.length) {
+            setSelectedLogIds([])
+        } else {
+            setSelectedLogIds(logs.map((log) => log.id))
+        }
+    }
+
+    const handleDeleteSelected = async () => {
+        if (selectedLogIds.length === 0) return
+
+        if (!window.confirm(`Are you sure you want to delete ${selectedLogIds.length} log(s)?`)) {
+            return
+        }
+
+        try {
+            const token = localStorage.getItem("token")
+
+            const response = await fetch(`http://89.28.236.11:3000/api/admin/logs`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ ids: selectedLogIds }),
+            })
+
+            if (response.ok) {
+                await fetchLogs()
+                setSelectedLogIds([])
+            } else {
+                console.error("Failed to delete logs:", response.status)
+            }
+        } catch (error) {
+            console.error("Error deleting logs:", error)
+        }
     }
 
     if (isLoading) {
@@ -134,9 +182,27 @@ export function SystemLogsManagement() {
                             />
                         </div>
 
+                        <div className="flex justify-end mb-4">
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleDeleteSelected}
+                                disabled={selectedLogIds.length === 0}
+                            >
+                                Delete selected ({selectedLogIds.length})
+                            </Button>
+                        </div>
+
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedLogIds.length === logs.length && logs.length > 0}
+                                            onChange={toggleSelectAll}
+                                        />
+                                    </TableHead>
                                     <TableHead>User ID</TableHead>
                                     <TableHead>Action</TableHead>
                                     <TableHead>IP</TableHead>
@@ -147,6 +213,13 @@ export function SystemLogsManagement() {
                             <TableBody>
                                 {logs.map((log) => (
                                     <TableRow key={log.id}>
+                                        <TableCell>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedLogIds.includes(log.id)}
+                                                onChange={() => toggleSelectLog(log.id)}
+                                            />
+                                        </TableCell>
                                         <TableCell className="font-medium">{log.user.name}</TableCell>
                                         <TableCell>{log.action}</TableCell>
                                         <TableCell>{log.ip}</TableCell>
