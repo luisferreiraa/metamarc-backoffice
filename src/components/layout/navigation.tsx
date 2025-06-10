@@ -45,7 +45,7 @@ export function Navigation() {
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center space-x-4">
-                        <Link href={user.role === "ADMIN" ? "/admin" : "/dashboard"} className="font-bold text-xl">
+                        <Link href={user.role === "ADMIN" ? "/admin" : "/dashboard"} className="font-bold text-xl text-[#705085]">
                             Metamarc API
                         </Link>
 

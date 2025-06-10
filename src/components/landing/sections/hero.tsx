@@ -6,16 +6,16 @@ import Link from "next/link"
 
 export function Hero() {
     return (
-        <section className="relative bg-gradient-to-br from-slate-50 to-blue-50 py-20 lg:py-32">
+        <section className="relative bg-gradient-to-br from-slate-50 to-[#FDF6F8] py-20 lg:py-32">
             <div className="container mx-auto px-4">
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                     <div className="space-y-8">
                         <div className="space-y-4">
-                            <h1 className="text-4xl lg:text-6xl font-bold text-slate-500 leading-tight">
+                            <h1 className="text-4xl lg:text-6xl font-bold text-[#CCC1D4] leading-tight">
                                 UNIMARC Made{" "}
-                                <span className="text-pink-500 relative">
+                                <span className="text-[#E88596] relative">
                                     Simple
-                                    <div className="absolute -bottom-2 left-0 w-full h-1 bg-blue-200 rounded"></div>
+                                    <div className="absolute -bottom-2 left-0 w-full h-1 bg-[#F7D3DA] rounded"></div>
                                 </span>
                             </h1>
                             <p className="text-xl text-slate-600 leading-relaxed">
@@ -31,9 +31,8 @@ export function Hero() {
 
                         <div className="flex flex-col sm:flex-row gap-4">
                             <Link href="/register">
-                                <Button size="lg" className="text-lg px-8 py-6">
-                                    Join Waitlist
-                                    <ArrowRight className="ml-2 h-5 w-5" />
+                                <Button variant={"defaultPlum"} size="lg" className="text-lg px-8 py-6">
+                                    Try for free
                                 </Button>
                             </Link>
                             <Button size="lg" variant="outline" className="text-lg px-8 py-6">
@@ -56,11 +55,11 @@ export function Hero() {
                     <div className="relative">
                         <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-200">
                             <div className="flex items-center space-x-2 mb-6">
-                                <Code className="h-6 w-6 text-blue-600" />
+                                <Code className="h-6 w-6 text-[#CCC1D4]" />
                                 <span className="font-semibold text-slate-800">API Response Preview</span>
                             </div>
-                            <div className="bg-slate-900 rounded-lg p-4 text-sm font-mono text-green-400 overflow-x-auto">
-                                <div className="text-blue-300">GET /api/fields/100</div>
+                            <div className="bg-[#705085] rounded-lg p-4 text-sm font-mono text-green-400 overflow-x-auto">
+                                <div className="text-[#E88596]">GET /api/fields/100</div>
                                 <div className="mt-2 text-white">
                                     {`{
   "tag": "100",
@@ -78,8 +77,8 @@ export function Hero() {
                                 </div>
                             </div>
                         </div>
-                        <div className="absolute -top-4 -right-4 w-24 h-24 bg-blue-100 rounded-full opacity-50"></div>
-                        <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-slate-100 rounded-full opacity-30"></div>
+                        {/* <div className="absolute -top-4 -right-4 w-24 h-24 bg-[blue-100] rounded-full opacity-50"></div>
+                        <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-slate-100 rounded-full opacity-30"></div> */}
                     </div>
                 </div>
             </div>

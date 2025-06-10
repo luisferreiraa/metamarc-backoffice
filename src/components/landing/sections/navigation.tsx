@@ -13,7 +13,7 @@ export function Navigation() {
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
-                        <Link href="/landing" className="text-2xl font-bold text-slate-800">
+                        <Link href="/landing" className="text-2xl font-bold text-[#705085]">
                             Metamarc API
                         </Link>
                     </div>
@@ -37,7 +37,7 @@ export function Navigation() {
                                 <Button variant="ghost">Login</Button>
                             </Link>
                             <Link href="/register">
-                                <Button variant={"defaultPink"}>Get Started</Button>
+                                <Button variant={"defaultPlum"}>Get Started</Button>
                             </Link>
                         </div>
                     </div>
