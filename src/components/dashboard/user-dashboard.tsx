@@ -24,12 +24,43 @@ export function UserDashboard() {
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        // Carregear dados do utilizador
-        const userData = localStorage.getItem("user")
-        if (userData) {
-            setUser(JSON.parse(userData))
+        const fetchUserData = async () => {
+            const token = localStorage.getItem("token")
+            const userData = localStorage.getItem("user")
+
+            if (!token || !userData) {
+                setIsLoading(false)
+                return
+            }
+
+            try {
+                const response = await fetch("http://89.28.236.11:3000/api/auth/get-api-key", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
+
+                if (response.ok) {
+                    const apiData = await response.json()
+                    const parsedUser = JSON.parse(userData)
+
+                    // Combina os dados do localStorage com os dados do backend
+                    setUser({
+                        ...parsedUser,
+                        apiKey: apiData.apiKey,
+                        apiKeyExpiresAt: apiData.apiKeyExpiresAt,
+                    })
+                } else {
+                    console.error("Failed to fetch API key")
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error)
+            }
+
+            setIsLoading(false)
         }
-        setIsLoading(false)
+
+        fetchUserData()
     }, [])
 
     const handleRenewApiKey = async () => {
