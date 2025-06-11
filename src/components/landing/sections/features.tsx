@@ -26,7 +26,7 @@ export function Features() {
         <section id="features" className="py-20 bg-white">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">Get Programmatic Access to:</h2>
+                    <h2 className="text-3xl lg:text-4xl font-bold text-[#CCC1D4] mb-4">Get Programmatic Access to:</h2>
                     <p className="text-xl text-slate-600 max-w-3xl mx-auto">
                         Integrate UNIMARC rules directly into your workflows—no manual lookups required.
                     </p>
@@ -34,10 +34,10 @@ export function Features() {
 
                 <div className="grid md:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
-                        <Card key={index} className="border-2 border-gray-100 hover:border-blue-200 transition-colors">
+                        <Card key={index} className="border-2 border-gray-100 hover:border-[#705085] transition-colors">
                             <CardHeader>
-                                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                                    <feature.icon className="h-6 w-6 text-blue-600" />
+                                <div className="w-12 h-12 bg-[#FCEEF0] rounded-lg flex items-center justify-center mb-4">
+                                    <feature.icon className="h-6 w-6 text-[#E88596]" />
                                 </div>
                                 <CardTitle className="text-xl text-slate-900">✅ {feature.title}</CardTitle>
                             </CardHeader>

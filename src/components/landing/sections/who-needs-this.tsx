@@ -32,7 +32,7 @@ export function WhoNeedsThis() {
     ]
 
     return (
-        <section id="who-needs" className="py-20 bg-slate-50">
+        <section id="who-needs" className="py-20 bg-[#FDF6F8]">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">Who Needs This?</h2>

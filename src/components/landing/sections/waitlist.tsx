@@ -57,7 +57,7 @@ export function Waitlist() {
     }
 
     return (
-        <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-100">
+        <section className="py-20 bg-gradient-to-br from-slate-50 to-[#FDF6F8]">
             <div className="container mx-auto px-4">
                 <div className="max-w-2xl mx-auto text-center">
                     <div className="mb-12">
