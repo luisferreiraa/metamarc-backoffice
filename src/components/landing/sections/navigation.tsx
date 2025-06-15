@@ -9,35 +9,35 @@ export function Navigation() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
 
     return (
-        <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <nav className="bg-black sticky top-0 z-50">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
-                        <Link href="/landing" className="text-2xl font-bold text-[#705085]">
+                        <Link href="/landing" className="text-2xl font-bold text-[#66b497] [font-family:var(--font-poppins)]">
                             Metamarc API
                         </Link>
                     </div>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-8">
-                        <a href="#features" className="text-gray-600 hover:text-slate-800 transition-colors">
+                    <div className="hidden md:flex items-center space-x-15 [font-family:var(--font-poppins)]">
+                        <a href="#features" className="text-white hover:font-bold transition-colors">
                             Features
                         </a>
-                        <a href="#who-needs" className="text-gray-600 hover:text-slate-800 transition-colors">
+                        <a href="#who-needs" className="text-white hover:font-bold transition-colors">
                             Who Needs This
                         </a>
-                        <a href="#api-preview" className="text-gray-600 hover:text-slate-800 transition-colors">
+                        <a href="#api-preview" className="text-white hover:font-bold transition-colors">
                             API Preview
                         </a>
-                        <a href="#faq" className="text-gray-600 hover:text-slate-800 transition-colors">
+                        <a href="#faq" className="text-white hover:font-bold transition-colors">
                             FAQ
                         </a>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-7">
                             <Link href="/login">
-                                <Button variant="ghost">Login</Button>
+                                <Button variant={"none"}>Log in</Button>
                             </Link>
                             <Link href="/register">
-                                <Button variant={"defaultPlum"}>Get Started</Button>
+                                <Button variant={"main"}>Sign up</Button>
                             </Link>
                         </div>
                     </div>
