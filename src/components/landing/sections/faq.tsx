@@ -36,28 +36,32 @@ export function FAQ() {
     ]
 
     return (
-        <section id="faq" className="py-20 bg-white">
+        <section id="faq" className="py-20 bg-black text-white [font-family:var(--font-poppins)]">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <HelpCircle className="h-8 w-8 text-blue-600" />
+                    <div className="w-16 h-16 bg-[#66b497]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <HelpCircle className="h-8 w-8 text-[#66b497]" />
                     </div>
-                    <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">FAQ</h2>
-                    <p className="text-xl text-slate-600 max-w-2xl mx-auto">Common questions about the UNIMARC API project.</p>
+                    <h2 className="text-3xl lg:text-4xl font-bold mb-4">FAQ</h2>
+                    <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                        Common questions about the UNIMARC API project.
+                    </p>
                 </div>
 
                 <div className="max-w-4xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-6">
                         {faqs.map((faq, index) => (
-                            <Card key={index} className="border-2 border-gray-100 hover:border-blue-200 transition-colors">
+                            <Card key={index} className="bg-zinc-900 border border-zinc-800 hover:border-[#66b497] transition-colors">
                                 <CardHeader>
-                                    <CardTitle className="text-lg text-slate-900 flex items-start space-x-2">
-                                        <span className="text-blue-600 font-bold">❓</span>
+                                    <CardTitle className="text-lg text-white flex items-start space-x-2">
+                                        <span className="text-[#66b497] font-bold">❓</span>
                                         <span>{faq.question}</span>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <CardDescription className="text-slate-600 text-base leading-relaxed">{faq.answer}</CardDescription>
+                                    <CardDescription className="text-gray-300 text-base leading-relaxed">
+                                        {faq.answer}
+                                    </CardDescription>
                                 </CardContent>
                             </Card>
                         ))}
@@ -65,12 +69,11 @@ export function FAQ() {
                 </div>
 
                 <div className="mt-16 text-center">
-                    <Card className="bg-slate-50 border-slate-200 max-w-2xl mx-auto">
-                        <CardContent className="pt-8">
-                            <h3 className="text-xl font-bold text-slate-900 mb-4">Why Wait?</h3>
-                            <p className="text-slate-700 text-lg leading-relaxed">
-                                Manual lookups are so last century. Automate accuracy with the first API built for UNIMARC's complex
-                                specs.
+                    <Card className="bg-zinc-900 border border-zinc-800 max-w-2xl mx-auto">
+                        <CardContent className="pt-8 pb-10">
+                            <h3 className="text-xl font-bold text-white mb-4">Why Wait?</h3>
+                            <p className="text-gray-300 text-lg leading-relaxed">
+                                Manual lookups are so last century. Automate accuracy with the first API built for UNIMARC's complex specs.
                             </p>
                         </CardContent>
                     </Card>

@@ -1,6 +1,11 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
 import { CheckCircle, Database, Zap, Code2 } from "lucide-react"
 
 export function Features() {
@@ -8,53 +13,64 @@ export function Features() {
         {
             icon: Database,
             title: "All fields and subfields",
-            description: "Retrieve exact specifications in JSON/XML format for every UNIMARC field and subfield.",
+            description:
+                "Retrieve exact specifications in JSON/XML format for every UNIMARC field and subfield.",
         },
         {
             icon: CheckCircle,
             title: "Critical metadata",
-            description: "Check repeatability, mandatory status, and scope at a glance without manual lookups.",
+            description:
+                "Check repeatability, mandatory status, and scope at a glance without manual lookups.",
         },
         {
             icon: Code2,
             title: "Machine-readable clarity",
-            description: "Perfect for developers building cataloging tools, validators, or training datasets.",
+            description:
+                "Perfect for developers building cataloging tools, validators, or training datasets.",
         },
     ]
 
     return (
-        <section id="features" className="py-20 bg-white">
+        <section id="features" className="py-20 bg-black">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl lg:text-4xl font-bold text-[#CCC1D4] mb-4">Get Programmatic Access to:</h2>
-                    <p className="text-lg text-slate-600 max-w-3xl mx-auto">
-                        Integrate UNIMARC rules directly into your workflows—no manual lookups required.
+                    <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 [font-family:var(--font-poppins)]">
+                        Get Programmatic Access to:
+                    </h2>
+                    <p className="text-lg text-white/80 max-w-3xl mx-auto [font-family:var(--font-poppins)]">
+                        Integrate UNIMARC rules directly into your workflows—no manual
+                        lookups required.
                     </p>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
-                        <Card key={index} className="border-2 border-gray-100 hover:border-[#705085] transition-colors">
-                            <CardHeader>
-                                <div className="w-12 h-12 bg-[#FCEEF0] rounded-lg flex items-center justify-center mb-4">
-                                    <feature.icon className="h-6 w-6 text-[#E88596]" />
+                        <Card
+                            key={index}
+                            className="bg-[#0e0e0e] border border-white/10 hover:border-[#66b497] transition duration-300 group"
+                        >
+                            <CardHeader className="flex flex-col items-start gap-4">
+                                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <feature.icon className="h-6 w-6 text-[#66b497]" />
                                 </div>
-                                <CardTitle className="text-xl text-slate-900">✅ {feature.title}</CardTitle>
+                                <CardTitle className="text-xl text-white">
+                                    {feature.title}
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <CardDescription className="text-slate-600 text-base leading-relaxed">
+                                <p className="text-white/80 text-base leading-relaxed">
                                     {feature.description}
-                                </CardDescription>
+                                </p>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
 
-                <div className="mt-12 text-center">
-                    <div className="inline-flex items-center space-x-2 bg-blue-50 px-6 py-3 rounded-full">
-                        <Zap className="h-5 w-5 text-blue-600" />
-                        <span className="text-blue-800 font-semibold">
-                            🔌 Integrate UNIMARC rules directly into your workflows—no manual lookups required.
+                <div className="mt-20 text-center">
+                    <div className="inline-flex items-center gap-2 px-6 py-4 bg-[#1a1a1a] rounded-full border border-white/10 text-white text-sm">
+                        <Zap className="h-5 w-5 text-[#66b497]" />
+                        <span>
+                            Instantly access the complete UNIMARC Bibliographic and Holdings Manuals.
                         </span>
                     </div>
                 </div>

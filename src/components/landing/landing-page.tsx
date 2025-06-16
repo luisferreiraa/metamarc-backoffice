@@ -8,6 +8,7 @@ import { Waitlist } from "./sections/waitlist"
 import { FAQ } from "./sections/faq"
 import { Footer } from "./sections/footer"
 import { Navigation } from "./sections/navigation"
+import { PricingTiers } from "./sections/PricingTiers"
 
 export function LandingPage() {
     return (
@@ -17,7 +18,7 @@ export function LandingPage() {
             <Features />
             <WhoNeedsThis />
             <ApiPreview />
-            <Waitlist />
+            <PricingTiers />
             <FAQ />
             <Footer />
         </div>

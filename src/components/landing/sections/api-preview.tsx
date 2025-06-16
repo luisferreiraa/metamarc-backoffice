@@ -1,9 +1,7 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Code, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Copy, Code } from "lucide-react"
 
 export function ApiPreview() {
     const copyToClipboard = (text: string) => {
@@ -11,69 +9,59 @@ export function ApiPreview() {
     }
 
     return (
-        <section id="api-preview" className="py-20 bg-white">
+        <section className="bg-black py-20 lg:py-32">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">See It In Action</h2>
-                    <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-                        Clean, structured data that integrates seamlessly with your existing workflows.
+                    <h2 className="text-4xl lg:text-5xl font-bold text-white leading-tight [font-family:var(--font-poppins)]">
+                        Preview the <span className="text-[#66b497]">UNIMARC API</span>
+                    </h2>
+                    <p className="mt-4 text-lg text-white/80 [font-family:var(--font-poppins)] max-w-2xl mx-auto">
+                        A real look into the request and response structure. Fast, clear, and developer-friendly.
                     </p>
                 </div>
 
-                <div className="max-w-4xl mx-auto">
-                    <div className="grid lg:grid-cols-2 gap-8">
-                        {/* Request Example */}
-                        <Card className="border-2 border-gray-200">
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-2">
-                                        <Code className="h-5 w-5 text-blue-600" />
-                                        <CardTitle className="text-lg">API Request</CardTitle>
-                                    </div>
-                                    <Badge variant="secondary">GET</Badge>
-                                </div>
-                                <CardDescription>Simple HTTP requests to get field specifications</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="bg-slate-900 rounded-lg p-4 relative">
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        className="absolute top-2 right-2 text-gray-400 hover:text-white"
-                                        onClick={() => copyToClipboard("curl -X GET 'https://api.unimarc.dev/fields/245'")}
-                                    >
-                                        <Copy className="h-4 w-4" />
-                                    </Button>
-                                    <code className="text-green-400 text-sm">
-                                        <div className="text-blue-300">curl -X GET \</div>
-                                        <div className="ml-2">'https://api.unimarc.dev/fields/245'</div>
-                                    </code>
-                                </div>
-                            </CardContent>
-                        </Card>
+                <div className="grid lg:grid-cols-2 gap-8 text-white font-mono">
+                    {/* Request */}
+                    <div className="bg-[#111] p-6 rounded-2xl relative border border-white/10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <Code className="w-4 h-4 text-[#66b497]" />
+                                <h3 className="text-white text-sm font-semibold tracking-wide uppercase [font-family:var(--font-poppins)]">
+                                    API Request
+                                </h3>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-white/60 hover:text-white"
+                                onClick={() =>
+                                    copyToClipboard("curl -X GET 'https://api.unimarc.dev/fields/245'")
+                                }
+                            >
+                                <Copy className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <pre className="text-[#66b497] whitespace-pre-wrap text-sm leading-relaxed">
+                            {`curl -X GET \\
+  'https://api.unimarc.dev/fields/245'`}
+                        </pre>
+                    </div>
 
-                        {/* Response Example */}
-                        <Card className="border-2 border-gray-200">
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-2">
-                                        <Code className="h-5 w-5 text-green-600" />
-                                        <CardTitle className="text-lg">API Response</CardTitle>
-                                    </div>
-                                    <Badge variant="default" className="bg-green-100 text-green-800">
-                                        JSON
-                                    </Badge>
-                                </div>
-                                <CardDescription>Structured, machine-readable field definitions</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="bg-slate-900 rounded-lg p-4 relative overflow-x-auto">
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        className="absolute top-2 right-2 text-gray-400 hover:text-white"
-                                        onClick={() =>
-                                            copyToClipboard(`{
+                    {/* Response */}
+                    <div className="bg-[#111] p-6 rounded-2xl relative border border-white/10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <Code className="w-4 h-4 text-[#66b497]" />
+                                <h3 className="text-white text-sm font-semibold tracking-wide uppercase [font-family:var(--font-poppins)]">
+                                    API Response
+                                </h3>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-white/60 hover:text-white"
+                                onClick={() =>
+                                    copyToClipboard(`{
   "tag": "245",
   "name": "Title and Statement of Responsibility",
   "repeatable": false,
@@ -92,13 +80,13 @@ export function ApiPreview() {
       "mandatory": false
     }
   ]
-}`)
-                                        }
-                                    >
-                                        <Copy className="h-4 w-4" />
-                                    </Button>
-                                    <code className="text-white text-sm">
-                                        <pre className="whitespace-pre-wrap">{`{
+}`)}
+                            >
+                                <Copy className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <pre className="whitespace-pre-wrap text-white text-sm leading-relaxed">
+                            {`{
   "tag": "245",
   "name": "Title and Statement of Responsibility",
   "repeatable": false,
@@ -111,33 +99,14 @@ export function ApiPreview() {
       "mandatory": true
     },
     {
-      "code": "b", 
+      "code": "b",
       "name": "Remainder of title",
       "repeatable": false,
       "mandatory": false
     }
   ]
-}`}</pre>
-                                    </code>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Testimonial */}
-                    <div className="mt-12 text-center">
-                        <Card className="bg-blue-50 border-blue-200 max-w-2xl mx-auto">
-                            <CardContent className="pt-6">
-                                <blockquote className="text-lg text-slate-700 italic mb-4">
-                                    "This solves a pain point we've had for years! No more hunting through PDF manuals during cataloging
-                                    sessions."
-                                </blockquote>
-                                <div className="text-sm text-slate-600">
-                                    <strong>— Future Beta User</strong>
-                                    <div>Senior Cataloging Librarian</div>
-                                </div>
-                            </CardContent>
-                        </Card>
+}`}
+                        </pre>
                     </div>
                 </div>
             </div>
