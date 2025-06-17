@@ -1,30 +1,52 @@
-// app/api/subscribe/route.ts
-import { NextResponse } from 'next/server'
+// app/api/subscription/subscribe/route.ts
+import { type NextRequest, NextResponse } from 'next/server'
 
-export async function POST(request: Request) {
+export const dynamic = 'force-dynamic'
+
+export async function POST(request: NextRequest) {
     try {
-        const { tier } = await request.json()
-        const backendUrl = `${process.env.BACKEND_URL}/subscribe`
+        // 1. Obter token CORRETAMENTE
+        const token = request.cookies.get('authToken')?.value ||
+            request.headers.get('Authorization')?.replace('Bearer ', '')
 
-        const response = await fetch(backendUrl, {
+        if (!token) {
+            return NextResponse.json(
+                { error: 'Token de autenticação não encontrado' },
+                { status: 401 }
+            )
+        }
+
+        // 2. Ler corpo da requisição
+        const { tier } = await request.json()
+
+        // 3. Configurar chamada ao backend
+        const backendUrl = "http://89.28.236.11:3000/subscription/subscribe"
+        const backendResponse = await fetch(backendUrl, {
             method: 'POST',
             headers: {
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
-                'Authorization': request.headers.get('Authorization') || ''
+                'Origin': request.nextUrl.origin // Adiciona origem para CORS
             },
             body: JSON.stringify({ tier })
         })
 
-        const data = await response.json()
-
-        if (!response.ok) {
-            return NextResponse.json({ error: data.error }, { status: response.status })
+        // 4. Tratar resposta
+        if (!backendResponse.ok) {
+            const errorText = await backendResponse.text()
+            console.error('Erro no backend:', errorText)
+            return NextResponse.json(
+                { error: 'Falha na comunicação com o serviço de assinatura' },
+                { status: 502 }
+            )
         }
 
-        return NextResponse.json(data)
+        return NextResponse.json(await backendResponse.json())
+
     } catch (error) {
+        console.error('Erro interno:', error)
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: 'Ocorreu um erro inesperado' },
             { status: 500 }
         )
     }

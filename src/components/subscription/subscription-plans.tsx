@@ -31,18 +31,48 @@ export default function SubscriptionPlans() {
     const router = useRouter()
 
     const handleSubscribe = async (tier: string) => {
-        setLoading(true)
+        setLoading(true);
         try {
-            const response = await axios.post('/api/subscribe', { tier })
-            window.location.href = response.data.url // Redireciona para o checkout do Stripe
-        } catch (error) {
-            console.error('Subscription error:', error)
-            alert('Ocorreu um erro ao processar sua subscrição')
-        } finally {
-            setLoading(false)
-        }
-    }
+            // 1. Obter o token JWT (ajuste conforme seu sistema de autenticação)
+            const token = localStorage.getItem('token')
 
+            if (!token) {
+                throw new Error('Usuário não autenticado');
+            }
+
+            // 2. Fazer a requisição com o token no header
+            const response = await axios.post(
+                '/api/subscription/subscribe',
+                { tier },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            // 3. Redirecionar para o checkout do Stripe
+            if (response.data.url) {
+                window.location.href = response.data.url;
+            } else {
+                throw new Error('URL de checkout não recebida');
+            }
+
+        } catch (error) {
+            console.error('Erro na subscrição:', error);
+
+            // Tratamento específico para erro 401
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                alert('Sessão expirada. Por favor, faça login novamente.');
+                router.push('/login');
+            } else {
+                alert(error instanceof Error ? error.message : 'Erro ao processar pagamento');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
         <div className="max-w-7xl mx-auto px-4 py-12">
             <h1 className="text-3xl font-bold text-center mb-8">Escolha seu Plano</h1>
