@@ -13,7 +13,7 @@ export function ApiPreview() {
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
                     <h2 className="text-4xl lg:text-5xl font-bold text-white leading-tight [font-family:var(--font-poppins)]">
-                        Preview the <span className="text-[#66b497]">UNIMARC API</span>
+                        Preview the <span className="text-[#66b497]">Metamarc API</span>
                     </h2>
                     <p className="mt-4 text-lg text-white/80 [font-family:var(--font-poppins)] max-w-2xl mx-auto">
                         A real look into the request and response structure. Fast, clear, and developer-friendly.

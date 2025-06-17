@@ -38,7 +38,7 @@ export function Features() {
                         Get Programmatic Access to:
                     </h2>
                     <p className="text-lg text-white/80 max-w-3xl mx-auto [font-family:var(--font-poppins)]">
-                        Integrate UNIMARC rules directly into your workflows—no manual
+                        Integrate UNIMARC rules directly into your workflows - no manual
                         lookups required.
                     </p>
                 </div>
@@ -70,7 +70,7 @@ export function Features() {
                     <div className="inline-flex items-center gap-2 px-6 py-4 bg-[#1a1a1a] rounded-full border border-white/10 text-white text-sm">
                         <Zap className="h-5 w-5 text-[#66b497]" />
                         <span>
-                            Instantly access the complete UNIMARC Bibliographic and Holdings Manuals.
+                            Instantly access the complete UNIMARC Bibliographic and Holdings Formats.
                         </span>
                     </div>
                 </div>

@@ -7,7 +7,7 @@ const pricingTiers = [
     {
         name: "FREE",
         price: "$0",
-        description: "Ideal for personal projects and light experimentation.",
+        description: "Perfect for personal projects, testing and explorations.",
         features: [
             "100 requests/day",
             "Community support",
@@ -28,7 +28,7 @@ const pricingTiers = [
     {
         name: "PREMIUM",
         price: "$99/mo",
-        description: "Built for teams and advanced integrations.",
+        description: "Designed for teams and advanced integrations.",
         features: [
             "100,000 requests/month",
             "Dedicated support channel",
@@ -40,7 +40,7 @@ const pricingTiers = [
     {
         name: "ENTERPRISE",
         price: "Custom",
-        description: "Custom SLAs, volume pricing, and private hosting.",
+        description: "Custom SLAs, volume pricing, and private hosting options available.",
         features: [
             "Unlimited access",
             "24/7 SLA-backed support",
@@ -58,7 +58,7 @@ export function PricingTiers() {
                 <div className="text-center mb-16">
                     <h2 className="text-3xl lg:text-4xl font-bold mb-4">Pricing</h2>
                     <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-                        Transparent plans for every stage of your project.
+                        Transparent plans tailored to mee the needs of every project stage.
                     </p>
                 </div>
 

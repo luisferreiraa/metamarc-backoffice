@@ -41,16 +41,16 @@ export function Navigation() {
     if (!user) return null
 
     return (
-        <nav className="bg-white shadow-sm border-b">
+        <nav className="bg-black shadow-sm border-b [font-family:var(--font-poppins)]">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center space-x-4">
-                        <Link href={user.role === "ADMIN" ? "/admin" : "/dashboard"} className="font-bold text-xl text-[#705085]">
+                        <Link href={user.role === "ADMIN" ? "/admin" : "/dashboard"} className="font-bold text-xl text-[#66b497]">
                             Metamarc API
                         </Link>
 
                         <div className="flex items-center space-x-2">
-                            <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>{user.role}</Badge>
+                            <Badge variant={user.role === "ADMIN" ? "main" : "secondary"}>{user.role}</Badge>
                             <Badge variant={user.tier === "PREMIUM" ? "default" : "outline"}>{user.tier}</Badge>
                         </div>
                     </div>

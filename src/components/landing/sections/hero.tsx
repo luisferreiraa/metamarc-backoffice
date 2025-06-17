@@ -20,14 +20,12 @@ export function Hero() {
                                 </span>
                             </h1>
                             <p className="mt-5 text-lg text-white leading-relaxed [font-family:var(--font-poppins)]">
-                                Instantly Access Bibliographic & Holdings Manuals via API
+                                Access Bibliographic & Holdings Formats via API
                             </p>
                         </div>
 
                         <p className="text-slate-700 leading-relaxed text-white">
-                            Tired of digging through dense PDFs or static documents to find UNIMARC field definitions? Say hello to a
-                            smarter way—programmatic access to the complete UNIMARC Bibliographic and Holdings Manuals, delivered via
-                            a lightweight, easy-to-use API.
+                            Say goodbye to manual searches - discover the power of programmatic access to comprehensive UNIMARC Bibliographic and Holdings Formats through our lightweight and intuitive API.
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4">

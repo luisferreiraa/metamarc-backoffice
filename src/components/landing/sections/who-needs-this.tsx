@@ -14,25 +14,25 @@ export function WhoNeedsThis() {
         {
             icon: Users,
             title: "Librarians & Catalogers",
-            description: "Speed up metadata creation and validation with instant field lookups.",
+            description: "Accelerate metadata creation and validation with instant lookups.",
             color: "bg-green-500/10 text-green-400",
         },
         {
             icon: Code,
             title: "Software Developers",
-            description: "Build UNIMARC-compliant tools faster with programmatic access to specifications.",
+            description: "Develop efficient, UNIMARC-compliant tools with direct access to detailed specifications.",
             color: "bg-blue-500/10 text-blue-400",
         },
         {
             icon: Archive,
             title: "Digital Archivists",
-            description: "Ensure consistency in legacy data migrations and digital preservation projects.",
+            description: "Ensure consistency in data migrations and digital preservation projects.",
             color: "bg-purple-500/10 text-purple-400",
         },
         {
             icon: GraduationCap,
             title: "Library Science Students",
-            description: "Learn UNIMARC structures programmatically and build practical skills.",
+            description: "Learn UNIMARC structures programmatically to enhance practical skills.",
             color: "bg-orange-500/10 text-orange-400",
         },
     ]

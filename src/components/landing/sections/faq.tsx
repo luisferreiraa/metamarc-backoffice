@@ -8,30 +8,30 @@ export function FAQ() {
         {
             question: "Is this the official UNIMARC API?",
             answer:
-                "No—this is an independent project making the manuals more accessible to developers and librarians worldwide.",
+                "No, this is an independent project aimed at enhancing accessibility for developers and librarians worldwide.",
         },
         {
-            question: "Will there be a free tier?",
-            answer: "Yes! Free access for low-volume users + premium tiers for heavy usage and enterprise features.",
+            question: "Is there a free tier?",
+            answer: "Absolutely. Free access is available for low-volume users, with premium options for heavy usage and enterprise needs.",
         },
         {
             question: "Can I request specific features?",
-            answer: "Absolutely. Beta users will help shape the roadmap. We're building this for the community!",
+            answer: "Certainly. Beta users will help shape the roadmap. We're commited to community-driven development!",
         },
         {
             question: "What formats are supported?",
             answer:
-                "The API returns data in JSON by default, with XML support available. We're also considering CSV exports for bulk operations.",
+                "The API returns data in JSON by default, with XML support also available. CSV exports for bulk operations are under consideration.",
         },
         {
             question: "How accurate is the data?",
             answer:
-                "Our data is sourced directly from the official UNIMARC manuals and regularly updated to ensure accuracy and completeness.",
+                "Data is sourced directly from official UNIMARC manuals, ensuring ongoing accuracy and completeness.",
         },
         {
-            question: "When will the API be available?",
+            question: "Is the API available?",
             answer:
-                "We're targeting a beta release in the coming months. Waitlist subscribers will get first access and exclusive updates.",
+                "Yes, the UNIMARC API is live and ready to use. Start building today and gain instant access to the complete bibliographic and holdings manuals via a simple, developer-friendly interface.",
         },
     ]
 
@@ -44,7 +44,7 @@ export function FAQ() {
                     </div>
                     <h2 className="text-3xl lg:text-4xl font-bold mb-4">FAQ</h2>
                     <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-                        Common questions about the UNIMARC API project.
+                        Common questions about the Metamarc API project.
                     </p>
                 </div>
 
@@ -66,17 +66,6 @@ export function FAQ() {
                             </Card>
                         ))}
                     </div>
-                </div>
-
-                <div className="mt-16 text-center">
-                    <Card className="bg-zinc-900 border border-zinc-800 max-w-2xl mx-auto">
-                        <CardContent className="pt-8 pb-10">
-                            <h3 className="text-xl font-bold text-white mb-4">Why Wait?</h3>
-                            <p className="text-gray-300 text-lg leading-relaxed">
-                                Manual lookups are so last century. Automate accuracy with the first API built for UNIMARC's complex specs.
-                            </p>
-                        </CardContent>
-                    </Card>
                 </div>
             </div>
         </section>

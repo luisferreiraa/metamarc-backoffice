@@ -9,7 +9,7 @@ export function Footer() {
             <div className="container mx-auto px-4">
                 <div className="grid md:grid-cols-4 gap-12">
                     <div className="md:col-span-2">
-                        <h3 className="text-2xl font-bold mb-4 text-[#66b497]">UNIMARC API</h3>
+                        <h3 className="text-2xl font-bold mb-4 text-[#66b497]">Metamarc API</h3>
                         <p className="text-gray-300 mb-6 leading-relaxed text-sm">
                             Making UNIMARC specifications accessible through modern API technology.
                             Built for librarians, developers, and the entire cataloging community.
@@ -65,9 +65,9 @@ export function Footer() {
                 </div>
 
                 <div className="border-t border-zinc-800 mt-12 pt-8 text-center text-gray-500 text-sm">
-                    <p>© 2024 UNIMARC API — Built by developers for the UNIMARC community.</p>
+                    <p>© 2025 Metamarc API — Built by developers for the community.</p>
                     <p className="mt-1">
-                        This is an independent project and is not officially affiliated with the UNIMARC organization.
+                        This is an independent project and is not officially affiliated with any organization.
                     </p>
                 </div>
             </div>
