@@ -42,13 +42,19 @@ export function UserDashboard() {
 
                 if (response.ok) {
                     const apiData = await response.json()
-                    const parsedUser = JSON.parse(userData)
+                    /* const parsedUser = JSON.parse(userData) */
 
                     // Combina os dados do localStorage com os dados do backend
                     setUser({
-                        ...parsedUser,
+                        id: apiData.id,
+                        name: apiData.name,
+                        email: apiData.email,
+                        role: apiData.role,
+                        tier: apiData.tier,
+                        isActive: apiData.isActive,
                         apiKey: apiData.apiKey,
                         apiKeyExpiresAt: apiData.apiKeyExpiresAt,
+                        createdAt: apiData.createdAt
                     })
                 } else {
                     console.error("Failed to fetch API key")

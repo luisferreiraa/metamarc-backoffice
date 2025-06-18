@@ -64,22 +64,18 @@ export function AdminDashboard() {
         <DashboardLayout>
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-3xl font-bold">Admin Panel</h1>
-                    <Button variant="outline" onClick={handleLogout}>
-                        <LogOut className="mr-2 h-4" />
-                        Logout
-                    </Button>
+                    <h1 className="text-3xl font-bold text-white">Admin Panel</h1>
                 </div>
 
                 {/* Estatísticas */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card>
+                    <Card className="bg-[#1a1a1a] border border-[#66b497]">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total of Users</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <CardTitle className="text-sm font-medium text-white">Total of Users</CardTitle>
+                            <Users className="h-4 w-4 text-[#66b497]" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
+                            <div className="text-2xl font-bold text-white">{stats?.totalUsers || 0}</div>
                         </CardContent>
                     </Card>
 

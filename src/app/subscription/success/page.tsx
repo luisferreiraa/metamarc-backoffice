@@ -8,13 +8,7 @@ export default function SuccessPage() {
     const searchParams = useSearchParams()
     const sessionId = searchParams.get('session_id')
 
-    /* useEffect(() => {
-        if (sessionId) {
-            // Você pode enviar o sessionId para seu backend para confirmar o pagamento
-            axios.post('/api/subscription/confirm', { sessionId })
-                .catch(error => console.error('Confirmation error:', error))
-        }
-    }, [sessionId]) */
+    if (!sessionId) return
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-12 text-center">

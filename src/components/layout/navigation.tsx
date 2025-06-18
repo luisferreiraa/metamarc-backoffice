@@ -56,12 +56,12 @@ export function Navigation() {
                     </div>
 
                     <div className="flex items-center space-x-4">
-                        <span className="text-sm text-gray-600">Olá, {user.name}</span>
+                        <span className="text-sm text-white">Hi, {user.name}</span>
 
                         {/* Menu para Admins */}
                         <RoleGuard allowedRoles={["ADMIN"]} mode="silent">
                             <Link href="/admin">
-                                <Button variant="ghost" size="sm">
+                                <Button variant="white" size="sm">
                                     <Shield className="mr-2 h-4 w-4" />
                                     Admin
                                 </Button>
@@ -70,7 +70,7 @@ export function Navigation() {
 
                         {/* Menu para todos os usuários */}
                         <Link href="/dashboard">
-                            <Button variant="ghost" size="sm">
+                            <Button variant="white" size="sm">
                                 <LucideUser className="mr-2 h-4 w-4" />
                                 Dashboard
                             </Button>
