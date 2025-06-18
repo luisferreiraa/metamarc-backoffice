@@ -40,6 +40,8 @@ export default function SubscriptionPlans() {
                 throw new Error('Usuário não autenticado');
             }
 
+            console.log('Iniciando assinatura para tier:', tier)
+
             // 2. Fazer a requisição com o token no header
             const response = await axios.post(
                 '/api/subscription/subscribe',
@@ -51,6 +53,8 @@ export default function SubscriptionPlans() {
                     }
                 }
             );
+
+            console.log('Resposta da API:', response.data)
 
             // 3. Redirecionar para o checkout do Stripe
             if (response.data.url) {
