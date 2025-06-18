@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         const { tier } = await request.json()
 
         // 3. Configurar chamada ao backend
-        const backendUrl = "http://89.28.236.11:3000/subscription/subscribe"
+        const backendUrl = "http://89.28.236.11:3000/api/subscription/subscribe"
         const backendResponse = await fetch(backendUrl, {
             method: 'POST',
             headers: {
