@@ -43,12 +43,6 @@ export function AdminDashboard() {
         }
     }
 
-    const handleLogout = () => {
-        localStorage.removeItem("token")
-        localStorage.removeItem("user")
-        window.location.href = "/"
-    }
-
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -62,16 +56,20 @@ export function AdminDashboard() {
 
     return (
         <DashboardLayout>
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-3xl font-bold text-white">Admin Panel</h1>
+            <div className="container mx-auto px-4 py-20 space-y-6 [font-family:var(--font-poppins)]">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+                        Admin Panel
+                    </h2>
                 </div>
 
                 {/* Estatísticas */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card className="bg-[#1a1a1a] border border-[#66b497]">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-white">Total of Users</CardTitle>
+                    <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-white">
+                                Total de Utilizadores
+                            </CardTitle>
                             <Users className="h-4 w-4 text-[#66b497]" />
                         </CardHeader>
                         <CardContent>
@@ -79,30 +77,36 @@ export function AdminDashboard() {
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-white">
+                                Utilizadores Ativos
+                            </CardTitle>
+                            <TrendingUp className="h-4 w-4 text-[#66b497]" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-green-600">{stats?.activeUsers || 0}</div>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Inactive Users</CardTitle>
-                            <Shield className="h-4 w-4 text-muted-foreground" />
+                    <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-white">
+                                Utilizadores Inativos
+                            </CardTitle>
+                            <Shield className="h-4 w-4 text-[#66b497]" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-red-600">{stats?.inactiveUsers || 0}</div>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Premium Users</CardTitle>
-                            <Activity className="h-4 w-4 text-muted-foreground" />
+                    <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-white">
+                                Utilizadores Premium
+                            </CardTitle>
+                            <Activity className="h-4 w-4 text-[#66b497]" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-blue-600">{stats?.premiumUsers || 0}</div>
@@ -113,37 +117,37 @@ export function AdminDashboard() {
                 {/* Menu de Navegação */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     <Link href="/admin/users">
-                        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <Card className="bg-[#1a1a1a] border border-white/10 hover:shadow-md transition-shadow cursor-pointer">
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="flex items-center gap-2 text-white">
                                     <Users className="h-5 w-5" />
-                                    Users Management
+                                    Gestão de Utilizadores
                                 </CardTitle>
-                                <CardDescription>View, create, update and delete users</CardDescription>
+                                <CardDescription className="text-white/70">Ver, criar, atualizar e apagar utilizadores</CardDescription>
                             </CardHeader>
                         </Card>
                     </Link>
 
                     <Link href="/admin/logs">
-                        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <Card className="bg-[#1a1a1a] border border-white/10 hover:shadow-md transition-shadow cursor-pointer">
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="flex items-center gap-2 text-white">
                                     <Activity className="h-5 w-5" />
-                                    System Logs
+                                    Registos do Sistema
                                 </CardTitle>
-                                <CardDescription>View system's activity and audit logs</CardDescription>
+                                <CardDescription className="text-white/70">Ver atividades e registos de auditoria do sistema</CardDescription>
                             </CardHeader>
                         </Card>
                     </Link>
 
                     <Link href="/admin/health">
-                        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <Card className="bg-[#1a1a1a] border border-white/10 hover:shadow-md transition-shadow cursor-pointer">
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="flex items-center gap-2 text-white">
                                     <Shield className="h-5 w-5" />
-                                    System Status
+                                    Estado do Sistema
                                 </CardTitle>
-                                <CardDescription>Check system backend health status</CardDescription>
+                                <CardDescription className="text-white/70">Verificar estado de saúde do backend do sistema</CardDescription>
                             </CardHeader>
                         </Card>
                     </Link>

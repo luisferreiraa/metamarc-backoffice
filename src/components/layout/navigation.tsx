@@ -41,48 +41,81 @@ export function Navigation() {
     if (!user) return null
 
     return (
-        <nav className="bg-black shadow-sm border-b [font-family:var(--font-poppins)]">
+        <nav className="bg-black border-b border-white/10 shadow-sm [font-family:var(--font-poppins)]">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
+                    {/* Branding + Badges */}
                     <div className="flex items-center space-x-4">
-                        <Link href={user.role === "ADMIN" ? "/admin" : "/dashboard"} className="font-bold text-xl text-[#66b497]">
+                        <Link
+                            href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
+                            className="font-bold text-xl text-[#66b497] hover:text-[#88d4bb] transition-colors"
+                        >
                             Metamarc API
                         </Link>
 
                         <div className="flex items-center space-x-2">
-                            <Badge variant={user.role === "ADMIN" ? "main" : "secondary"}>{user.role}</Badge>
-                            <Badge variant={user.tier === "PREMIUM" ? "default" : "outline"}>{user.tier}</Badge>
+                            <Badge
+                                variant={user.role === "ADMIN" ? "default" : "secondary"}
+                                className={user.role === "ADMIN"
+                                    ? "bg-[#66b497]/10 text-[#66b497] border border-[#66b497]/50"
+                                    : "bg-white/10 text-white/80 border border-white/20"}
+                            >
+                                {user.role}
+                            </Badge>
+                            <Badge
+                                variant={user.tier === "PREMIUM" ? "default" : "outline"}
+                                className={user.tier === "PREMIUM"
+                                    ? "bg-[#66b497]/10 text-[#66b497] border border-[#66b497]/50"
+                                    : "bg-white/10 text-white/80 border border-white/20"}
+                            >
+                                {user.tier}
+                            </Badge>
                         </div>
                     </div>
 
+                    {/* Right-side actions */}
                     <div className="flex items-center space-x-4">
-                        <span className="text-sm text-white">Hi, {user.name}</span>
+                        <span className="text-sm text-white/80">Hi, {user.name}</span>
 
-                        {/* Menu para Admins */}
+                        {/* Admin Only */}
                         <RoleGuard allowedRoles={["ADMIN"]} mode="silent">
                             <Link href="/admin">
-                                <Button variant="white" size="sm">
-                                    <Shield className="mr-2 h-4 w-4" />
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-white hover:bg-white/10 transition-all"
+                                >
+                                    <Shield className="mr-2 h-4 w-4 text-[#66b497]" />
                                     Admin
                                 </Button>
                             </Link>
                         </RoleGuard>
 
-                        {/* Menu para todos os usuários */}
+                        {/* All Users */}
                         <Link href="/dashboard">
-                            <Button variant="white" size="sm">
-                                <LucideUser className="mr-2 h-4 w-4" />
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-white hover:bg-white/10 transition-all"
+                            >
+                                <LucideUser className="mr-2 h-4 w-4 text-[#66b497]" />
                                 Dashboard
                             </Button>
                         </Link>
 
-                        <Button variant="outline" size="sm" onClick={handleLogout}>
-                            <LogOut className="mr-2 h-4 w-4" />
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleLogout}
+                            className="border border-white/10 text-white hover:border-[#66b497] transition-all"
+                        >
+                            <LogOut className="mr-2 h-4 w-4 text-[#66b497]" />
                             Logout
                         </Button>
                     </div>
                 </div>
             </div>
-        </nav >
+        </nav>
     )
+
 }

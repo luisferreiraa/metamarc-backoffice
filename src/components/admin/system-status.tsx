@@ -70,45 +70,72 @@ export function SystemStatusCheck() {
 
     return (
         <DashboardLayout>
-            <div className="space-y-6">
+            <div className="container mx-auto px-4 py-20 space-y-6">
+                {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link href="/admin">
-                            <Button variant="outline" size="sm">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                            >
+                                <ArrowLeft className="mr-2 h-4 w-4 text-[#66b497]" />
                                 Back
                             </Button>
                         </Link>
-                        <h1 className="text-3xl font-bold">System Status Check</h1>
+                        <h1 className="text-3xl lg:text-4xl font-bold text-white [font-family:var(--font-poppins)]">
+                            System Status Check
+                        </h1>
                     </div>
                 </div>
-            </div>
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <Card className="w-full max-w-2xl">
-                    <CardHeader>
-                        <CardTitle>API Connection Test</CardTitle>
-                        <CardDescription>Check if the API is responding correctly.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex gap-4">
-                            <Button onClick={testApiConnection} disabled={isLoading}>
-                                Test Health Check
-                            </Button>
-                            <Button onClick={testLoginEndpoint} disabled={isLoading} variant="outline">
-                                Test Login
-                            </Button>
-                        </div>
 
-                        {result && (
-                            <Alert>
-                                <AlertDescription>
-                                    <pre className="whitespace-pre-wrap text-sm">{result}</pre>
-                                </AlertDescription>
-                            </Alert>
-                        )}
-                    </CardContent>
-                </Card>
+                {/* Card de Testes */}
+                <div className="flex items-center justify-center">
+                    <Card className="w-full max-w-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
+                        <CardHeader>
+                            <CardTitle className="text-white [font-family:var(--font-poppins)]">
+                                API Connection Test
+                            </CardTitle>
+                            <CardDescription className="text-white/70">
+                                Check if the API is responding correctly.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            {/* Botões */}
+                            <div className="flex gap-4 flex-wrap">
+                                <Button
+                                    onClick={testApiConnection}
+                                    disabled={isLoading}
+                                    className="bg-[#66b497] text-black hover:bg-[#5aa88b] transition-all"
+                                >
+                                    Test Health Check
+                                </Button>
+                                <Button
+                                    onClick={testLoginEndpoint}
+                                    disabled={isLoading}
+                                    variant="outline"
+                                    className="border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                                >
+                                    Test Login
+                                </Button>
+                            </div>
+
+                            {/* Resultado */}
+                            {result && (
+                                <Alert className="bg-white/5 border border-white/10 text-white">
+                                    <AlertDescription>
+                                        <pre className="whitespace-pre-wrap text-sm [font-family:monospace] text-white/90">
+                                            {result}
+                                        </pre>
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </DashboardLayout>
     )
+
 }

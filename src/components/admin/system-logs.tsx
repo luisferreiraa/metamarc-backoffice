@@ -153,92 +153,119 @@ export function SystemLogsManagement() {
 
     return (
         <DashboardLayout>
-            <div className="space-y-6">
+            <div className="container mx-auto px-4 py-20 space-y-6 [font-family:var(--font-poppins)]">
+                {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link href="/admin">
-                            <Button variant="outline" size="sm">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                            >
+                                <ArrowLeft className="mr-2 h-4 w-4 text-[#66b497]" />
                                 Back
                             </Button>
                         </Link>
-                        <h1 className="text-3xl font-bold">System Logs</h1>
+                        <h1 className="text-3xl lg:text-4xl font-bold text-white [font-family:var(--font-poppins)]">
+                            System Logs
+                        </h1>
                     </div>
                 </div>
 
-                <Card>
+                {/* Log Card */}
+                <Card className="bg-[#1a1a1a] border border-white/10 transition-all duration-300">
                     <CardHeader>
-                        <CardTitle>List of System Logs</CardTitle>
-                        <CardDescription>Manage all system logs</CardDescription>
+                        <CardTitle className="text-white [font-family:var(--font-poppins)]">List of System Logs</CardTitle>
+                        <CardDescription className="text-white/70">Manage all system logs</CardDescription>
                     </CardHeader>
+
                     <CardContent>
+                        {/* Search */}
                         <div className="flex items-center space-x-2 mb-4">
-                            <Search className="h-4 w-4 text-muted-foreground" />
+                            <Search className="h-4 w-4 text-white/60" />
                             <Input
                                 placeholder="Search by action or IP..."
                                 value={searchTerm}
                                 onChange={handleSearchChange}
-                                className="max-w-sm"
+                                className="max-w-sm bg-black border border-white/10 text-white placeholder-white/50"
                             />
                         </div>
 
+                        {/* Delete Button */}
                         <div className="flex justify-end mb-4">
                             <Button
                                 variant="destructive"
                                 size="sm"
                                 onClick={handleDeleteSelected}
                                 disabled={selectedLogIds.length === 0}
+                                className="bg-red-600 text-white hover:bg-red-700 transition-all"
                             >
                                 Delete ({selectedLogIds.length})
                             </Button>
                         </div>
 
+                        {/* Table */}
                         <Table>
                             <TableHeader>
-                                <TableRow>
+                                <TableRow className="border-white/10">
                                     <TableHead>
                                         <input
                                             type="checkbox"
                                             checked={selectedLogIds.length === logs.length && logs.length > 0}
                                             onChange={toggleSelectAll}
+                                            className="accent-[#66b497]"
                                         />
                                     </TableHead>
-                                    <TableHead>User ID</TableHead>
-                                    <TableHead>Action</TableHead>
-                                    <TableHead>IP</TableHead>
-                                    <TableHead>Agent</TableHead>
-                                    <TableHead>Date</TableHead>
+                                    <TableHead className="text-white/80">User</TableHead>
+                                    <TableHead className="text-white/80">Action</TableHead>
+                                    <TableHead className="text-white/80">IP</TableHead>
+                                    <TableHead className="text-white/80">Agent</TableHead>
+                                    <TableHead className="text-white/80">Date</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {logs.map((log) => (
-                                    <TableRow key={log.id}>
+                                    <TableRow key={log.id} className="hover:bg-white/5 transition-colors">
                                         <TableCell>
                                             <input
                                                 type="checkbox"
                                                 checked={selectedLogIds.includes(log.id)}
                                                 onChange={() => toggleSelectLog(log.id)}
+                                                className="accent-[#66b497]"
                                             />
                                         </TableCell>
-                                        <TableCell className="font-medium">{log.user.name}</TableCell>
-                                        <TableCell>{log.action}</TableCell>
-                                        <TableCell>{log.ip}</TableCell>
-                                        <TableCell>{log.userAgent}</TableCell>
-                                        <TableCell>{new Date(log.createdAt).toLocaleDateString()}</TableCell>
+                                        <TableCell className="font-medium text-white">{log.user.name}</TableCell>
+                                        <TableCell className="text-white/80">{log.action}</TableCell>
+                                        <TableCell className="text-white/80">{log.ip}</TableCell>
+                                        <TableCell className="text-white/80">{log.userAgent}</TableCell>
+                                        <TableCell className="text-white/60">
+                                            {new Date(log.createdAt).toLocaleDateString()}
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
                         </Table>
 
-                        {/* Pagination Controls */}
-                        <div className="flex justify-between items-center mt-4">
-                            <Button variant="outline" size="sm" onClick={handlePrevPage} disabled={page === 1}>
+                        {/* Pagination */}
+                        <div className="flex justify-between items-center mt-6">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handlePrevPage}
+                                disabled={page === 1}
+                                className="border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                            >
                                 Previous
                             </Button>
-                            <span>
-                                Page {page} of {totalPages}
-                            </span>
-                            <Button variant="outline" size="sm" onClick={handleNextPage} disabled={page === totalPages}>
+                            <span className="text-white/70">Page {page} of {totalPages}</span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleNextPage}
+                                disabled={page === totalPages}
+                                className="border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                            >
                                 Next
                             </Button>
                         </div>
@@ -247,4 +274,5 @@ export function SystemLogsManagement() {
             </div>
         </DashboardLayout>
     )
+
 }

@@ -159,23 +159,33 @@ export function UsersManagement() {
 
     return (
         <DashboardLayout>
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
+            <div className="container mx-auto px-4 py-20 space-y-6 [font-family:var(--font-poppins)]">
+                {/* Título e Ações */}
+                <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
                         <Link href="/admin">
-                            <Button variant="outline" size="sm">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                            >
+                                <ArrowLeft className="mr-2 h-4 w-4 text-[#66b497]" />
                                 Back
                             </Button>
                         </Link>
-                        <h1 className="text-3xl font-bold">Users Management</h1>
+                        <h1 className="text-3xl lg:text-4xl font-bold text-white [font-family:var(--font-poppins)]">
+                            Users Management
+                        </h1>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline">
-                                    <Download className="mr-2 h-4 w-4" />
+                                <Button
+                                    variant="outline"
+                                    className="border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                                >
+                                    <Download className="mr-2 h-4 w-4 text-[#66b497]" />
                                     Export
                                 </Button>
                             </DropdownMenuTrigger>
@@ -186,74 +196,98 @@ export function UsersManagement() {
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <Button onClick={() => setShowCreateDialog(true)}>
+                        <Button className="bg-[#66b497] text-black hover:bg-[#5aa88b]" onClick={() => setShowCreateDialog(true)}>
                             <Plus className="mr-2 h-4 w-4" />
                             New User
                         </Button>
                     </div>
                 </div>
 
-                <Card>
+                {/* Tabela */}
+                <Card className="bg-[#1a1a1a] border border-white/10 transition-all duration-300">
                     <CardHeader>
-                        <CardTitle>List of Users</CardTitle>
-                        <CardDescription>Manage all system users</CardDescription>
+                        <CardTitle className="text-white [font-family:var(--font-poppins)]">List of Users</CardTitle>
+                        <CardDescription className="text-white/70">Manage all system users</CardDescription>
                     </CardHeader>
                     <CardContent>
+                        {/* Pesquisa */}
                         <div className="flex items-center space-x-2 mb-4">
-                            <Search className="h-4 w-4 text-muted-foreground" />
+                            <Search className="h-4 w-4 text-white/60" />
                             <Input
                                 placeholder="Search by email..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="max-w-sm"
+                                className="max-w-sm bg-black border border-white/10 text-white placeholder-white/50"
                             />
                         </div>
 
+                        {/* Tabela */}
                         <Table>
                             <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Role</TableHead>
-                                    <TableHead>Tier</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Created at</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                <TableRow className="border-white/10">
+                                    <TableHead className="text-white/80">Name</TableHead>
+                                    <TableHead className="text-white/80">Email</TableHead>
+                                    <TableHead className="text-white/80">Role</TableHead>
+                                    <TableHead className="text-white/80">Tier</TableHead>
+                                    <TableHead className="text-white/80">Status</TableHead>
+                                    <TableHead className="text-white/80">Created at</TableHead>
+                                    <TableHead className="text-right text-white/80">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {filteredUsers.map((user) => (
-                                    <TableRow key={user.id}>
-                                        <TableCell className="font-medium">{user.name}</TableCell>
-                                        <TableCell>{user.email}</TableCell>
+                                    <TableRow key={user.id} className="hover:bg-white/5 transition-colors">
+                                        <TableCell className="font-medium text-white">{user.name}</TableCell>
+                                        <TableCell className="text-white/80">{user.email}</TableCell>
                                         <TableCell>
-                                            <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>{user.role}</Badge>
+                                            <Badge
+                                                variant={user.role === "ADMIN" ? "default" : "secondary"}
+                                                className={user.role === "ADMIN"
+                                                    ? "bg-[#66b497]/10 text-[#66b497] border border-[#66b497]/50"
+                                                    : "bg-white/10 text-white/80 border border-white/20"}
+                                            >
+                                                {user.role}
+                                            </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={user.tier === "PREMIUM" ? "default" : "outline"}>{user.tier}</Badge>
+                                            <Badge
+                                                variant={user.tier === "PREMIUM" ? "default" : "outline"}
+                                                className={user.tier === "PREMIUM"
+                                                    ? "bg-[#66b497]/10 text-[#66b497] border border-[#66b497]/50"
+                                                    : "bg-white/10 text-white/80 border border-white/20"}
+                                            >
+                                                {user.tier}
+                                            </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={user.isActive ? "default" : "destructive"}>
+                                            <Badge
+                                                variant={user.isActive ? "default" : "destructive"}
+                                                className={user.isActive
+                                                    ? "bg-[#66b497]/10 text-[#66b497] border border-[#66b497]/50"
+                                                    : "bg-red-600/10 text-red-600 border border-red-600/40"}
+                                            >
                                                 {user.isActive ? "Active" : "Inactive"}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                                        <TableCell className="text-white/70">
+                                            {new Date(user.createdAt).toLocaleDateString()}
+                                        </TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                    <Button variant="ghost" className="h-8 w-8 p-0 text-white hover:bg-white/10">
                                                         <MoreHorizontal className="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuItem
                                                         onClick={() => {
-                                                            setSelectedUser(user)
-                                                            setShowEditDialog(true)
+                                                            setSelectedUser(user);
+                                                            setShowEditDialog(true);
                                                         }}
                                                     >
                                                         <Edit className="mr-2 h-4 w-4" />
-                                                        Editar
+                                                        Edit
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem onClick={() => handleToggleUserStatus(user.id, user.isActive)}>
                                                         {user.isActive ? (
@@ -272,7 +306,10 @@ export function UsersManagement() {
                                                         <Key className="mr-2 h-4 w-4" />
                                                         Reset Password
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleDeleteUser(user.id)} className="text-red-600">
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleDeleteUser(user.id)}
+                                                        className="text-red-600"
+                                                    >
                                                         <Trash2 className="mr-2 h-4 w-4" />
                                                         Delete
                                                     </DropdownMenuItem>
@@ -284,26 +321,26 @@ export function UsersManagement() {
                             </TableBody>
                         </Table>
 
-                        {/* Pagination */}
-                        <div className="flex items-center justify-center mt-4 space-x-2">
+                        {/* Paginação */}
+                        <div className="flex items-center justify-center mt-6 space-x-2">
                             <Button
                                 variant="outline"
                                 size="sm"
                                 disabled={page === 1}
                                 onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                                className="border border-white/10 text-white hover:border-[#66b497]"
                             >
                                 Previous
                             </Button>
 
-                            <span className="text-sm">
-                                Page {page} of {totalPages}
-                            </span>
+                            <span className="text-white/70 text-sm">Page {page} of {totalPages}</span>
 
                             <Button
                                 variant="outline"
                                 size="sm"
                                 disabled={page === totalPages}
                                 onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                                className="border border-white/10 text-white hover:border-[#66b497]"
                             >
                                 Next
                             </Button>
@@ -312,8 +349,11 @@ export function UsersManagement() {
                 </Card>
 
                 {/* Dialogs */}
-                <CreateUserDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onUserCreated={fetchUsers} />
-
+                <CreateUserDialog
+                    open={showCreateDialog}
+                    onOpenChange={setShowCreateDialog}
+                    onUserCreated={fetchUsers}
+                />
                 {selectedUser && (
                     <EditUserDialog
                         open={showEditDialog}
@@ -324,8 +364,8 @@ export function UsersManagement() {
                 )}
             </div>
         </DashboardLayout>
+    );
 
-    )
 
 
 }
