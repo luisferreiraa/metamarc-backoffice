@@ -12,6 +12,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { CreateUserDialog } from "@/components/admin/create-user-dialog"
 import { EditUserDialog } from "@/components/admin/edit-user-dialog"
 import Link from "next/link"
+import { LoadingSpinner } from "../layout/loading-spinner"
 
 interface User {
     id: string
@@ -148,12 +149,7 @@ export function UsersManagement() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="flex flex-col items-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid mb-4"></div>
-                    <p className="text-gray-600">Loading users...</p>
-                </div>
-            </div>
+            <LoadingSpinner message="Loading users..." />
         )
     }
 
@@ -224,7 +220,7 @@ export function UsersManagement() {
                         {/* Tabela */}
                         <Table>
                             <TableHeader>
-                                <TableRow className="border-white/10">
+                                <TableRow className="bborder-b border-white/10">
                                     <TableHead className="text-white/80">Name</TableHead>
                                     <TableHead className="text-white/80">Email</TableHead>
                                     <TableHead className="text-white/80">Role</TableHead>
@@ -236,7 +232,7 @@ export function UsersManagement() {
                             </TableHeader>
                             <TableBody>
                                 {filteredUsers.map((user) => (
-                                    <TableRow key={user.id} className="hover:bg-white/5 transition-colors">
+                                    <TableRow key={user.id} className="hover:bg-white/5 transition-colors border-b border-white/10">
                                         <TableCell className="font-medium text-white">{user.name}</TableCell>
                                         <TableCell className="text-white/80">{user.email}</TableCell>
                                         <TableCell>

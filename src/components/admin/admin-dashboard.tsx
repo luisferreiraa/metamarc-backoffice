@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Users, Activity, Shield, TrendingUp, LogOut } from "lucide-react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import Link from "next/link"
+import { LoadingSpinner } from "../layout/loading-spinner"
 
 interface Stats {
     totalUsers: number,
@@ -45,12 +46,7 @@ export function AdminDashboard() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="flex flex-col items-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid mb-4"></div>
-                    <p className="text-gray-600">Loading admin dashboard...</p>
-                </div>
-            </div>
+            <LoadingSpinner message="Loading admin dashboard..." />
         )
     }
 
@@ -68,7 +64,7 @@ export function AdminDashboard() {
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-white">
-                                Total de Utilizadores
+                                Total Users
                             </CardTitle>
                             <Users className="h-4 w-4 text-[#66b497]" />
                         </CardHeader>
@@ -80,7 +76,7 @@ export function AdminDashboard() {
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-white">
-                                Utilizadores Ativos
+                                Active Users
                             </CardTitle>
                             <TrendingUp className="h-4 w-4 text-[#66b497]" />
                         </CardHeader>
@@ -92,7 +88,7 @@ export function AdminDashboard() {
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-white">
-                                Utilizadores Inativos
+                                Inactive Users
                             </CardTitle>
                             <Shield className="h-4 w-4 text-[#66b497]" />
                         </CardHeader>
@@ -104,7 +100,7 @@ export function AdminDashboard() {
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-white">
-                                Utilizadores Premium
+                                Premium Users
                             </CardTitle>
                             <Activity className="h-4 w-4 text-[#66b497]" />
                         </CardHeader>
@@ -121,9 +117,9 @@ export function AdminDashboard() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-white">
                                     <Users className="h-5 w-5" />
-                                    Gestão de Utilizadores
+                                    Users Management
                                 </CardTitle>
-                                <CardDescription className="text-white/70">Ver, criar, atualizar e apagar utilizadores</CardDescription>
+                                <CardDescription className="text-white/70">View, create, update, and delete users</CardDescription>
                             </CardHeader>
                         </Card>
                     </Link>
@@ -133,9 +129,9 @@ export function AdminDashboard() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-white">
                                     <Activity className="h-5 w-5" />
-                                    Registos do Sistema
+                                    System Logs
                                 </CardTitle>
-                                <CardDescription className="text-white/70">Ver atividades e registos de auditoria do sistema</CardDescription>
+                                <CardDescription className="text-white/70">View system activity and audit logs</CardDescription>
                             </CardHeader>
                         </Card>
                     </Link>
@@ -145,9 +141,9 @@ export function AdminDashboard() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-white">
                                     <Shield className="h-5 w-5" />
-                                    Estado do Sistema
+                                    Health Check
                                 </CardTitle>
-                                <CardDescription className="text-white/70">Verificar estado de saúde do backend do sistema</CardDescription>
+                                <CardDescription className="text-white/70">Check system backend health status</CardDescription>
                             </CardHeader>
                         </Card>
                     </Link>

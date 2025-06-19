@@ -4,8 +4,10 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Key, User, LogOut, RefreshCw } from "lucide-react"
+import { Key, User, LogOut, RefreshCw, CircleFadingArrowUp } from "lucide-react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import Link from "next/link"
+import { LoadingSpinner } from "../layout/loading-spinner"
 
 interface UserData {
     id: string
@@ -95,7 +97,11 @@ export function UserDashboard() {
     }
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return (
+            <div className="bg-black">
+                <LoadingSpinner message="Loading dashboard..." />
+            </div>
+        )
     }
 
     if (!user) {
@@ -188,6 +194,15 @@ export function UserDashboard() {
                         </CardContent>
                     </Card>
                 </div>
+                <Link href="/subscription/plans" className="w-full">
+                    <Button
+                        variant="main"
+                        className="w-full border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                    >
+                        <CircleFadingArrowUp className="mr-2 h-4 w-4 text-white" />
+                        Upgrade your plan
+                    </Button>
+                </Link>
             </div>
         </DashboardLayout>
     )

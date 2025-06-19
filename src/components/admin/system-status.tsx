@@ -1,16 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { LoadingSpinner } from "../layout/loading-spinner"
 
 export function SystemStatusCheck() {
     const [result, setResult] = useState("")
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+
+    // Simular carregamento da página
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setIsLoading(false)
+        }, 1000) // ou 1500ms se quiseres um delay mais visível
+
+        return () => clearTimeout(timeout)
+    }, [])
 
     const testApiConnection = async () => {
 
@@ -66,6 +76,12 @@ export function SystemStatusCheck() {
         } finally {
             setIsLoading(false)
         }
+    }
+
+    if (isLoading) {
+        return (
+            <LoadingSpinner message="Loading health check..." />
+        )
     }
 
     return (

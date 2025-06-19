@@ -66,7 +66,7 @@ export function LoginForm() {
     }
 
     return (
-        <Card className="bg-[#1a1a1a] border border-white/10 w-full max-w-md text-white font-poppins shadow-xl">
+        <Card className="bg-[#1a1a1a] border border-white/10 w-full max-w-md text-white [font-family:var(--font-poppins)] shadow-xl">
             <CardHeader className="space-y-1 text-center">
                 <CardTitle className="text-3xl font-semibold text-[#66b497]">Login</CardTitle>
                 <CardDescription className="text-sm text-white/70">

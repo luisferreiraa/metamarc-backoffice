@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, ArrowLeft } from "lucide-react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import Link from "next/link"
+import { LoadingSpinner } from "../layout/loading-spinner"
 
 interface User {
     name: string
@@ -142,12 +143,7 @@ export function SystemLogsManagement() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="flex flex-col items-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid mb-4"></div>
-                    <p className="text-gray-600">Loading system logs...</p>
-                </div>
-            </div>
+            <LoadingSpinner message="Loading system logs..." />
         )
     }
 
@@ -208,7 +204,7 @@ export function SystemLogsManagement() {
                         {/* Table */}
                         <Table>
                             <TableHeader>
-                                <TableRow className="border-white/10">
+                                <TableRow className="border-b border-white/10">
                                     <TableHead>
                                         <input
                                             type="checkbox"
@@ -226,7 +222,7 @@ export function SystemLogsManagement() {
                             </TableHeader>
                             <TableBody>
                                 {logs.map((log) => (
-                                    <TableRow key={log.id} className="hover:bg-white/5 transition-colors">
+                                    <TableRow key={log.id} className="hover:bg-white/5 transition-colors border-b border-white/10">
                                         <TableCell>
                                             <input
                                                 type="checkbox"
@@ -248,7 +244,7 @@ export function SystemLogsManagement() {
                         </Table>
 
                         {/* Pagination */}
-                        <div className="flex justify-between items-center mt-6">
+                        <div className="flex items-center justify-center mt-6 space-x-2">
                             <Button
                                 variant="outline"
                                 size="sm"

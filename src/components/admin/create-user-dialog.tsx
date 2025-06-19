@@ -79,10 +79,10 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] bg-[#1a1a1a] [font-family:var(--font-poppins)]">
                 <DialogHeader>
-                    <DialogTitle>Create New User</DialogTitle>
-                    <DialogDescription>Fill in the data to create a new user.</DialogDescription>
+                    <DialogTitle className="text-3xl font-semibold text-[#66b497]">Create New User</DialogTitle>
+                    <DialogDescription className="text-sm text-white/70">Fill in the data to create a new user.</DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit}>
@@ -94,20 +94,20 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                         )}
 
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right">
+                            <Label htmlFor="name" className="text-right text-white">
                                 Name
                             </Label>
                             <Input
                                 id="name"
                                 value={formData.name}
                                 onChange={(e) => handleChange("name", e.target.value)}
-                                className="col-span-3"
+                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
                                 required
                             />
                         </div>
 
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="email" className="text-right">
+                            <Label htmlFor="email" className="text-right text-white">
                                 Email
                             </Label>
                             <Input
@@ -115,17 +115,17 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) => handleChange("email", e.target.value)}
-                                className="col-span-3"
+                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
                                 required
                             />
                         </div>
 
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="role" className="text-right">
+                            <Label htmlFor="role" className="text-right text-white">
                                 Role
                             </Label>
                             <Select value={formData.role} onValueChange={(value) => handleChange("role", value)}>
-                                <SelectTrigger className="col-span-3">
+                                <SelectTrigger className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -136,16 +136,18 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                         </div>
 
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="tier" className="text-right">
+                            <Label htmlFor="tier" className="text-right text-white">
                                 Tier
                             </Label>
                             <Select value={formData.tier} onValueChange={(value) => handleChange("tier", value)}>
-                                <SelectTrigger className="col-span-3">
+                                <SelectTrigger className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="FREE">Free</SelectItem>
+                                    <SelectItem value="PRO">Pro</SelectItem>
                                     <SelectItem value="PREMIUM">Premium</SelectItem>
+                                    <SelectItem value="ENTERPRISE">Enterprise</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -155,7 +157,7 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isLoading}>
+                        <Button type="submit" variant={"ghost"} disabled={isLoading} className="text-white hover:bg-white/10 transition-all">
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create User
                         </Button>
