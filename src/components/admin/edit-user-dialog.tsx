@@ -1,3 +1,8 @@
+// src/components/admin/edit-user-dialog.tsx
+
+// Sugestões:
+// - Adicionar validações mais complexas (ex: email válido) antes do submit
+
 "use client"
 
 import type React from "react"
@@ -18,6 +23,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 
+// Interface que descreve a estrutura de um utilizador a ser editado
 interface User {
     id: string
     name: string
@@ -27,6 +33,7 @@ interface User {
     isActive: boolean
 }
 
+// Props do component, incluindo o user a editar e callbacks para abrir/fechar e atualização
 interface EditUserDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
@@ -35,15 +42,16 @@ interface EditUserDialogProps {
 }
 
 export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: EditUserDialogProps) {
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState("")
-    const [formData, setFormData] = useState({
+    const [isLoading, setIsLoading] = useState(false)       // Estado para controlar se o form está a enviar dados
+    const [error, setError] = useState("")      // Estado para guardar mensagens de erro
+    const [formData, setFormData] = useState({      // Estado local para armazenar os dados do form antes de enviar
         name: "",
         email: "",
         role: "",
         tier: "",
     })
 
+    // Sempre que o prop "user" muda, atualiza os dados do form para os valores do user
     useEffect(() => {
         if (user) {
             setFormData({
@@ -55,36 +63,39 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
         }
     }, [user])
 
+    // Função chamada quando o form é submetido
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setIsLoading(true)
-        setError("")
+        e.preventDefault()      // Evita recarregar a página
+        setIsLoading(true)      // Ativa o spinner de loading
+        setError("")        // Limpa erros anteriores
 
         try {
-            const token = localStorage.getItem("token")
+            const token = localStorage.getItem("token")     // Recupera o token de autenticação
             const response = await fetch(`http://89.28.236.11:3000/api/admin/users/${user.id}`, {
-                method: "PUT",
+                method: "PUT",      // Método para atualizar o utilizador
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,       // Adiciona token no header do request
+                    "Content-Type": "application/json",     // Corpo é JSON
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(formData),     // Converte o formData para JSON
             })
 
             if (response.ok) {
-                onUserUpdated()
-                onOpenChange(false)
+                onUserUpdated()     // Notifica o component pai que a atualização foi feita
+                onOpenChange(false)     // Fecha o diálogo
             } else {
+                // Se a resposta não foi OK, tenta obter a mensagem de erro do backend
                 const errorData = await response.json()
-                setError(errorData.message || "Error udating user")
+                setError(errorData.message || "Error udating user")     // Define mensage de erro para mostrar
             }
         } catch (err) {
             setError("Connection error. Try again.")
         } finally {
-            setIsLoading(false)
+            setIsLoading(false)     // Desativa indicador de loading
         }
     }
 
+    // Função genérica para atualizar o estado do form com o campo alterado
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({
             ...prev,
@@ -102,12 +113,14 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
 
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 py-4">
+                        {/* Se houver erro, mostra um alerta vermelho com a mensagem */}
                         {error && (
                             <Alert variant="destructive">
                                 <AlertDescription>{error}</AlertDescription>
                             </Alert>
                         )}
 
+                        {/* Campo para editar o Nome */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right text-white">
                                 Name
@@ -121,6 +134,7 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                             />
                         </div>
 
+                        {/* Campo para editar o Email */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="email" className="text-right text-white">
                                 Email
@@ -135,6 +149,7 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                             />
                         </div>
 
+                        {/* Campo para editar o Role (função) */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="role" className="text-right text-white">
                                 Role
@@ -150,6 +165,7 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                             </Select>
                         </div>
 
+                        {/* Campo para editar o Tier (plano) */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="tier" className="text-right text-white">
                                 Tier
@@ -168,11 +184,13 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                         </div>
                     </div>
 
+                    {/* Botões no rodapé do diálogo */}
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                             Cancel
                         </Button>
                         <Button type="submit" variant={"ghost"} disabled={isLoading} className="text-white hover:bg-white/10 transition-all">
+                            {/* Spinner de loading enquanto aguarda resposta */}
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Update
                         </Button>

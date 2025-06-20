@@ -1,3 +1,10 @@
+// src/components/admin/admin-dashboard.tsx
+
+// Sugestões:
+// - Adicionar premiumUsers ao tipo Stats
+// - Considerar usar useCallback para fetchStats se pretendo reutilizá-la noutros efeitos ou components
+// - Para segurança e melhores práticas, o token deve idealmente ser gerido via contexto ou cookies HttpOnly, não localStorage
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -8,6 +15,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
 
+// Interface que define a estrutura esperada 
 interface Stats {
     totalUsers: number,
     activeUsers: number,
@@ -16,34 +24,46 @@ interface Stats {
     byRole: Record<string, number>
 }
 
+// Component principal do dashboard
 export function AdminDashboard() {
+    // Estado que guarda os dados recebidos do backend
     const [stats, setStats] = useState<Stats | null>(null)
+    // Estado que indica se os dados ainda estão a ser carregados
     const [isLoading, setIsLoading] = useState(true)
 
+    // Executa a função fetchStats() uma vez que o component é montado
     useEffect(() => {
         fetchStats()
     }, [])
 
+    // Função assíncrona que vai buscar os dados ao backend
     const fetchStats = async () => {
         try {
+            // Vai buscar o token do localStorage
             const token = localStorage.getItem("token")
             const response = await fetch("http://89.28.236.11:3000/api/admin/users/stats", {
+                // Adiciona o token no header do request
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
 
             if (response.ok) {
+                // Converte a resposta em JSON
                 const data = await response.json()
+                // Atualiza o estado com os dados recebidos
                 setStats(data.data)
             }
         } catch (error) {
+            // Se der erro, mostra, mostra no console
             console.error("Error loading stats:", error)
         } finally {
+            // Desativa o loading independentemente do resultado
             setIsLoading(false)
         }
     }
 
+    // Enquanto os dados estão a ser carregados, mostra o spinner de loading
     if (isLoading) {
         return (
             <LoadingSpinner message="Loading admin dashboard..." />
@@ -59,7 +79,7 @@ export function AdminDashboard() {
                     </h2>
                 </div>
 
-                {/* Estatísticas */}
+                {/* Card com estatísticas dos utilizadores */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -73,6 +93,7 @@ export function AdminDashboard() {
                         </CardContent>
                     </Card>
 
+                    {/* Utilizadores ativos */}
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-white">
@@ -85,6 +106,7 @@ export function AdminDashboard() {
                         </CardContent>
                     </Card>
 
+                    {/* Utilizadores inativos */}
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-white">
@@ -97,6 +119,7 @@ export function AdminDashboard() {
                         </CardContent>
                     </Card>
 
+                    {/* Utilizadores premium (nota: premiumUsers não está no tipo `Stats`, seria boa ideia adicionar) */}
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-white">
@@ -110,8 +133,9 @@ export function AdminDashboard() {
                     </Card>
                 </div>
 
-                {/* Menu de Navegação */}
+                {/* Secção de navegação para páginas administrativas */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Link para gestão de utilizadores */}
                     <Link href="/admin/users">
                         <Card className="bg-[#1a1a1a] border border-white/10 hover:shadow-md transition-shadow cursor-pointer">
                             <CardHeader>
@@ -124,6 +148,7 @@ export function AdminDashboard() {
                         </Card>
                     </Link>
 
+                    {/* Link para logs do sistema */}
                     <Link href="/admin/logs">
                         <Card className="bg-[#1a1a1a] border border-white/10 hover:shadow-md transition-shadow cursor-pointer">
                             <CardHeader>
@@ -136,6 +161,7 @@ export function AdminDashboard() {
                         </Card>
                     </Link>
 
+                    {/* Link para verificar o estado de saúde da API/backend */}
                     <Link href="/admin/health">
                         <Card className="bg-[#1a1a1a] border border-white/10 hover:shadow-md transition-shadow cursor-pointer">
                             <CardHeader>

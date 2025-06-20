@@ -1,3 +1,4 @@
+// src/components/admin/system-logs.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -9,7 +10,10 @@ import { Search, ArrowLeft } from "lucide-react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
+import { toast } from 'react-toastify'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
 
+// Tipos de dados recebidos
 interface User {
     name: string
 }
@@ -25,15 +29,17 @@ interface Log {
 }
 
 export function SystemLogsManagement() {
-    const [logs, setLogs] = useState<Log[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [searchTerm, setSearchTerm] = useState("")
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)
-    const [page, setPage] = useState(1)
-    const [limit] = useState(20)
-    const [totalPages, setTotalPages] = useState(1)
-    const [selectedLogIds, setSelectedLogIds] = useState<string[]>([])
+    const [logs, setLogs] = useState<Log[]>([])     // Lista de logs
+    const [isLoading, setIsLoading] = useState(true)    // Spinner
+    const [searchTerm, setSearchTerm] = useState("")        // Campo de pesquisa em tempo real
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)      // Pesquisa após delay
+    const [page, setPage] = useState(1)     // Página atual
+    const [limit] = useState(20)        // Nº de registos por página
+    const [totalPages, setTotalPages] = useState(1)     // Total de páginas
+    const [selectedLogIds, setSelectedLogIds] = useState<string[]>([])      // Logs selecionados para apagar
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false)       // Modal de confirmação
 
+    // Debounce da pesquisa para evitar chamadas excessivas
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedSearchTerm(searchTerm)
@@ -44,10 +50,12 @@ export function SystemLogsManagement() {
         }
     }, [searchTerm])
 
+    // Recolhe os logs sempre que muda a página ou a pesquisa
     useEffect(() => {
         fetchLogs()
     }, [page, debouncedSearchTerm])
 
+    // Função principal de fetch dos logs
     const fetchLogs = async () => {
         try {
             setIsLoading(true)
@@ -71,7 +79,7 @@ export function SystemLogsManagement() {
                 const data = await response.json()
                 setLogs(data.data || [])
                 setTotalPages(data.meta.pages || 1)
-                setSelectedLogIds([])
+                setSelectedLogIds([])       // Limpa seleção ao carregar nova página
             } else {
                 console.error("Failed to fetch logs:", response.status)
             }
@@ -82,11 +90,13 @@ export function SystemLogsManagement() {
         }
     }
 
+    // Atualiza pequisa e faz reset à página
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value)
         setPage(1)
     }
 
+    // Navegação entre páginas
     const handlePrevPage = () => {
         if (page > 1) setPage(page - 1)
     }
@@ -95,6 +105,7 @@ export function SystemLogsManagement() {
         if (page < totalPages) setPage(page + 1)
     }
 
+    // Selecionar log individual
     const toggleSelectLog = (logId: string) => {
         setSelectedLogIds((prevSelected) =>
             prevSelected.includes(logId)
@@ -103,6 +114,7 @@ export function SystemLogsManagement() {
         )
     }
 
+    // Selecionar todos os logs da página
     const toggleSelectAll = () => {
         if (selectedLogIds.length === logs.length) {
             setSelectedLogIds([])
@@ -111,12 +123,12 @@ export function SystemLogsManagement() {
         }
     }
 
+    // Apagar logs selecionados
     const handleDeleteSelected = async () => {
         if (selectedLogIds.length === 0) return
 
-        if (!window.confirm(`Are you sure you want to delete ${selectedLogIds.length} log(s)?`)) {
-            return
-        }
+        const confirmed = confirm(`Are you sure you want to delete ${selectedLogIds.length} log(s)?`)
+        if (!confirmed) return
 
         try {
             const token = localStorage.getItem("token")
@@ -133,14 +145,18 @@ export function SystemLogsManagement() {
             if (response.ok) {
                 await fetchLogs()
                 setSelectedLogIds([])
+                toast.success('Logs deleted successfully.')
             } else {
                 console.error("Failed to delete logs:", response.status)
+                toast.error('Failed to delete logs (${response.status})')
             }
         } catch (error) {
             console.error("Error deleting logs:", error)
+            toast.error("An unexpected error ocurred.")
         }
     }
 
+    // Mostrar spinner enquanto carrega
     if (isLoading) {
         return (
             <LoadingSpinner message="Loading system logs..." />
@@ -150,7 +166,7 @@ export function SystemLogsManagement() {
     return (
         <DashboardLayout>
             <div className="container mx-auto px-4 py-20 space-y-6 [font-family:var(--font-poppins)]">
-                {/* Header */}
+                {/* Cabeçalho com botão "Back" */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link href="/admin">
@@ -169,7 +185,7 @@ export function SystemLogsManagement() {
                     </div>
                 </div>
 
-                {/* Log Card */}
+                {/* Cartão de logs com pesquisa e tabela */}
                 <Card className="bg-[#1a1a1a] border border-white/10 transition-all duration-300">
                     <CardHeader>
                         <CardTitle className="text-white [font-family:var(--font-poppins)]">List of System Logs</CardTitle>
@@ -177,7 +193,7 @@ export function SystemLogsManagement() {
                     </CardHeader>
 
                     <CardContent>
-                        {/* Search */}
+                        {/* Pesquisa */}
                         <div className="flex items-center space-x-2 mb-4">
                             <Search className="h-4 w-4 text-white/60" />
                             <Input
@@ -188,20 +204,20 @@ export function SystemLogsManagement() {
                             />
                         </div>
 
-                        {/* Delete Button */}
+                        {/* Botão para apagar selecionados */}
                         <div className="flex justify-end mb-4">
                             <Button
                                 variant="destructive"
                                 size="sm"
-                                onClick={handleDeleteSelected}
                                 disabled={selectedLogIds.length === 0}
+                                onClick={() => setShowConfirmDialog(true)}
                                 className="bg-red-600 text-white hover:bg-red-700 transition-all"
                             >
                                 Delete ({selectedLogIds.length})
                             </Button>
                         </div>
 
-                        {/* Table */}
+                        {/* Tabela de logs */}
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-b border-white/10">
@@ -243,7 +259,7 @@ export function SystemLogsManagement() {
                             </TableBody>
                         </Table>
 
-                        {/* Pagination */}
+                        {/* Paginação */}
                         <div className="flex items-center justify-center mt-6 space-x-2">
                             <Button
                                 variant="outline"
@@ -268,6 +284,60 @@ export function SystemLogsManagement() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Modal de confirmação de remoção */}
+            <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                <DialogContent className="bg-[#1a1a1a] border border-white/10 text-white">
+                    <DialogHeader>
+                        <DialogTitle className="[font-family:var(--font-poppins)] text-white">
+                            Confirm Deletion
+                        </DialogTitle>
+                    </DialogHeader>
+                    <p className="[font-family:var(--font-poppins)]">Are you sure you want to delete <strong>{selectedLogIds.length}</strong> log(s)? This action cannot be undone.</p>
+                    <DialogFooter className="mt-6">
+                        <Button
+                            variant="outline"
+                            className="border-white/20 text-white"
+                            onClick={() => setShowConfirmDialog(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            className="bg-[#66b497]"
+                            onClick={async () => {
+                                try {
+                                    const token = localStorage.getItem("token")
+
+                                    const response = await fetch(`http://89.28.236.11:3000/api/admin/logs`, {
+                                        method: "DELETE",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            Authorization: `Bearer ${token}`,
+                                        },
+                                        body: JSON.stringify({ ids: selectedLogIds }),
+                                    })
+
+                                    if (response.ok) {
+                                        await fetchLogs()
+                                        setSelectedLogIds([])
+                                        toast.success("Logs deleted successfully.")
+                                    } else {
+                                        toast.error("Failed to delete logs.")
+                                    }
+                                } catch (error) {
+                                    toast.error("An unexpected error occurred.")
+                                } finally {
+                                    setShowConfirmDialog(false)
+                                }
+                            }}
+                        >
+                            Confirm
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
         </DashboardLayout>
     )
 

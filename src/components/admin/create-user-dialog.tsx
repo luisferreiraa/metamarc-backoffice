@@ -1,7 +1,12 @@
+// src/components/admin/create-user-dialog.tsx
+
+// Sugestões:
+// - Considerar mover os valores fixos de role e tier para arrys constantes - ajuda a manter e a escalar
+// - Poderia extrair o formData para um custom hook no futuro (ex: useCreateUserForm) para reutilização
+
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
@@ -18,15 +23,17 @@ import {
 import { Alert, AlertDescription } from "../ui/alert"
 import { Loader2 } from "lucide-react"
 
+// Props que o component recebe do component pai
 interface CreateUserDialogProps {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    onUserCreated: () => void
+    open: boolean       // Se o dialog está visível
+    onOpenChange: (open: boolean) => void       // Função para alterar o estado do dialog
+    onUserCreated: () => void       // Função para chamar depois de criar um novo user
 }
 
+// Component de criação de utilizador
 export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUserDialogProps) {
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState("")
+    const [isLoading, setIsLoading] = useState(false)       // Estado para mostrar spinner enquanto faz request
+    const [error, setError] = useState("")      // Mensagem de erro, se houver
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -34,13 +41,14 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
         tier: "FREE",
     })
 
+    // Função chamada ao submeter o formulário
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setIsLoading(true)
-        setError("")
+        setIsLoading(true)      // Ativa o loading
+        setError("")        // Limpa error anteriores
 
         try {
-            const token = localStorage.getItem("token")
+            const token = localStorage.getItem("token")     // Obtém o token de autenticação
             const response = await fetch("http://89.28.236.11:3000/api/admin/users", {
                 method: "POST",
                 headers: {
@@ -51,8 +59,8 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
             })
 
             if (response.ok) {
-                onUserCreated()
-                onOpenChange(false)
+                onUserCreated()     // Notifica o pai que um novo utilizador foi criado
+                onOpenChange(false)     // Fecha o dialog
                 setFormData({
                     name: "",
                     email: "",
@@ -61,15 +69,16 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                 })
             } else {
                 const errorData = await response.json()
-                setError(errorData.message || "Error creating user")
+                setError(errorData.message || "Error creating user")    // Mostra o erro do backend
             }
         } catch (err) {
-            setError("Connection error. Try again.")
+            setError("Connection error. Try again.")    // Erro de rede
         } finally {
-            setIsLoading(false)
+            setIsLoading(false)     // Desativa o loading
         }
     }
 
+    // Função genérica para atualizar os campos do formulário
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({
             ...prev,
@@ -93,6 +102,7 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                             </Alert>
                         )}
 
+                        {/* Campo: Nome */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right text-white">
                                 Name
@@ -106,6 +116,7 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                             />
                         </div>
 
+                        {/* Campo: Email */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="email" className="text-right text-white">
                                 Email
@@ -120,6 +131,7 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                             />
                         </div>
 
+                        {/* Campo: Role (função do utilizador) */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="role" className="text-right text-white">
                                 Role
@@ -135,6 +147,7 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                             </Select>
                         </div>
 
+                        {/* Campo: Tier (plano do utilizador) */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="tier" className="text-right text-white">
                                 Tier
@@ -153,11 +166,13 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                         </div>
                     </div>
 
+                    {/* Botões de ação no rodapé do diálogo */}
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                             Cancel
                         </Button>
                         <Button type="submit" variant={"ghost"} disabled={isLoading} className="text-white hover:bg-white/10 transition-all">
+                            {/* Ícone de loading enquanto envia */}
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create User
                         </Button>

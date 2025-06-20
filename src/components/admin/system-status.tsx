@@ -1,3 +1,10 @@
+// src/components/admin/system-status.tsx
+
+// Sugestões:
+// - Guardar logs no servidor
+// - Melhorar a usabilidade com animações ou ícones
+// - Mostrar status com cores dinâmicas
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -10,42 +17,45 @@ import { ArrowLeft } from "lucide-react"
 import { LoadingSpinner } from "../layout/loading-spinner"
 
 export function SystemStatusCheck() {
+    // Estado para armazenar o resultado da requisição (mensagem de sucesso/ erro)
     const [result, setResult] = useState("")
+    // Estado para controlar se está a carregar
     const [isLoading, setIsLoading] = useState(true)
 
-    // Simular carregamento da página
+    // Efeito para simular um carregamento inicial da página
     useEffect(() => {
         const timeout = setTimeout(() => {
             setIsLoading(false)
-        }, 1000) // ou 1500ms se quiseres um delay mais visível
+        }, 1000)        // Aguarda 1 segundo antes de exibir o conteúdo
 
-        return () => clearTimeout(timeout)
+        return () => clearTimeout(timeout)      // Limpa timeout se o component for desmontado antes
     }, [])
 
+    // Função para testar o endpoint /api/admin/health da api externa
     const testApiConnection = async () => {
 
-        const token = localStorage.getItem("token")
+        const token = localStorage.getItem("token")     // Token JWT armazenado localmente
 
         setIsLoading(true)
-        setResult("")
+        setResult("")       // Limpa o resultado anterior
 
         try {
             // Testar conexão direta com a API
             const response = await fetch("http://89.28.236.11:3000/api/admin/health", {
                 method: "GET",
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,       // Envia token no header
                 }
             })
 
             if (response.ok) {
                 const data = await response.json()
-                setResult(`✅ API está funcionando! Resposta: ${JSON.stringify(data, null, 2)}`)
+                setResult(`✅ API está funcionando! Resposta: ${JSON.stringify(data, null, 2)}`)        // Sucesso
             } else {
-                setResult(`❌ API retornou erro ${response.status}: ${response.statusText}`)
+                setResult(`❌ API retornou erro ${response.status}: ${response.statusText}`)        // Erro com status
             }
         } catch (error) {
-            setResult(`❌ Erro de conexão: ${error}`)
+            setResult(`❌ Erro de conexão: ${error}`)       // Erro de rede
         } finally {
             setIsLoading(false)
         }

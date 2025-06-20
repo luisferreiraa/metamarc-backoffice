@@ -1,3 +1,8 @@
+// src/components/admin/users-management.tsx
+
+// Sugestões:
+// - Adicionar colunas como lastLogin
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -13,7 +18,10 @@ import { CreateUserDialog } from "@/components/admin/create-user-dialog"
 import { EditUserDialog } from "@/components/admin/edit-user-dialog"
 import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
+import { toast } from 'react-toastify'
 
+// Interface para representar os dados do utilizador
 interface User {
     id: string
     name: string
@@ -26,20 +34,23 @@ interface User {
 }
 
 export function UsersManagement() {
-    const [users, setUsers] = useState<User[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [searchTerm, setSearchTerm] = useState("")
-    const [selectedUser, setSelectedUser] = useState<User | null>(null)
-    const [showCreateDialog, setShowCreateDialog] = useState(false)
-    const [showEditDialog, setShowEditDialog] = useState(false)
-    const [page, setPage] = useState(1)
-    const [limit] = useState(20)
-    const [totalPages, setTotalPages] = useState(1)
+    const [users, setUsers] = useState<User[]>([])      // Lista de utilizadores
+    const [isLoading, setIsLoading] = useState(true)        // Estado de carregamento
+    const [searchTerm, setSearchTerm] = useState("")        // Texto de pesquisa
+    const [selectedUser, setSelectedUser] = useState<User | null>(null)     // Utilizador selecionado para edição
+    const [showCreateDialog, setShowCreateDialog] = useState(false)     // Controla o modal de criação
+    const [showEditDialog, setShowEditDialog] = useState(false)     // Controla o modal de edição
+    const [page, setPage] = useState(1)     // Página atual da lista
+    const [limit] = useState(20)        // Número de utilizadores por página
+    const [totalPages, setTotalPages] = useState(1)     // Total de páginas (calculado pela API)
+    const [userIdToDelete, setUserIdToDelete] = useState<string | null>(null)
 
+    // Carrega utilizadores sempre que a página muda
     useEffect(() => {
         fetchUsers()
     }, [page])
 
+    // Requisição à API para obter utilizadores
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem("token")
@@ -61,6 +72,7 @@ export function UsersManagement() {
         }
     }
 
+    // Ativa ou inativa um utilizador
     const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
         try {
             const token = localStorage.getItem("token")
@@ -81,6 +93,7 @@ export function UsersManagement() {
         }
     }
 
+    // Restaura a password de um utilizador
     const handleResetPassword = async (userId: string) => {
         try {
             const token = localStorage.getItem("token")
@@ -99,26 +112,7 @@ export function UsersManagement() {
         }
     }
 
-    const handleDeleteUser = async (userId: string) => {
-        if (!confirm("Are you sure you want to delete this user?")) return
-
-        try {
-            const token = localStorage.getItem("token")
-            const response = await fetch(`http://89.28.236.11:3000/api/admin/users/${userId}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-
-            if (response.ok) {
-                fetchUsers()
-            }
-        } catch (error) {
-            console.error("Error deleting user:", error)
-        }
-    }
-
+    // Exporta a lista de utilizadores num formato escolhido
     const handleExportUsers = async (format: string) => {
         try {
             const token = localStorage.getItem("token")
@@ -141,12 +135,14 @@ export function UsersManagement() {
         }
     }
 
+    // Filtra utilizadores com base no termo de pesquisa
     const filteredUsers = users.filter(
         (user) =>
             user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase()),
     )
 
+    // Se estiver a carregar, mostra spinner
     if (isLoading) {
         return (
             <LoadingSpinner message="Loading users..." />
@@ -303,7 +299,7 @@ export function UsersManagement() {
                                                         Reset Password
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
-                                                        onClick={() => handleDeleteUser(user.id)}
+                                                        onClick={() => setUserIdToDelete(user.id)}
                                                         className="text-red-600"
                                                     >
                                                         <Trash2 className="mr-2 h-4 w-4" />
@@ -359,8 +355,60 @@ export function UsersManagement() {
                     />
                 )}
             </div>
+
+            {/* Modal de confirmação de remoção */}
+            <Dialog open={!!userIdToDelete} onOpenChange={() => setUserIdToDelete(null)}>
+                <DialogContent className="bg-[#1a1a1a] border border-white/10 text-white">
+                    <DialogHeader>
+                        <DialogTitle className="[font-family:var(--font-poppins)] text-white">
+                            Confirm Deletion
+                        </DialogTitle>
+                    </DialogHeader>
+                    <p className="[font-family:var(--font-poppins)]">
+                        Are you sure you want to delete this user? This action cannot be undone.
+                    </p>
+                    <DialogFooter className="mt-6">
+                        <Button
+                            variant="outline"
+                            className="border-white/20 text-white"
+                            onClick={() => setUserIdToDelete(null)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            className="bg-[#66b497]"
+                            onClick={async () => {
+                                if (!userIdToDelete) return
+                                try {
+                                    const token = localStorage.getItem("token")
+                                    const response = await fetch(`http://89.28.236.11:3000/api/admin/users/${userIdToDelete}`, {
+                                        method: "DELETE",
+                                        headers: {
+                                            Authorization: `Bearer ${token}`,
+                                        },
+                                    })
+
+                                    if (response.ok) {
+                                        await fetchUsers()
+                                        toast.success("User deleted successfully.")
+                                    }
+                                } catch (error) {
+                                    console.error("Error deleting user:", error)
+                                    toast.error("Error deleting user.")
+                                } finally {
+                                    setUserIdToDelete(null)
+                                }
+                            }}
+                        >
+                            Confirm
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
         </DashboardLayout>
-    );
+    )
 
 
 
