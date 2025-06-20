@@ -5,6 +5,11 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { Navigation } from '@/components/layout/navigation'
 import { LoadingSpinner } from '@/components/layout/loading-spinner'
+import { DashboardLayout } from '@/components/layout/dashboard-layout'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface SubscriptionStatus {
     tier: string
@@ -43,50 +48,83 @@ export default function SubscriptionPage() {
     if (loading) return <LoadingSpinner />
 
     return (
-        <div>
-            <Navigation />
-            <div className="max-w-4xl mx-auto px-4 py-12">
-                <h1 className="text-3xl font-bold mb-8">My Subscription Plan</h1>
-
-                {status ? (
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <div className="mb-6">
-                            <h2 className="text-xl font-semibold">Current Plan</h2>
-                            <p className="text-2xl">{status.tier}</p>
-                            <p className={status.isActive ? 'text-green-600' : 'text-red-600'}>
-                                {status.isActive ? 'Ativo' : 'Inativo'}
-                            </p>
-                        </div>
-
-                        <div className="mb-6">
-                            <h2 className="text-xl font-semibold">Renews at</h2>
-                            <p>{status.expiresAt ? new Date(status.expiresAt).toLocaleDateString() : 'N/A'}</p>
-                        </div>
-
-                        <div className="mb-6">
-                            <h2 className="text-xl font-semibold">API Key Expires at</h2>
-                            <p>{status.apiKeyExpiresAt ? new Date(status.apiKeyExpiresAt).toLocaleDateString() : 'N/A'}</p>
-                        </div>
-
-                        <button
-                            onClick={() => router.push('/subscription/upgrade')}
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                        >
-                            Change Plan
-                        </button>
+        <DashboardLayout>
+            <div className="container mx-auto px-4 py-20 space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Link href="/dashboard">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                            >
+                                <ArrowLeft className="mr-2 h-4 w-4 text-[#66b497]" />
+                                Back
+                            </Button>
+                        </Link>
+                        <h1 className="text-3xl lg:text-4xl font-bold text-white [font-family:var(--font-poppins)]">
+                            My Subscription Plan
+                        </h1>
                     </div>
-                ) : (
-                    <div className="text-center py-8">
-                        <p className="mb-4">You don't have an active subscription</p>
-                        <button
-                            onClick={() => router.push('/subscription/plans')}
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                        >
-                            Ver Planos
-                        </button>
-                    </div>
-                )}
+                </div>
+
+                {/* Card */}
+                <div className="flex items-center justify-center">
+                    <Card className="w-full bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
+                        <CardHeader>
+                            <CardTitle className="text-white [font-family:var(--font-poppins)]">
+                                Subscription Details
+                            </CardTitle>
+                            <CardDescription className="text-white/70">
+                                Information about your current plan
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6 text-white/90">
+                            {loading ? (
+                                <p className="text-white/70">Loading...</p>
+                            ) : status ? (
+                                <>
+                                    <div>
+                                        <h2 className="font-semibold">Current Plan</h2>
+                                        <p className="text-xl">{status.tier}</p>
+                                        <p className={status.isActive ? "text-green-500" : "text-red-500"}>
+                                            {status.isActive ? "Active" : "Inactive"}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <h2 className="font-semibold">Renews at</h2>
+                                        <p>{status.expiresAt ? new Date(status.expiresAt).toLocaleDateString() : "N/A"}</p>
+                                    </div>
+
+                                    <div>
+                                        <h2 className="font-semibold">API Key Expires at</h2>
+                                        <p>{status.apiKeyExpiresAt ? new Date(status.apiKeyExpiresAt).toLocaleDateString() : "N/A"}</p>
+                                    </div>
+
+                                    <Button
+                                        onClick={() => router.push("/subscription/upgrade")}
+                                        className="bg-[#66b497] text-black hover:bg-[#5aa88b] transition-all"
+                                    >
+                                        Change Plan
+                                    </Button>
+                                </>
+                            ) : (
+                                <div className="text-center text-white/70">
+                                    <p className="mb-4">You don't have an active subscription</p>
+                                    <Button
+                                        onClick={() => router.push("/subscription/plans")}
+                                        className="bg-[#66b497] text-black hover:bg-[#5aa88b] transition-all"
+                                    >
+                                        View Plans
+                                    </Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
-        </div>
+        </DashboardLayout>
     )
 }

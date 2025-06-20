@@ -86,7 +86,7 @@ export function SystemStatusCheck() {
 
     return (
         <DashboardLayout>
-            <div className="container mx-auto px-4 py-20 space-y-6">
+            <div className="container mx-auto px-4 py-20 space-y-6 bg-black">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -108,7 +108,7 @@ export function SystemStatusCheck() {
 
                 {/* Card de Testes */}
                 <div className="flex items-center justify-center">
-                    <Card className="w-full max-w-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
+                    <Card className="w-full bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader>
                             <CardTitle className="text-white [font-family:var(--font-poppins)]">
                                 API Connection Test

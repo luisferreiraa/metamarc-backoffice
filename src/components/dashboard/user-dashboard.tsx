@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Key, User, LogOut, RefreshCw, CircleFadingArrowUp } from "lucide-react"
+import { Key, User, LogOut, RefreshCw, CircleFadingArrowUp, Podcast } from "lucide-react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
@@ -117,14 +117,6 @@ export function UserDashboard() {
                     <h1 className="text-3xl lg:text-4xl font-bold text-white [font-family:var(--font-poppins)]">
                         Dashboard
                     </h1>
-                    <Button
-                        variant="outline"
-                        onClick={handleLogout}
-                        className="border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
-                    >
-                        <LogOut className="mr-2 h-4 w-4 text-[#66b497]" />
-                        Logout
-                    </Button>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
@@ -194,15 +186,26 @@ export function UserDashboard() {
                         </CardContent>
                     </Card>
                 </div>
-                <Link href="/subscription/plans" className="w-full">
-                    <Button
-                        variant="main"
-                        className="w-full border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
-                    >
-                        <CircleFadingArrowUp className="mr-2 h-4 w-4 text-white" />
-                        Upgrade your plan
-                    </Button>
-                </Link>
+                <div className="flex items-center gap-4">
+                    <Link href="/subscription" className="w-full">
+                        <Button
+                            variant="main"
+                            className="w-full border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                        >
+                            <Podcast className="mr-2 h-4 w-4 text-white" />
+                            My Subscription Plan
+                        </Button>
+                    </Link>
+                    <Link href="/subscription/plans" className="w-full">
+                        <Button
+                            variant="main"
+                            className="w-full border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                        >
+                            <CircleFadingArrowUp className="mr-2 h-4 w-4 text-white" />
+                            Upgrade My Plan
+                        </Button>
+                    </Link>
+                </div>
             </div>
         </DashboardLayout>
     )
