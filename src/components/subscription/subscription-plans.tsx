@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import axios from 'axios'
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -17,7 +17,7 @@ const TIERS = [
     },
     {
         name: 'PREMIUM',
-        price: '€99.99',
+        price: '€99.00',
         features: ['100,000 requests/mês', 'Prioridade no processamento', 'Suporte prioritário'],
         priceId: 'price_1Rb0eNRpvzFUjHn4C5iXBZQf'
     },
@@ -29,10 +29,55 @@ const TIERS = [
     }
 ]
 
+interface UserData {
+    id: string
+    tier: string
+}
+
 export default function SubscriptionPlans() {
     const [loading, setLoading] = useState(false)
     const [selectedTier, setSelectedTier] = useState('')
+    const [user, setUser] = useState<UserData | null>(null)
     const router = useRouter()
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const token = localStorage.getItem("token")
+            const userData = localStorage.getItem("user")
+
+            if (!token || !userData) {
+                setLoading(false)
+                return
+            }
+
+            try {
+                const response = await fetch("http://89.28.236.11:3000/api/auth/get-api-key", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
+
+                if (response.ok) {
+                    const apiData = await response.json()
+                    /* const parsedUser = JSON.parse(userData) */
+
+                    // Combina os dados do localStorage com os dados do backend
+                    setUser({
+                        id: apiData.id,
+                        tier: apiData.tier,
+                    })
+                } else {
+                    console.error("Failed to fetch API key")
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error)
+            }
+
+            setLoading(false)
+        }
+
+        fetchUserData()
+    }, [])
 
     const handleSubscribe = async (tier: string) => {
         setLoading(true);
@@ -104,44 +149,54 @@ export default function SubscriptionPlans() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {TIERS.map((tier, index) => (
-                        <Card
-                            key={index}
-                            className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-colors"
-                        >
-                            <CardHeader>
-                                <CardTitle className="text-xl text-white mb-2 [font-family:var(--font-poppins)]">
-                                    {tier.name}
-                                </CardTitle>
-                                <div className="text-3xl font-bold text-[#66b497] [font-family:var(--font-poppins)]">
-                                    {tier.price}
-                                </div>
-                            </CardHeader>
+                    {TIERS.map((tier, index) => {
+                        const isCurrentPlan = user?.tier === tier.name
 
-                            <CardContent>
-                                <ul className="space-y-3 my-4">
-                                    {tier.features.map((feature, idx) => (
-                                        <li key={idx} className="flex items-center text-white/80 text-sm">
-                                            <CheckCircle2 className="h-4 w-4 text-[#66b497] mr-2" />
-                                            {feature}
-                                        </li>
-                                    ))}
-                                </ul>
+                        return (
+                            <Card
+                                key={index}
+                                className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-colors"
+                            >
+                                <CardHeader>
+                                    <CardTitle className="text-xl text-white mb-2 [font-family:var(--font-poppins)]">
+                                        {tier.name}
+                                    </CardTitle>
+                                    <div className="text-3xl font-bold text-[#66b497] [font-family:var(--font-poppins)]">
+                                        {tier.price}
+                                    </div>
+                                </CardHeader>
 
-                                <button
-                                    onClick={() => handleSubscribe(tier.name)}
-                                    disabled={loading}
-                                    className="w-full mt-2 bg-[#66b497] text-black py-2 rounded hover:bg-[#5aa88b] disabled:bg-white/20 transition-all"
-                                >
-                                    {loading
-                                        ? "Processing..."
-                                        : tier.name === "ENTERPRISE"
-                                            ? "Contact us"
-                                            : "Subscribe"}
-                                </button>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                <CardContent>
+                                    <ul className="space-y-3 my-4">
+                                        {tier.features.map((feature, idx) => (
+                                            <li key={idx} className="flex items-center text-white/80 text-sm">
+                                                <CheckCircle2 className="h-4 w-4 text-[#66b497] mr-2" />
+                                                {feature}
+                                            </li>
+                                        ))}
+                                    </ul>
+
+                                    <button
+                                        onClick={() => handleSubscribe(tier.name)}
+                                        disabled={loading || isCurrentPlan}
+                                        className={`w-full mt-2 py-2 rounded transition-all
+                        ${isCurrentPlan
+                                                ? "bg-white/10 text-white cursor-not-allowed"
+                                                : "bg-[#66b497] text-black hover:bg-[#5aa88b] disabled:bg-white/20"
+                                            }`}
+                                    >
+                                        {loading
+                                            ? "Processing..."
+                                            : isCurrentPlan
+                                                ? "Your plan"
+                                                : tier.name === "ENTERPRISE"
+                                                    ? "Contact us"
+                                                    : "Subscribe"}
+                                    </button>
+                                </CardContent>
+                            </Card>
+                        )
+                    })}
                 </div>
             </div>
         </div>

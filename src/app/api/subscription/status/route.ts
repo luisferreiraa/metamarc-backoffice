@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
     try {
-        const backendUrl = `${process.env.BACKEND_URL}/subscription/status`
+        const backendUrl = `http://89.28.236.11:3000/api/subscription/status`
 
         const response = await fetch(backendUrl, {
             headers: {
