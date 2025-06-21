@@ -1,3 +1,4 @@
+// src/app/admin/page.tsx
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
 import { AuthGuard } from "@/components/auth/auth-guard"
 

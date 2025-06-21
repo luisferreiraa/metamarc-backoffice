@@ -5,36 +5,41 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
     try {
-        // 1. Obter token CORRETAMENTE
+        // Autenticação
+        // Busca token em cookies ou headers (abordagem defensiva)
         const token = request.cookies.get('authToken')?.value ||
             request.headers.get('Authorization')?.replace('Bearer ', '')
 
+        // Validação explícita do token
         if (!token) {
             return NextResponse.json(
                 { error: 'Token de autenticação não encontrado' },
-                { status: 401 }
+                { status: 401 }     // Unauthorized
             )
         }
 
-        // 2. Ler corpo da requisição
+        // Validação dos dados
         const { tier } = await request.json()
 
-        // 3. Configurar chamada ao backend
+        // Integração com backend
         const backendUrl = "http://89.28.236.11:3000/api/subscription/subscribe"
+
         const backendResponse = await fetch(backendUrl, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer ${token}`,     // Token JWT
                 'Content-Type': 'application/json',
-                'Origin': request.nextUrl.origin // Adiciona origem para CORS
+                'Origin': request.nextUrl.origin        // Melhoria para CORS
             },
             body: JSON.stringify({ tier })
         })
 
-        // 4. Tratar resposta
+        // Tratamento da resposta
         if (!backendResponse.ok) {
+            // Tenta extrair detalhes do erro
             const errorText = await backendResponse.text()
             console.error('Erro no backend:', errorText)
+
             return NextResponse.json(
                 { error: 'Falha na comunicação com o serviço de assinatura' },
                 { status: 502 }
