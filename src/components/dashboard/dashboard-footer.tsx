@@ -1,3 +1,4 @@
+// src/components/dashboard/dashboard-footer.tsx
 "use client"
 
 export function DashboardFooter() {

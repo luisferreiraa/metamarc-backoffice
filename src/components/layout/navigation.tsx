@@ -1,3 +1,4 @@
+// src/components/layout/navigation.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -7,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { LogOut, Shield, LucideUser } from "lucide-react"
 import { RoleGuard } from "@/components/auth/role-guard"
 
+// Interface para tipagem dos dados do user
 interface UserType {
     id: string
     name: string
@@ -15,37 +17,49 @@ interface UserType {
     tier: string
 }
 
+// Component para navegação principal
 export function Navigation() {
+    // Estado para armazenar dados do user
     const [user, setUser] = useState<UserType | null>(null)
 
+    // Efeito que roda quando o component é montado
     useEffect(() => {
         const userStr = localStorage.getItem("user")
         if (userStr) {
             try {
+                // Tenta parsear os dados do usuário do localStorage
                 setUser(JSON.parse(userStr))
             } catch (error) {
                 console.error("Error loading user data:", error)
             }
         }
-    }, [])
+    }, [])      // Array de dependências vazio = executa apenas no mount
 
+    // Função para lidar com logout
     const handleLogout = () => {
+        // Remove itens do localStorage
         localStorage.removeItem("token")
         localStorage.removeItem("user")
-        // Limpar cookies
+
+        // Limpa cookies relacionados à autenticação
         document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
         document.cookie = "userRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+
+        // Redireciona para a página inicial
         window.location.href = "/"
     }
 
+    // Se não houver usuário, não renderiza nada
     if (!user) return null
 
     return (
         <nav className="bg-black border-b border-white/10 shadow-sm [font-family:var(--font-poppins)]">
             <div className="container mx-auto px-4">
+                {/* Container principal flexível */}
                 <div className="flex items-center justify-between h-16">
-                    {/* Branding + Badges */}
+                    {/* Lado esquerdo - Branding e badges */}
                     <div className="flex items-center space-x-4">
+                        {/* Logo/Link principal - muda conforme role */}
                         <Link
                             href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
                             className="font-bold text-xl text-[#66b497] hover:text-[#88d4bb] transition-colors"
@@ -53,7 +67,9 @@ export function Navigation() {
                             Metamarc API
                         </Link>
 
+                        {/* Badges de role e tier */}
                         <div className="flex items-center space-x-2">
+                            {/* Badge de role (ADMIN/USER) */}
                             <Badge
                                 variant={user.role === "ADMIN" ? "default" : "secondary"}
                                 className={user.role === "ADMIN"
@@ -62,6 +78,7 @@ export function Navigation() {
                             >
                                 {user.role}
                             </Badge>
+                            {/* Badge de tier (PREMIUM/FREE) */}
                             <Badge
                                 variant={user.tier === "PREMIUM" ? "default" : "outline"}
                                 className={user.tier === "PREMIUM"
@@ -73,11 +90,12 @@ export function Navigation() {
                         </div>
                     </div>
 
-                    {/* Right-side actions */}
+                    {/* Lado direito - Ações e navegação */}
                     <div className="flex items-center space-x-4">
+                        {/* Saudação personalizada */}
                         <span className="text-sm text-white/80">Hi, {user.name}</span>
 
-                        {/* Admin Only */}
+                        {/* Botão Admin - visível apenas para ADMINS */}
                         <RoleGuard allowedRoles={["ADMIN"]} mode="silent">
                             <Link href="/admin">
                                 <Button
@@ -91,7 +109,7 @@ export function Navigation() {
                             </Link>
                         </RoleGuard>
 
-                        {/* All Users */}
+                        {/* Botão Dashboard - visível para todos */}
                         <Link href="/dashboard">
                             <Button
                                 variant="ghost"
@@ -103,6 +121,7 @@ export function Navigation() {
                             </Button>
                         </Link>
 
+                        {/* Botão de Logout */}
                         <Button
                             variant="outline"
                             size="sm"

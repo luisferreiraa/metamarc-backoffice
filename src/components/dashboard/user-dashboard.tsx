@@ -1,3 +1,4 @@
+// src/components/dashboard/user-dasboard.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -9,6 +10,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
 
+// Interface que define a estrutura dos dados do user
 interface UserData {
     id: string
     name: string
@@ -21,21 +23,27 @@ interface UserData {
     createdAt: string
 }
 
+// Component principal do dashboard do user
 export function UserDashboard() {
+    // Estados para armazenar os dados do user e status de loading
     const [user, setUser] = useState<UserData | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
+    // Efeito que roda quando o component é montado para buscar os dados do user
     useEffect(() => {
         const fetchUserData = async () => {
+            // Obtém token e dados do user do localStorage
             const token = localStorage.getItem("token")
             const userData = localStorage.getItem("user")
 
+            // Se não houver token ou dados, finaliza o loading
             if (!token || !userData) {
                 setIsLoading(false)
                 return
             }
 
             try {
+                // Faz requisição para a API para obter a API Key
                 const response = await fetch("http://89.28.236.11:3000/api/auth/get-api-key", {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -44,9 +52,8 @@ export function UserDashboard() {
 
                 if (response.ok) {
                     const apiData = await response.json()
-                    /* const parsedUser = JSON.parse(userData) */
 
-                    // Combina os dados do localStorage com os dados do backend
+                    // Atualiza o estado com os dados combinados
                     setUser({
                         id: apiData.id,
                         name: apiData.name,
@@ -69,8 +76,9 @@ export function UserDashboard() {
         }
 
         fetchUserData()
-    }, [])
+    }, [])      // Array de dependências vazio = executa apenas no mount
 
+    // Função para renovar a API Key
     const handleRenewApiKey = async () => {
         try {
             const token = localStorage.getItem("token")
@@ -83,6 +91,7 @@ export function UserDashboard() {
 
             if (response.ok) {
                 const data = await response.json()
+                // Atualiza apenas a API Key no estado
                 setUser((prev) => (prev ? { ...prev, apiKey: data.apiKey } : null))
             }
         } catch (error) {
@@ -90,12 +99,16 @@ export function UserDashboard() {
         }
     }
 
+    // Função para fazer logout
     const handleLogout = () => {
+        // Remove os itens de autenticação do localStorage
         localStorage.removeItem("token")
         localStorage.removeItem("user")
+        // Redireciona para a página principal
         window.location.href = "/"
     }
 
+    // Exibe loading spinner enquanto os dados são buscados
     if (isLoading) {
         return (
             <div className="bg-black">
@@ -104,6 +117,7 @@ export function UserDashboard() {
         )
     }
 
+    // Mensagem se não encontrar dados do user
     if (!user) {
         return <div>User not found</div>
     }
@@ -113,13 +127,16 @@ export function UserDashboard() {
     return (
         <DashboardLayout>
             <div className="container mx-auto px-4 py-20 space-y-6 [font-family:var(--font-poppins)]">
+                {/* Cabeçalho */}
                 <div className="flex items-center justify-between mb-10">
                     <h1 className="text-3xl lg:text-4xl font-bold text-white [font-family:var(--font-poppins)]">
                         Dashboard
                     </h1>
                 </div>
 
+                {/* Grid com os cards principais */}
                 <div className="grid gap-6 md:grid-cols-2">
+                    {/* Card de informações da conta */}
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-white [font-family:var(--font-poppins)]">
@@ -128,14 +145,17 @@ export function UserDashboard() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            {/* Nome do user */}
                             <div>
                                 <p className="text-sm font-medium text-white/70">Name</p>
                                 <p className="text-lg text-white">{user.name}</p>
                             </div>
+                            {/* Email do user */}
                             <div>
                                 <p className="text-sm font-medium text-white/70">Email</p>
                                 <p className="text-lg text-white">{user.email}</p>
                             </div>
+                            {/* Tier e status */}
                             <div className="flex items-center gap-6 flex-wrap">
                                 <div>
                                     <p className="text-sm font-medium text-white/70">Tier</p>
@@ -158,6 +178,7 @@ export function UserDashboard() {
                         </CardContent>
                     </Card>
 
+                    {/* Card da chave API */}
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-white [font-family:var(--font-poppins)]">
@@ -169,12 +190,15 @@ export function UserDashboard() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            {/* Card da chave API */}
                             <div className="p-3 bg-black border border-white/10 rounded-md font-mono text-sm text-white break-all">
                                 {user.apiKey}
                             </div>
+                            {/* Data de expiração da chave */}
                             <div className="p-3 bg-black border border-white/10 rounded-md font-mono text-sm text-white/80 break-all">
                                 {user.apiKeyExpiresAt ? new Date(user.apiKeyExpiresAt).toLocaleString() : "N/A"}
                             </div>
+                            {/* Botão para renovar chave */}
                             <Button
                                 onClick={handleRenewApiKey}
                                 variant="outline"
@@ -186,7 +210,9 @@ export function UserDashboard() {
                         </CardContent>
                     </Card>
                 </div>
+                {/* Botões de ação */}
                 <div className="flex items-center gap-4">
+                    {/* Link para página de assinatura */}
                     <Link href="/subscription" className="w-full">
                         <Button
                             variant="main"
@@ -196,6 +222,7 @@ export function UserDashboard() {
                             My Subscription Plan
                         </Button>
                     </Link>
+                    {/* Link para upgrade de plano */}
                     <Link href="/subscription/plans" className="w-full">
                         <Button
                             variant="main"
