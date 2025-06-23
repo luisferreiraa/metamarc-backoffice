@@ -6,47 +6,51 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 const pricingTiers = [
     {
         name: "FREE",
-        price: "$0",
+        price: "€0",
         description: "Perfect for personal projects, testing and explorations.",
         features: [
-            "100 requests/day",
-            "Community support",
-            "Basic UNIMARC fields",
+            'Fetch fields by type',
+            'Fetch a specific field by type and tag',
+            'Validate tags',
+            'List available tags',
+            'Limit of 100 requests per month',
+            'Basic email support'
         ],
     },
     {
         name: "PRO",
-        price: "$19/mo",
+        price: '€9.99/mo',
         description: "For developers building production tools.",
         features: [
-            "10,000 requests/month",
-            "Priority email support",
-            "Extended UNIMARC fields",
-            "Rate limiting dashboard",
+            'Everything in FREE plus:',
+            'List available languages for translations',
+            'Limit of 5.000 requests per month',
+            'Access to language-related endpoints',
+            'Priority email support'
         ],
     },
     {
         name: "PREMIUM",
-        price: "$99/mo",
+        price: "€29.99/mo",
         description: "Designed for teams and advanced integrations.",
         features: [
-            "100,000 requests/month",
-            "Dedicated support channel",
-            "Real-time field updates",
-            "Usage analytics",
-            "CSV & XML export",
+            'Everything in PRO plus:',
+            'Limit of 50.000 requests per month',
+            'Automatic API Key renewal',
+            'Early access to new features',
+            'Technical support via email and chat'
         ],
     },
     {
         name: "ENTERPRISE",
-        price: "Custom",
+        price: "Contact us",
         description: "Custom SLAs, volume pricing, and private hosting options available.",
         features: [
-            "Unlimited access",
-            "24/7 SLA-backed support",
-            "On-premise or private cloud",
-            "Custom endpoints",
-            "Integration consulting",
+            'Everything in PREMIUM plus:',
+            'Unlimited requests',
+            '99.9% SLA uptime guarantee',
+            'Personalized technical consultancy',
+            '24/7 technical support'
         ],
     },
 ]

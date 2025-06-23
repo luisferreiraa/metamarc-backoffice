@@ -34,9 +34,11 @@ export function Hero() {
                                     Try free
                                 </Button>
                             </Link>
-                            <Button variant="outline" className="px-8 py-6 [font-family:var(--font-poppins)]">
-                                Contact sales
-                            </Button>
+                            <Link href="http://89.28.236.11:3000/api-docs/">
+                                <Button variant="outline" className="px-8 py-6 [font-family:var(--font-poppins)]">
+                                    View Docs
+                                </Button>
+                            </Link>
                         </div>
 
                         <div className="flex items-center space-x-6 text-sm text-white">

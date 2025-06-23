@@ -13,20 +13,38 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 const TIERS = [
     {
         name: 'PRO',
-        price: '€9.99',
-        features: ['10,000 requests/mês', 'Metadados completos', 'Suporte por email'],
+        price: '€9.99/mo',
+        features: [
+            'Everything in FREE plus:',
+            'List available languages for translations',
+            'Limit of 5.000 requests per month',
+            'Access to language-related endpoints',
+            'Priority email support'
+        ],
         priceId: 'price_1Rb0e5RpvzFUjHn4tlTCWD2y'       // ID do preço no Stripe
     },
     {
         name: 'PREMIUM',
-        price: '€99.00',
-        features: ['100,000 requests/mês', 'Prioridade no processamento', 'Suporte prioritário'],
+        price: '€29.99/mo',
+        features: [
+            'Everything in PRO plus:',
+            'Limit of 50.000 requests per month',
+            'Automatic API Key renewal',
+            'Early access to new features',
+            'Technical support via email and chat'
+        ],
         priceId: 'price_1Rb0eNRpvzFUjHn4C5iXBZQf'
     },
     {
         name: 'ENTERPRISE',
         price: 'Contact us',
-        features: ['Requests ilimitados', 'Suporte dedicado', 'API dedicada'],
+        features: [
+            'Everything in PREMIUM plus:',
+            'Unlimited requests',
+            '99.9% SLA uptime guarantee',
+            'Personalized technical consultancy',
+            '24/7 technical support'
+        ],
         priceId: 'price_1Rb0eeRpvzFUjHn4bQnl3swX'
     }
 ]
