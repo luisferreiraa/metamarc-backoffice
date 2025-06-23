@@ -19,18 +19,38 @@ export function ChatBox({ withUserId, currentUserId }: ChatBoxProps) {
     const [newMessage, setNewMessage] = useState("")
 
     const fetchHistory = async () => {
-        const res = await axios.get(`http://89.28.236.11:3000/api/chat/history/${withUserId}`)
-        setMessages(res.data)
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get(`http://89.28.236.11:3000/api/chat/history/${withUserId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        setMessages(res.data);
     }
 
     const sendMessage = async () => {
-        if (!newMessage.trim()) return
+        if (!newMessage.trim()) return;
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
         await axios.post("http://89.28.236.11:3000/api/chat/send", {
             to: withUserId,
             message: newMessage
-        })
-        setMessages(prev => [...prev, { from: currentUserId, to: withUserId, message: newMessage, timestamp: new Date().toISOString() }])
-        setNewMessage("")
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        setMessages(prev => [...prev, {
+            from: currentUserId,
+            to: withUserId,
+            message: newMessage,
+            timestamp: new Date().toISOString()
+        }]);
+        setNewMessage("");
     }
 
     useEffect(() => {
