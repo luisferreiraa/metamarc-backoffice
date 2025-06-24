@@ -39,24 +39,30 @@ export function Navigation() {
 
     // Polling para verificar novas mensagens
     useEffect(() => {
-        if (!user) return
+        if (!user?.id) return;
 
-        const interval = setInterval(async () => {
-            const token = localStorage.getItem("token")
-            if (!token) return
+        const checkUnread = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) return;
 
             try {
                 const res = await axios.get("http://89.28.236.11:3000/api/chat/unread", {
                     headers: { Authorization: `Bearer ${token}` }
-                })
-                setHasUnread(res.data?.hasUnread || false)
+                });
+                setHasUnread(res.data.hasUnread);
             } catch (error) {
-                console.error("Error fetching unread status:", error)
+                console.error("Failed to check unread messages:", error);
             }
-        }, 5000)
+        }
 
-        return () => clearInterval(interval)
-    }, [user])
+        // Verificação imediata
+        checkUnread();
+
+        // Polling a cada 3 segundos (ajuste conforme necessidade)
+        const interval = setInterval(checkUnread, 3000);
+
+        return () => clearInterval(interval);
+    }, [user?.id]);
 
     // Função para lidar com logout
     const handleLogout = () => {
