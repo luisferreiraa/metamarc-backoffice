@@ -15,7 +15,7 @@ interface UserSummary {
 
 export default function AdminPage() {
     const { user, isAuthenticated } = useAuth("ADMIN")
-    const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+    const [selectedUser, setSelectedUser] = useState<UserSummary | null>(null)
     const [users, setUsers] = useState<UserSummary[]>([])
 
     useEffect(() => {
@@ -42,28 +42,40 @@ export default function AdminPage() {
         <AuthGuard requiredRole="ADMIN">
             <AdminDashboard />
 
-            <div className="mt-4">
-                <h2 className="text-lg font-bold mb-2">User Chats</h2>
+            <div className="flex mt-4 h-[70vh]">
 
-                {users.length === 0 ? (
-                    <p>No users with active chats.</p>
-                ) : (
-                    users.map((u) => (
-                        <button
-                            key={u.id}
-                            className="mr-2 mb-2 border px-4 py-1 rounded bg-gray-200"
-                            onClick={() => setSelectedUserId(u.id)}
-                        >
-                            {u.name} ({u.email})
-                        </button>
-                    ))
-                )}
+                {/* Sidebar com utilizadores */}
+                <div className="w-64 bg-[#1a1a1a] border border-white/10 p-4 rounded text-white mr-4 overflow-y-auto">
+                    <h2 className="text-lg font-bold mb-4 text-[#66b497]">Active Chats</h2>
 
-                {selectedUserId && (
-                    <div className="mt-4">
-                        <ChatBox withUserId={selectedUserId} currentUserId={user.id} />
-                    </div>
-                )}
+                    {users.length === 0 ? (
+                        <p className="text-white/70">No active chats.</p>
+                    ) : (
+                        users.map((u) => (
+                            <button
+                                key={u.id}
+                                className={`block w-full text-left mb-2 px-3 py-2 rounded hover:bg-[#2a2a2a] ${selectedUser?.id === u.id ? "bg-[#66b497] text-black" : "bg-[#111111] text-white"}`}
+                                onClick={() => setSelectedUser(u)}
+                            >
+                                {u.name} <br />
+                                <span className="text-xs text-white/50">{u.email}</span>
+                            </button>
+                        ))
+                    )}
+                </div>
+
+                {/* Área do chat */}
+                <div className="flex-grow">
+                    {selectedUser?.id ? (
+                        <ChatBox
+                            withUserId={selectedUser.id}
+                            withUserName={selectedUser.name}
+                            currentUserId={user.id}
+                        />
+                    ) : (
+                        <p className="text-white">Select a chat to view conversation.</p>
+                    )}
+                </div>
             </div>
         </AuthGuard>
     )

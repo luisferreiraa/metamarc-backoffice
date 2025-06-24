@@ -5,8 +5,9 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { LogOut, Shield, LucideUser } from "lucide-react"
+import { MessageCircle, LogOut, Shield, LucideUser } from "lucide-react"
 import { RoleGuard } from "@/components/auth/role-guard"
+import axios from "axios"
 
 // Interface para tipagem dos dados do user
 interface UserType {
@@ -21,6 +22,7 @@ interface UserType {
 export function Navigation() {
     // Estado para armazenar dados do user
     const [user, setUser] = useState<UserType | null>(null)
+    const [hasUnread, setHasUnread] = useState(false)
 
     // Efeito que roda quando o component é montado
     useEffect(() => {
@@ -34,6 +36,27 @@ export function Navigation() {
             }
         }
     }, [])      // Array de dependências vazio = executa apenas no mount
+
+    // Polling para verificar novas mensagens
+    useEffect(() => {
+        if (!user) return
+
+        const interval = setInterval(async () => {
+            const token = localStorage.getItem("token")
+            if (!token) return
+
+            try {
+                const res = await axios.get("http://89.28.236.11:3000/api/chat/unread", {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                setHasUnread(res.data?.hasUnread || false)
+            } catch (error) {
+                console.error("Error fetching unread status:", error)
+            }
+        }, 5000)
+
+        return () => clearInterval(interval)
+    }, [user])
 
     // Função para lidar com logout
     const handleLogout = () => {
@@ -120,6 +143,23 @@ export function Navigation() {
                                 Dashboard
                             </Button>
                         </Link>
+
+                        {/* Botão de Chat - visível apenas para ADMINS */}
+                        <RoleGuard allowedRoles={["ADMIN"]} mode="silent">
+                            <Link href="/admin/chats">
+                                <Button variant="ghost" size="sm" className="relative text-white hover:bg-white/10 transition-all">
+                                    <MessageCircle className="mr-2 h-4 w-4 text-[#66b497]" />
+                                    Chats
+
+                                    {hasUnread && (
+                                        <>
+                                            <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full animate-ping"></span>
+                                            <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                                        </>
+                                    )}
+                                </Button>
+                            </Link>
+                        </RoleGuard>
 
                         {/* Botão de Logout */}
                         <Button
