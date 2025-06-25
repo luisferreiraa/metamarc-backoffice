@@ -59,7 +59,7 @@ export default function ChatManagementPage() {
                             </Button>
                         </Link>
                         <h1 className="text-3xl lg:text-4xl font-bold text-white">
-                            Users Chats
+                            Messages
                         </h1>
                     </div>
 

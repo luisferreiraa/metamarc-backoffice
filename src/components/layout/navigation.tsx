@@ -155,7 +155,7 @@ export function Navigation() {
                             <Link href="/admin/chats">
                                 <Button variant="ghost" size="sm" className="relative text-white hover:bg-white/10 transition-all">
                                     <MessageCircle className="mr-2 h-4 w-4 text-[#66b497]" />
-                                    Chats
+                                    Messages
 
                                     {hasUnread && (
                                         <>

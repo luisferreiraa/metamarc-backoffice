@@ -229,7 +229,14 @@ export function UsersManagement() {
                             <TableBody>
                                 {filteredUsers.map((user) => (
                                     <TableRow key={user.id} className="hover:bg-white/5 transition-colors border-b border-white/10">
-                                        <TableCell className="font-medium text-white">{user.name}</TableCell>
+                                        <TableCell className="font-medium text-white">
+                                            <Link
+                                                href={`/admin/users/${user.id}`}
+                                                className="hover:underline text-[#66b497] hover:text-[#88d4bb] transition-colors"
+                                            >
+                                                {user.name}
+                                            </Link>
+                                        </TableCell>
                                         <TableCell className="text-white/80">{user.email}</TableCell>
                                         <TableCell>
                                             <Badge
