@@ -1,7 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { CreditCard, Mail } from "lucide-react"
 import { useParams } from "next/navigation"
 import { LoadingSpinner } from "../layout/loading-spinner"
