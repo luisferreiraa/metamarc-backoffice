@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { MessageCircle } from "lucide-react"
+import { UserStripeProfile } from "@/components/admin/user-stripe-profile"
 
 export default function DashboardPage() {
     const { user, isAuthenticated } = useAuth()
@@ -37,6 +38,7 @@ export default function DashboardPage() {
         <AuthGuard>
             <DashboardLayout>
                 <UserDashboard />
+                <UserStripeProfile />
 
                 {(user.tier === "PREMIUM" || user.tier === "ENTERPRISE") && adminId && (
                     <>

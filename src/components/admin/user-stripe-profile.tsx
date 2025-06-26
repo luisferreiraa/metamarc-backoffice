@@ -42,22 +42,35 @@ interface StripeData {
     paymentMethods: PaymentMethod[]
 }
 
-export function UserStripeProfile() {
+interface UserStripeProfileProps {
+    userId?: string // Prop opcional
+}
+
+export function UserStripeProfile({ userId }: UserStripeProfileProps) {
     const [stripeData, setStripeData] = useState<StripeData | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
-    const { id } = useParams()
+    const params = useParams()
 
+    const finalUserId = userId || params.id
     useEffect(() => {
         async function fetchStripeData() {
             try {
                 setLoading(true)
+                const token = localStorage.getItem("token")
 
-                const token = localStorage.getItem('token')
-                const res = await fetch(`http://89.28.236.11:3000/api/admin/users/stripe/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                // Pega o ID do token se não for modo admin
+                const payload = token ? JSON.parse(atob(token.split(".")[1])) : null
+                const resolvedId = finalUserId || payload?.userId
+
+                if (!resolvedId) {
+                    setError("User ID not found")
+                    setLoading(false)
+                    return
+                }
+
+                const res = await fetch(`http://89.28.236.11:3000/api/admin/users/stripe/${resolvedId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
                 })
 
                 if (res.status === 404) {
@@ -78,7 +91,7 @@ export function UserStripeProfile() {
         }
 
         fetchStripeData()
-    }, [id])
+    }, [finalUserId])
 
     if (loading) return <LoadingSpinner />
     if (error) return <p className="text-red-500">{error}</p>
