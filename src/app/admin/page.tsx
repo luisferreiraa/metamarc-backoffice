@@ -1,11 +1,10 @@
-// src/app/admin/page.tsx
 "use client"
+
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
 import { AuthGuard } from "@/components/auth/auth-guard"
 import { useAuth } from "@/app/hooks/use-auth"
 import { useEffect, useState } from "react"
 import axios from "axios"
-import { useRouter } from "next/navigation"
 import { LoadingSpinner } from "@/components/layout/loading-spinner"
 
 interface UserSummary {
@@ -15,27 +14,9 @@ interface UserSummary {
 }
 
 export default function AdminPage() {
-    const { user, isAuthenticated } = useAuth("ADMIN")
-    const [selectedUser, setSelectedUser] = useState<UserSummary | null>(null)
+    const { user, isAuthenticated } = useAuth()
     const [users, setUsers] = useState<UserSummary[]>([])
     const [loading, setLoading] = useState(true)
-    const router = useRouter()
-
-    useEffect(() => {
-        if (isAuthenticated === false) {
-            // User já confirmou não estar autenticado, redireciona
-            router.push("/dashboard")
-            return
-        }
-
-        if (isAuthenticated && user) {
-            if (user.role !== "ADMIN") {
-                router.push("/dashboard")
-            } else {
-                setLoading(false)
-            }
-        }
-    }, [isAuthenticated, user, router])
 
     useEffect(() => {
         const fetchUsersWithMessages = async () => {
@@ -49,21 +30,19 @@ export default function AdminPage() {
                 setUsers(res.data)
             } catch (error) {
                 console.error("Error fetching active chat users:", error)
+            } finally {
+                setLoading(false)
             }
         }
 
-        if (!loading && user?.role === "ADMIN") {
+        if (isAuthenticated && user?.role === "ADMIN") {
             fetchUsersWithMessages()
         }
-    }, [loading, user?.role])
-
-    if (loading) {
-        return <LoadingSpinner />
-    }
+    }, [isAuthenticated, user?.role])
 
     return (
-        <AuthGuard requiredRole="ADMIN">
-            <AdminDashboard />
+        <AuthGuard requiredRole="ADMIN" fallbackPath="/dashboard">
+            {loading ? <LoadingSpinner message="Loading users..." /> : <AdminDashboard />}
         </AuthGuard>
     )
 }

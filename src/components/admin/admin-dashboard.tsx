@@ -1,7 +1,6 @@
 // src/components/admin/admin-dashboard.tsx
 
 // Sugestões:
-// - Adicionar premiumUsers ao tipo Stats
 // - Considerar usar useCallback para fetchStats se pretendo reutilizá-la noutros efeitos ou components
 // - Para segurança e melhores práticas, o token deve idealmente ser gerido via contexto ou cookies HttpOnly, não localStorage
 

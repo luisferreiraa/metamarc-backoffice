@@ -16,11 +16,14 @@ export function AuthGuard({ children, requiredRole, fallbackPath = "/" }: AuthGu
     const router = useRouter()
 
     useEffect(() => {
+        // Só executa no client após montado
         const checkAuth = () => {
             const token = localStorage.getItem("token")
             const userStr = localStorage.getItem("user")
 
             if (!token || !userStr) {
+                setIsAllowed(false)
+                setIsChecking(false)
                 router.push(fallbackPath)
                 return
             }
@@ -29,17 +32,20 @@ export function AuthGuard({ children, requiredRole, fallbackPath = "/" }: AuthGu
                 const user = JSON.parse(userStr)
 
                 if (requiredRole && user.role !== requiredRole) {
+                    setIsAllowed(false)
+                    setIsChecking(false)
                     router.push(fallbackPath)
                     return
                 }
 
-                // Define cookies para o middleware, se necessário
+                // Define cookies para middleware, opcional
                 document.cookie = `token=${token}; path=/`
                 document.cookie = `userRole=${user.role}; path=/`
 
                 setIsAllowed(true)
             } catch (err) {
                 console.error("Invalid user data:", err)
+                setIsAllowed(false)
                 router.push(fallbackPath)
             } finally {
                 setIsChecking(false)
@@ -54,7 +60,6 @@ export function AuthGuard({ children, requiredRole, fallbackPath = "/" }: AuthGu
     }
 
     if (!isAllowed) {
-        // Enquanto redireciona, não mostra nada
         return null
     }
 
