@@ -2,7 +2,6 @@
 "use client"
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
 import { AuthGuard } from "@/components/auth/auth-guard"
-import { ChatBox } from "@/components/chat/chat-box"
 import { useAuth } from "@/app/hooks/use-auth"
 import { useEffect, useState } from "react"
 import axios from "axios"
