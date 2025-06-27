@@ -6,6 +6,8 @@ import { ChatBox } from "@/components/chat/chat-box"
 import { useAuth } from "@/app/hooks/use-auth"
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { useRouter } from "next/navigation"
+import { LoadingSpinner } from "@/components/layout/loading-spinner"
 
 interface UserSummary {
     id: string
@@ -17,6 +19,24 @@ export default function AdminPage() {
     const { user, isAuthenticated } = useAuth("ADMIN")
     const [selectedUser, setSelectedUser] = useState<UserSummary | null>(null)
     const [users, setUsers] = useState<UserSummary[]>([])
+    const [loading, setLoading] = useState(true)
+    const router = useRouter()
+
+    useEffect(() => {
+        if (isAuthenticated === false) {
+            // User já confirmou não estar autenticado, redireciona
+            router.push("/dashboard")
+            return
+        }
+
+        if (isAuthenticated && user) {
+            if (user.role !== "ADMIN") {
+                router.push("/dashboard")
+            } else {
+                setLoading(false)
+            }
+        }
+    }, [isAuthenticated, user, router])
 
     useEffect(() => {
         const fetchUsersWithMessages = async () => {
@@ -33,10 +53,14 @@ export default function AdminPage() {
             }
         }
 
-        fetchUsersWithMessages()
-    }, [])
+        if (!loading && user?.role === "ADMIN") {
+            fetchUsersWithMessages()
+        }
+    }, [loading, user?.role])
 
-    if (!isAuthenticated || !user) return <p>Unauthorized</p>
+    if (loading) {
+        return <LoadingSpinner />
+    }
 
     return (
         <AuthGuard requiredRole="ADMIN">

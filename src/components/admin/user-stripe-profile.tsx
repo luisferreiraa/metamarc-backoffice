@@ -43,10 +43,11 @@ interface StripeData {
 }
 
 interface UserStripeProfileProps {
-    userId?: string // Prop opcional
+    userId?: string
+    title?: string
 }
 
-export function UserStripeProfile({ userId }: UserStripeProfileProps) {
+export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
     const [stripeData, setStripeData] = useState<StripeData | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
@@ -106,7 +107,7 @@ export function UserStripeProfile({ userId }: UserStripeProfileProps) {
             {/* Título */}
             <div className="flex items-center justify-between flex-wrap gap-4">
                 <h1 className="text-3xl lg:text-4xl font-bold text-white [font-family:var(--font-poppins)]">
-                    Subscription & Payment Info
+                    {title ?? "Subscription & Payment Info"}
                 </h1>
             </div>
 

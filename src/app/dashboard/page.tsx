@@ -1,3 +1,4 @@
+// src/app/dashboard/page.tsx
 "use client"
 import { AuthGuard } from "@/components/auth/auth-guard"
 import { ChatBox } from "@/components/chat/chat-box"
@@ -38,7 +39,7 @@ export default function DashboardPage() {
         <AuthGuard>
             <DashboardLayout>
                 <UserDashboard />
-                <UserStripeProfile />
+                <UserStripeProfile title="My Subscription & Payments" />
 
                 {(user.tier === "PREMIUM" || user.tier === "ENTERPRISE") && adminId && (
                     <>

@@ -21,7 +21,8 @@ interface Stats {
     activeUsers: number,
     inactiveUsers: number,
     byTier: Record<string, number>,
-    byRole: Record<string, number>
+    byRole: Record<string, number>,
+    payingUsers: number
 }
 
 // Component principal do dashboard
@@ -123,12 +124,12 @@ export function AdminDashboard() {
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-white">
-                                Premium Users
+                                Paying Users
                             </CardTitle>
                             <Activity className="h-4 w-4 text-[#66b497]" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-blue-600">{stats?.premiumUsers || 0}</div>
+                            <div className="text-2xl font-bold text-blue-600">{stats?.payingUsers || 0}</div>
                         </CardContent>
                     </Card>
                 </div>
