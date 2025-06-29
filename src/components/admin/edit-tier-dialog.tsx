@@ -27,12 +27,30 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState("")
     const [formData, setFormData] = useState({
-        name: tier.name,
-        description: tier.description,
-        priceInCents: tier.priceInCents,
+        name: "",
+        description: "",
+        priceInCents: 0,
     })
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    // Atualiza o formData sempre que o tier mudar
+    useEffect(() => {
+        if (tier) {
+            setFormData({
+                name: tier.name || "",
+                description: tier.description || "",
+                priceInCents: tier.priceInCents || 0,
+            })
+        }
+    }, [tier])
+
+    const handleChange = (field: string, value: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            [field]: field === "priceInCents" ? parseInt(value) || 0 : value
+        }))
+    }
+
+    const handleUpdateTier = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
         setError("")
@@ -48,7 +66,6 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                 body: JSON.stringify({
                     newName: formData.name,
                     newDescription: formData.description,
-                    // O preço não é atualizado aqui conforme tua rota atual do backend
                 }),
             })
 
@@ -66,12 +83,43 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         }
     }
 
-    const handleChange = (field: string, value: string) => {
-        setFormData((prev) => ({
-            ...prev,
-            [field]: field === "priceInCents" ? parseInt(value) : value
-        }))
+    const handleUpdatePrice = async () => {
+        if (isNaN(formData.priceInCents) || formData.priceInCents <= 0) {
+            setError("Price must be a valid number greater than 0.")
+            return
+        }
+
+        setIsLoading(true)
+        setError("")
+
+        try {
+            const token = localStorage.getItem("token")
+            const response = await fetch(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}/price`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    priceInCents: formData.priceInCents,
+                }),
+            })
+
+            if (response.ok) {
+                onTierUpdated()
+                onOpenChange(false)
+            } else {
+                const errorData = await response.json()
+                setError(errorData.message || "Error updating price")
+            }
+        } catch (err) {
+            setError("Connection error. Try again.")
+        } finally {
+            setIsLoading(false)
+        }
     }
+
+    if (!tier) return null // Garante que só renderiza com dados prontos
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -81,7 +129,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                     <DialogDescription className="text-sm text-white/70">Update the information below</DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleUpdateTier}>
                     <div className="grid gap-4 py-4">
                         {error && (
                             <Alert variant="destructive">
@@ -120,16 +168,21 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                                 onChange={(e) => handleChange("priceInCents", e.target.value)}
                                 className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
                                 required
-                                disabled
                             />
                         </div>
                     </div>
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                        <Button type="submit" variant="ghost" disabled={isLoading} className="text-white hover:bg-white/10 transition-all">
+                    <DialogFooter className="flex flex-col gap-2">
+                        <div className="flex gap-2">
+                            <Button type="submit" variant="ghost" disabled={isLoading} className="text-white hover:bg-white/10 transition-all">
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Changes
+                            </Button>
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+                        </div>
+                        <Button type="button" variant="secondary" onClick={handleUpdatePrice} disabled={isLoading} className="w-full">
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Save Changes
+                            Update Tier
                         </Button>
                     </DialogFooter>
                 </form>
