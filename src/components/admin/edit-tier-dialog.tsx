@@ -1,6 +1,6 @@
 "use client"
 
-import { Dialog, DialogDescription, DialogTitle } from "@radix-ui/react-dialog"
+import { Dialog, DialogDescription, DialogTitle } from "../ui/dialog"
 import { useEffect, useState } from "react"
 import { DialogContent, DialogFooter, DialogHeader } from "../ui/dialog"
 import { Alert, AlertDescription } from "../ui/alert"
@@ -32,7 +32,6 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         priceInCents: 0,
     })
 
-    // Atualiza o formData sempre que o tier mudar
     useEffect(() => {
         if (tier) {
             setFormData({
@@ -50,7 +49,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         }))
     }
 
-    const handleUpdateTier = async (e: React.FormEvent) => {
+    const handleUpdateTierInfo = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
         setError("")
@@ -74,7 +73,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                 onOpenChange(false)
             } else {
                 const errorData = await response.json()
-                setError(errorData.message || "Error updating tier")
+                setError(errorData.message || "Error updating tier information")
             }
         } catch (err) {
             setError("Connection error. Try again.")
@@ -83,7 +82,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         }
     }
 
-    const handleUpdatePrice = async () => {
+    const handleReplacePrice = async () => {
         if (isNaN(formData.priceInCents) || formData.priceInCents <= 0) {
             setError("Price must be a valid number greater than 0.")
             return
@@ -94,7 +93,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
 
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}/price`, {
+            const response = await fetch(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}/replace-price`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -110,7 +109,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                 onOpenChange(false)
             } else {
                 const errorData = await response.json()
-                setError(errorData.message || "Error updating price")
+                setError(errorData.message || "Error replacing price")
             }
         } catch (err) {
             setError("Connection error. Try again.")
@@ -119,7 +118,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         }
     }
 
-    if (!tier) return null // Garante que só renderiza com dados prontos
+    if (!tier) return null
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -129,63 +128,62 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                     <DialogDescription className="text-sm text-white/70">Update the information below</DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleUpdateTier}>
-                    <div className="grid gap-4 py-4">
-                        {error && (
-                            <Alert variant="destructive">
-                                <AlertDescription>{error}</AlertDescription>
-                            </Alert>
-                        )}
+                {error && (
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
 
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right text-white">Name</Label>
-                            <Input
-                                id="name"
-                                value={formData.name}
-                                onChange={(e) => handleChange("name", e.target.value)}
-                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
-                                required
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="description" className="text-right text-white">Description</Label>
-                            <Input
-                                id="description"
-                                value={formData.description}
-                                onChange={(e) => handleChange("description", e.target.value)}
-                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
-                                required
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="priceInCents" className="text-right text-white">Price (in cents)</Label>
-                            <Input
-                                id="priceInCents"
-                                type="number"
-                                value={formData.priceInCents}
-                                onChange={(e) => handleChange("priceInCents", e.target.value)}
-                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
-                                required
-                            />
-                        </div>
+                <form onSubmit={handleUpdateTierInfo} className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right text-white">Name</Label>
+                        <Input
+                            id="name"
+                            value={formData.name}
+                            onChange={(e) => handleChange("name", e.target.value)}
+                            className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
+                            required
+                        />
                     </div>
 
-                    <DialogFooter className="flex flex-col gap-2">
-                        <div className="flex gap-2">
-                            <Button type="submit" variant="ghost" disabled={isLoading} className="text-white hover:bg-white/10 transition-all">
-                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save Changes
-                            </Button>
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                        </div>
-                        <Button type="button" variant="secondary" onClick={handleUpdatePrice} disabled={isLoading} className="w-full">
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Update Tier
-                        </Button>
-                    </DialogFooter>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="description" className="text-right text-white">Description</Label>
+                        <Input
+                            id="description"
+                            value={formData.description}
+                            onChange={(e) => handleChange("description", e.target.value)}
+                            className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
+                            required
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="priceInCents" className="text-right text-white">Price (in cents)</Label>
+                        <Input
+                            id="priceInCents"
+                            type="number"
+                            value={formData.priceInCents}
+                            onChange={(e) => handleChange("priceInCents", e.target.value)}
+                            className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
+                            required
+                        />
+                    </div>
+
+                    <Button type="submit" variant="ghost" disabled={isLoading} className="text-white hover:bg-white/10 transition-all w-full mt-2">
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save Changes
+                    </Button>
                 </form>
+
+                <DialogFooter className="flex flex-col gap-2 mt-4">
+                    <div className="flex gap-2">
+                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+                        <Button type="button" variant="secondary" onClick={handleReplacePrice} disabled={isLoading} className="flex-1">
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Replace Price
+                        </Button>
+                    </div>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     )
