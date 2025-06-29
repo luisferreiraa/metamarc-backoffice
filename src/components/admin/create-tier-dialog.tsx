@@ -1,0 +1,144 @@
+"use client"
+
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "../ui/dialog"
+import { useState } from "react"
+import { DialogFooter, DialogHeader } from "../ui/dialog"
+import { Alert, AlertDescription } from "../ui/alert"
+import { Label } from "../ui/label"
+import { Input } from "../ui/input"
+import { Button } from "../ui/button"
+import { Loader2 } from "lucide-react"
+
+interface CreateTierDialogProps {
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    onTierCreated: () => void
+}
+
+export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTierDialogProps) {
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState("")
+    const [formData, setFormData] = useState({
+        name: "",
+        description: "",
+        priceInCents: 0
+    })
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setIsLoading(true)
+        setError("")
+
+        try {
+            const token = localStorage.getItem("token")
+            const response = await fetch("http://89.28.236.11:3000/api/admin/tiers/", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData)
+            })
+
+            if (response.ok) {
+                onTierCreated()
+                onOpenChange(false)
+                setFormData({
+                    name: "",
+                    description: "",
+                    priceInCents: 0,
+                })
+            } else {
+                const errorData = await response.json()
+                setError(errorData.message || "Error creating tier")
+            }
+        } catch (err) {
+            setError("Connection error. Try again.")
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const handleChange = (field: string, value: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value
+        }))
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[425px] bg-[#1a1a1a] [font-family:var(--font-poppins)]">
+                <DialogHeader>
+                    <DialogTitle className="text-3xl font-semibold text-[#66b497]">Create New Tier</DialogTitle>
+                    <DialogDescription className="text-sm text-white/70">Fill in the data to create a new tier</DialogDescription>
+                </DialogHeader>
+
+                <form onSubmit={handleSubmit}>
+                    <div className="grid gap-4 py-4">
+                        {error && (
+                            <Alert variant="destructive">
+                                <AlertDescription>{error}</AlertDescription>
+                            </Alert>
+                        )}
+
+                        {/* Campo: Nome */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="name" className="text-right text-white">
+                                Name
+                            </Label>
+                            <Input
+                                id="name"
+                                value={formData.name}
+                                onChange={(e) => handleChange("name", e.target.value)}
+                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
+                                required
+                            />
+                        </div>
+
+                        {/* Campo: Descrição */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="description" className="text-right text-white">
+                                Description
+                            </Label>
+                            <Input
+                                id="description"
+                                value={formData.description}
+                                onChange={(e) => handleChange("description", e.target.value)}  // Corrigido
+                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
+                                required
+                            />
+                        </div>
+
+                        {/* Campo: Preço em cêntimos */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="priceInCents" className="text-white">
+                                Price (in cents)
+                            </Label>
+                            <Input
+                                id="priceInCents"
+                                type="number"
+                                value={formData.priceInCents}
+                                onChange={(e) => handleChange("priceInCents", e.target.value)}  // Corrigido
+                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    {/* Botões de ação no rodapé do diálogo */}
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" variant={"ghost"} disabled={isLoading} className="text-white hover:bg-white/10 transition-all">
+                            {/* Ícone de loading enquanto envia */}
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Create Tier
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    )
+}

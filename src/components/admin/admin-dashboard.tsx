@@ -9,7 +9,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Users, Activity, Shield, TrendingUp, LogOut } from "lucide-react"
+import { Users, Activity, Shield, TrendingUp, LogOut, Box } from "lucide-react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
@@ -119,7 +119,7 @@ export function AdminDashboard() {
                         </CardContent>
                     </Card>
 
-                    {/* Utilizadores premium (nota: premiumUsers não está no tipo `Stats`, seria boa ideia adicionar) */}
+                    {/* Utilizadores pagos */}
                     <Card className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-white">
@@ -144,6 +144,19 @@ export function AdminDashboard() {
                                     Users Management
                                 </CardTitle>
                                 <CardDescription className="text-white/70">View, create, update, and delete users</CardDescription>
+                            </CardHeader>
+                        </Card>
+                    </Link>
+
+                    {/* Link para gestão dos tiers no stripe */}
+                    <Link href="/admin/tiers">
+                        <Card className="bg-[#1a1a1a] border border-white/10 hover:shadow-md transition-shadow cursor-pointer">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-white">
+                                    <Box className="h-5 w-5" />
+                                    Tiers Management
+                                </CardTitle>
+                                <CardDescription className="text-white/70">View, create, update, and delete tiers</CardDescription>
                             </CardHeader>
                         </Card>
                     </Link>
