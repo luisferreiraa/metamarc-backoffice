@@ -12,21 +12,8 @@ import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
 import { toast } from 'react-toastify'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
-
-// Tipos de dados recebidos
-interface User {
-    name: string
-}
-
-interface Log {
-    id: string
-    userId: string
-    user: User
-    action: string
-    ip: string
-    userAgent: string
-    createdAt: string
-}
+import { Log } from "@/interfaces/log"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 export function SystemLogsManagement() {
     const [logs, setLogs] = useState<Log[]>([])     // Lista de logs
@@ -59,30 +46,23 @@ export function SystemLogsManagement() {
     const fetchLogs = async () => {
         try {
             setIsLoading(true)
-            const token = localStorage.getItem("token")
 
-            // Construir query string dinamicamente
-            const params = new URLSearchParams()
-            params.append("page", String(page))
-            params.append("limit", String(limit))
-            if (searchTerm) {
-                params.append("action", debouncedSearchTerm)
-            }
-
-            const response = await fetch(`http://89.28.236.11:3000/api/admin/logs?${params.toString()}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const data = await fetchWithAuth("http://89.28.236.11:3000/api/admin/logs", {
+                params: {
+                    page,
+                    limit,
+                    action: debouncedSearchTerm || undefined,   // Só envia se existir
+                }
             })
 
-            if (response.ok) {
-                const data = await response.json()
-                setLogs(data.data || [])
+            if (data?.data) {
+                setLogs(data.data)
                 setTotalPages(data.meta.pages || 1)
-                setSelectedLogIds([])       // Limpa seleção ao carregar nova página
+                setSelectedLogIds([])   // Limpa seleção
             } else {
-                console.error("Failed to fetch logs:", response.status)
+                console.error("Failed to fetch logs or no data returned")
             }
+
         } catch (error) {
             console.error("Error loading system logs:", error)
         } finally {

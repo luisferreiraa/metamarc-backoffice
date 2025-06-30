@@ -1,8 +1,9 @@
 // app/subscription/success/page.tsx
 'use client'
-import { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import axios from 'axios'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 
 export default function SuccessPage() {
     const searchParams = useSearchParams()
@@ -11,17 +12,30 @@ export default function SuccessPage() {
     if (!sessionId) return
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-            <h1 className="text-3xl font-bold mb-4">Subscrição Bem-sucedida!</h1>
-            <p className="text-lg mb-8">
-                Obrigado por assinar nosso serviço. Sua subscrição foi ativada com sucesso.
-            </p>
-            <a
-                href="/dashboard"
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-            >
-                Ir para o Dashboard
-            </a>
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-lg p-8 max-w-md text-center space-y-6 [font-family:var(--font-poppins)]">
+
+                <CheckCircle2 className="h-16 w-16 text-[#66b497] mx-auto mb-4" />
+
+                <h1 className="text-3xl lg:text-3xl font-bold text-white">
+                    Subscription confirmed!
+                </h1>
+
+                <p className="text-white/70 text-base">
+                    Thank you for choosing our service. Your subscription has been successfully activated.
+                </p>
+
+                <Link href="/dashboard">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border border-white/10 text-white hover:border-[#66b497] transition-all duration-300"
+                    >
+                        <ArrowLeft className="mr-2 h-4 w-4 text-[#66b497]" />
+                        Back to Dashboard
+                    </Button>
+                </Link>
+            </div>
         </div>
     )
 }

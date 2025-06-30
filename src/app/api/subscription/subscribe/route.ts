@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
         // Validação explícita do token
         if (!token) {
             return NextResponse.json(
-                { error: 'Token de autenticação não encontrado' },
+                { error: 'Authentication token not found' },
                 { status: 401 }     // Unauthorized
             )
         }
@@ -38,10 +38,10 @@ export async function POST(request: NextRequest) {
         if (!backendResponse.ok) {
             // Tenta extrair detalhes do erro
             const errorText = await backendResponse.text()
-            console.error('Erro no backend:', errorText)
+            console.error('Backend error:', errorText)
 
             return NextResponse.json(
-                { error: 'Falha na comunicação com o serviço de assinatura' },
+                { error: 'Communication with subscription service failed' },
                 { status: 502 }
             )
         }
@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(await backendResponse.json())
 
     } catch (error) {
-        console.error('Erro interno:', error)
+        console.error('Internal server error:', error)
         return NextResponse.json(
-            { error: 'Ocorreu um erro inesperado' },
+            { error: 'An unexpected error occurred' },
             { status: 500 }
         )
     }

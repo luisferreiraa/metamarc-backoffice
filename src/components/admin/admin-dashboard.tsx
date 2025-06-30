@@ -8,21 +8,12 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Users, Activity, Shield, TrendingUp, LogOut, Box } from "lucide-react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
-
-// Interface que define a estrutura esperada 
-interface Stats {
-    totalUsers: number,
-    activeUsers: number,
-    inactiveUsers: number,
-    byTier: Record<string, number>,
-    byRole: Record<string, number>,
-    payingUsers: number
-}
+import { Stats } from "@/interfaces/stats"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 // Component principal do dashboard
 export function AdminDashboard() {
@@ -39,26 +30,14 @@ export function AdminDashboard() {
     // Função assíncrona que vai buscar os dados ao backend
     const fetchStats = async () => {
         try {
-            // Vai buscar o token do localStorage
-            const token = localStorage.getItem("token")
-            const response = await fetch("http://89.28.236.11:3000/api/admin/users/stats", {
-                // Adiciona o token no header do request
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
+            const data = await fetchWithAuth("http://89.28.236.11:3000/api/admin/users/stats")
 
-            if (response.ok) {
-                // Converte a resposta em JSON
-                const data = await response.json()
-                // Atualiza o estado com os dados recebidos
+            if (data?.data) {
                 setStats(data.data)
             }
         } catch (error) {
-            // Se der erro, mostra, mostra no console
             console.error("Error loading stats:", error)
         } finally {
-            // Desativa o loading independentemente do resultado
             setIsLoading(false)
         }
     }
