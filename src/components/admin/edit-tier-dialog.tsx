@@ -1,14 +1,15 @@
+// src/components/admin/edit-tier-dialog.tsx
 "use client"
 
-import { Dialog, DialogDescription, DialogTitle } from "../ui/dialog"
+import { Dialog, DialogDescription, DialogTitle, DialogContent, DialogFooter, DialogHeader } from "../ui/dialog"
 import { useEffect, useState } from "react"
-import { DialogContent, DialogFooter, DialogHeader } from "../ui/dialog"
 import { Alert, AlertDescription } from "../ui/alert"
 import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
 import { Loader2 } from "lucide-react"
 
+// Interface que descreve a estrutura de um tier a ser editado
 interface EditTierData {
     id: string
     name: string
@@ -16,6 +17,7 @@ interface EditTierData {
     priceInCents: number
 }
 
+// Props do component, incluindo o tier a editar e callbacks para abrir/fechar e atualização
 interface EditTierDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
@@ -32,6 +34,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         priceInCents: 0,
     })
 
+    // Sempre que o prop "tier" muda, atualiza os dados do form para os valores do tier
     useEffect(() => {
         if (tier) {
             setFormData({
@@ -49,14 +52,23 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         }))
     }
 
-    const handleUpdateTierInfo = async (e: React.FormEvent) => {
+    // Função chamada quando o form é submetido
+    const handleSaveChanges = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
         setError("")
 
+        if (isNaN(formData.priceInCents) || formData.priceInCents <= 0) {
+            setError("Price must be a valid number greater than 0.")
+            setIsLoading(false)
+            return
+        }
+
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}`, {
+
+            // Atualiza nome e descrição
+            const resInfo = await fetch(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}`, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -68,32 +80,13 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                 }),
             })
 
-            if (response.ok) {
-                onTierUpdated()
-                onOpenChange(false)
-            } else {
-                const errorData = await response.json()
-                setError(errorData.message || "Error updating tier information")
+            if (!resInfo.ok) {
+                const errData = await resInfo.json()
+                throw new Error(errData.message || "Error updating tier info")
             }
-        } catch (err) {
-            setError("Connection error. Try again.")
-        } finally {
-            setIsLoading(false)
-        }
-    }
 
-    const handleReplacePrice = async () => {
-        if (isNaN(formData.priceInCents) || formData.priceInCents <= 0) {
-            setError("Price must be a valid number greater than 0.")
-            return
-        }
-
-        setIsLoading(true)
-        setError("")
-
-        try {
-            const token = localStorage.getItem("token")
-            const response = await fetch(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}/replace-price`, {
+            // Atualiza preço
+            const resPrice = await fetch(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}/replace-price`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -104,15 +97,16 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                 }),
             })
 
-            if (response.ok) {
-                onTierUpdated()
-                onOpenChange(false)
-            } else {
-                const errorData = await response.json()
-                setError(errorData.message || "Error replacing price")
+            if (!resPrice.ok) {
+                const errData = await resPrice.json()
+                throw new Error(errData.message || "Error replacing price")
             }
-        } catch (err) {
-            setError("Connection error. Try again.")
+
+            onTierUpdated()
+            onOpenChange(false)
+
+        } catch (err: any) {
+            setError(err.message || "Unexpected error")
         } finally {
             setIsLoading(false)
         }
@@ -134,7 +128,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                     </Alert>
                 )}
 
-                <form onSubmit={handleUpdateTierInfo} className="grid gap-4 py-4">
+                <form onSubmit={handleSaveChanges} className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="name" className="text-right text-white">Name</Label>
                         <Input
@@ -158,7 +152,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                     </div>
 
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="priceInCents" className="text-right text-white">Price (in cents)</Label>
+                        <Label htmlFor="priceInCents" className="text-white">Price (in cents)</Label>
                         <Input
                             id="priceInCents"
                             type="number"
@@ -169,21 +163,15 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                         />
                     </div>
 
-                    <Button type="submit" variant="ghost" disabled={isLoading} className="text-white hover:bg-white/10 transition-all w-full mt-2">
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Save Changes
-                    </Button>
-                </form>
-
-                <DialogFooter className="flex flex-col gap-2 mt-4">
-                    <div className="flex gap-2">
+                    {/* Botões no rodapé do diálogo */}
+                    <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                        <Button type="button" variant="secondary" onClick={handleReplacePrice} disabled={isLoading} className="flex-1">
+                        <Button type="submit" variant="ghost" disabled={isLoading} className="text-white hover:bg-white/10 transition-all">
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Replace Price
+                            Update
                         </Button>
-                    </div>
-                </DialogFooter>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     )
