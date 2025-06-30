@@ -48,10 +48,11 @@ export function SystemLogsManagement() {
             setIsLoading(true)
 
             const data = await fetchWithAuth("http://89.28.236.11:3000/api/admin/logs", {
+                method: "GET",
                 params: {
                     page,
                     limit,
-                    action: debouncedSearchTerm || undefined,   // Só envia se existir
+                    action: debouncedSearchTerm || undefined  // Só envia se existir
                 }
             })
 
@@ -100,39 +101,6 @@ export function SystemLogsManagement() {
             setSelectedLogIds([])
         } else {
             setSelectedLogIds(logs.map((log) => log.id))
-        }
-    }
-
-    // Apagar logs selecionados
-    const handleDeleteSelected = async () => {
-        if (selectedLogIds.length === 0) return
-
-        const confirmed = confirm(`Are you sure you want to delete ${selectedLogIds.length} log(s)?`)
-        if (!confirmed) return
-
-        try {
-            const token = localStorage.getItem("token")
-
-            const response = await fetch(`http://89.28.236.11:3000/api/admin/logs`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ ids: selectedLogIds }),
-            })
-
-            if (response.ok) {
-                await fetchLogs()
-                setSelectedLogIds([])
-                toast.success('Logs deleted successfully.')
-            } else {
-                console.error("Failed to delete logs:", response.status)
-                toast.error('Failed to delete logs (${response.status})')
-            }
-        } catch (error) {
-            console.error("Error deleting logs:", error)
-            toast.error("An unexpected error ocurred.")
         }
     }
 
@@ -287,18 +255,12 @@ export function SystemLogsManagement() {
                             className="bg-[#66b497]"
                             onClick={async () => {
                                 try {
-                                    const token = localStorage.getItem("token")
-
-                                    const response = await fetch(`http://89.28.236.11:3000/api/admin/logs`, {
+                                    const data = await fetchWithAuth("http://89.28.236.11:3000/api/admin/logs", {
                                         method: "DELETE",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                            Authorization: `Bearer ${token}`,
-                                        },
-                                        body: JSON.stringify({ ids: selectedLogIds }),
+                                        body: { ids: selectedLogIds }
                                     })
 
-                                    if (response.ok) {
+                                    if (data?.success) {
                                         await fetchLogs()
                                         setSelectedLogIds([])
                                         toast.success("Logs deleted successfully.")

@@ -1,41 +1,39 @@
 interface FetchOptions {
+    method?: string
     params?: Record<string, string | number | undefined>
+    body?: any
 }
 
-// Função genérica para fazer GET com token no header
 export const fetchWithAuth = async (url: string, options?: FetchOptions) => {
-    try {
-        const token = localStorage.getItem("token")
-        if (!token) {
-            throw new Error("No token found")
+    const token = localStorage.getItem("token")
+    if (!token) throw new Error("No token found")
+
+    const params = new URLSearchParams()
+    if (options?.params) {
+        for (const [key, value] of Object.entries(options.params)) {
+            if (value !== undefined) params.append(key, String(value))
         }
-
-        // Adiciona query params se existirem
-        const params = new URLSearchParams()
-        if (options?.params) {
-            for (const [key, value] of Object.entries(options.params)) {
-                if (value !== undefined) {
-                    params.append(key, String(value))
-                }
-            }
-        }
-
-        const finalUrl = params.toString() ? `${url}?${params.toString()}` : url
-
-        const response = await fetch(finalUrl, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-
-        if (!response.ok) {
-            throw new Error(`Request failed with status ${response.status}`)
-        }
-
-        return await response.json()
-
-    } catch (error) {
-        console.error(`Error fetching from ${url}:`, error)
-        return null
     }
+
+    const finalUrl = params.toString() ? `${url}?${params.toString()}` : url
+
+    const fetchOptions: RequestInit = {
+        method: options?.method || "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+    }
+
+    if (options?.body) {
+        fetchOptions.body = JSON.stringify(options.body)
+    }
+
+    const response = await fetch(finalUrl, fetchOptions)
+
+    if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`)
+    }
+
+    return await response.json()
 }

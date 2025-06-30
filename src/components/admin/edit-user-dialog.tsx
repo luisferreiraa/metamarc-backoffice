@@ -22,22 +22,15 @@ import {
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
-
-// Interface que descreve a estrutura de um utilizador a ser editado
-interface User {
-    id: string
-    name: string
-    email: string
-    role: string
-    tier: string
-    isActive: boolean
-}
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
+import { toast } from "react-toastify"
+import { UpdateUser } from "@/interfaces/user"
 
 // Props do component, incluindo o user a editar e callbacks para abrir/fechar e atualização
 interface EditUserDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    user: User
+    user: UpdateUser
     onUserUpdated: () => void
 }
 
@@ -65,33 +58,25 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
 
     // Função chamada quando o form é submetido
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()      // Evita recarregar a página
-        setIsLoading(true)      // Ativa o spinner de loading
-        setError("")        // Limpa erros anteriores
+        e.preventDefault()
+        setIsLoading(true)
+        setError("")
 
         try {
-            const token = localStorage.getItem("token")     // Recupera o token de autenticação
-            const response = await fetch(`http://89.28.236.11:3000/api/admin/users/${user.id}`, {
-                method: "PUT",      // Método para atualizar o utilizador
-                headers: {
-                    Authorization: `Bearer ${token}`,       // Adiciona token no header do request
-                    "Content-Type": "application/json",     // Corpo é JSON
-                },
-                body: JSON.stringify(formData),     // Converte o formData para JSON
+            await fetchWithAuth(`http://89.28.236.11:3000/api/admin/users/${user.id}`, {
+                method: "PUT",
+                body: formData,
             })
 
-            if (response.ok) {
-                onUserUpdated()     // Notifica o component pai que a atualização foi feita
-                onOpenChange(false)     // Fecha o diálogo
-            } else {
-                // Se a resposta não foi OK, tenta obter a mensagem de erro do backend
-                const errorData = await response.json()
-                setError(errorData.message || "Error udating user")     // Define mensage de erro para mostrar
-            }
-        } catch (err) {
-            setError("Connection error. Try again.")
+            onUserUpdated()
+            onOpenChange(false)
+
+            toast.success("User updated successfully!")
+        } catch (err: any) {
+            setError(err.message || "Error updating user")
+            toast.error("Failed to update user. Try again.")
         } finally {
-            setIsLoading(false)     // Desativa indicador de loading
+            setIsLoading(false)
         }
     }
 

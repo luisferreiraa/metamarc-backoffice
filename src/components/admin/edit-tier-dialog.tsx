@@ -8,14 +8,9 @@ import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
 import { Loader2 } from "lucide-react"
-
-// Interface que descreve a estrutura de um tier a ser editado
-interface EditTierData {
-    id: string
-    name: string
-    description: string
-    priceInCents: number
-}
+import { EditTierData } from "@/interfaces/stripe-tier"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
+import { toast } from "react-toastify"
 
 // Props do component, incluindo o tier a editar e callbacks para abrir/fechar e atualização
 interface EditTierDialogProps {
@@ -65,48 +60,30 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         }
 
         try {
-            const token = localStorage.getItem("token")
-
             // Atualiza nome e descrição
-            const resInfo = await fetch(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}`, {
+            await fetchWithAuth(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}`, {
                 method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
+                body: {
                     newName: formData.name,
                     newDescription: formData.description,
-                }),
+                },
             })
-
-            if (!resInfo.ok) {
-                const errData = await resInfo.json()
-                throw new Error(errData.message || "Error updating tier info")
-            }
 
             // Atualiza preço
-            const resPrice = await fetch(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}/replace-price`, {
+            await fetchWithAuth(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}/replace-price`, {
                 method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
+                body: {
                     priceInCents: formData.priceInCents,
-                }),
+                },
             })
 
-            if (!resPrice.ok) {
-                const errData = await resPrice.json()
-                throw new Error(errData.message || "Error replacing price")
-            }
+            toast.success("Tier updated successfully!")
 
             onTierUpdated()
             onOpenChange(false)
-
         } catch (err: any) {
             setError(err.message || "Unexpected error")
+            toast.error("Failed to update tier. Try again.")
         } finally {
             setIsLoading(false)
         }

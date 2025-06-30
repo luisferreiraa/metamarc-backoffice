@@ -112,6 +112,23 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Cor da progress bar dos toasts de sucesso */
+.Toastify__toast--success .Toastify__progress-bar {
+  background: #66b497 !important;
+}
+
+.Toastify__toast--success {
+  background: #1a1a1a !important;
+  color: #fff !important;
+}
+
+.Toastify__toast--success .Toastify__toast-icon,
+.Toastify__toast--success .Toastify__toast-icon svg path {
+  color: #66b497 !important;
+  fill: #66b497 !important;
+  stroke: #66b497 !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

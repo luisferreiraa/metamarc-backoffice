@@ -20,6 +20,7 @@ import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
 import { toast } from 'react-toastify'
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 // Interface para representar os dados do utilizador
 interface User {
@@ -53,18 +54,14 @@ export function UsersManagement() {
     // Requisição à API para obter utilizadores
     const fetchUsers = async () => {
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch(`http://89.28.236.11:3000/api/admin/users?page=${page}&limit=${limit}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const data = await fetchWithAuth(`http://89.28.236.11:3000/api/admin/users`, {
+                method: "GET",
+                params: { page, limit }
             })
 
-            if (response.ok) {
-                const data = await response.json()
-                setUsers(data.data || [])
-                setTotalPages(data.meta?.pages || 1)
-            }
+            setUsers(data.data || [])
+            setTotalPages(data.meta?.pages || 1)
+
         } catch (error) {
             console.error("Error loading users:", error)
         } finally {
@@ -75,40 +72,33 @@ export function UsersManagement() {
     // Ativa ou inativa um utilizador
     const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch(`http://89.28.236.11:3000/api/admin/users/${userId}/activate`, {
+            await fetchWithAuth(`http://89.28.236.11:3000/api/admin/users/${userId}/activate`, {
                 method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ isActive: !currentStatus }),
+                body: { isActive: !currentStatus }
             })
 
-            if (response.ok) {
-                fetchUsers()
-            }
+            toast.success(`User ${!currentStatus ? "activated" : "deactivated"} successfully.`)
+            fetchUsers()
+
         } catch (error) {
             console.error("Error updating user status:", error)
+            toast.error("Failed to update user status. Please try again.")
         }
     }
 
     // Restaura a password de um utilizador
     const handleResetPassword = async (userId: string) => {
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch(`http://89.28.236.11:3000/api/admin/users/${userId}/reset-password`, {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            await fetchWithAuth(`http://89.28.236.11:3000/api/admin/users/${userId}/reset-password`, {
+                method: "PATCH"
             })
 
-            if (response.ok) {
-                alert("Password successfully reset!")
-            }
+            toast.success("Password reset successfully!")
+
         } catch (error) {
             console.error("Error resetting password:", error)
+            toast.error("Failed to reset password. Try again.")
+
         }
     }
 
@@ -130,8 +120,11 @@ export function UsersManagement() {
                 a.download = `users.${format}`
                 a.click()
             }
+
+            toast.success("Users exported successfully!")
         } catch (error) {
             console.error("Error exporting users:", error)
+            toast.error("Failed to export users. Try again.")
         }
     }
 

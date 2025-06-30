@@ -30,7 +30,9 @@ export function AdminDashboard() {
     // Função assíncrona que vai buscar os dados ao backend
     const fetchStats = async () => {
         try {
-            const data = await fetchWithAuth("http://89.28.236.11:3000/api/admin/users/stats")
+            const data = await fetchWithAuth("http://89.28.236.11:3000/api/admin/users/stats", {
+                method: "GET",
+            })
 
             if (data?.data) {
                 setStats(data.data)
@@ -41,6 +43,11 @@ export function AdminDashboard() {
             setIsLoading(false)
         }
     }
+
+    // Chama fetchStats ao montar o componente
+    useEffect(() => {
+        fetchStats()
+    }, [])
 
     // Enquanto os dados estão a ser carregados, mostra o spinner de loading
     if (isLoading) {
