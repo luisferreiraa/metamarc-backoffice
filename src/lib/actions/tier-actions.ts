@@ -57,10 +57,8 @@ export async function getToken() {
     try {
         const cookieStore = await cookies()
         const token = cookieStore.get("token")?.value
-        console.log("Token:", token ? "Exists" : "Missing") // Debug
         return token || ""
     } catch (error) {
-        console.error("Failed to get token:", error)
         return ""
     }
 }
@@ -105,35 +103,61 @@ export async function createTier(prevState: CreateTierState, formData: FormData)
             description: formData.get("description"),
             priceInCents: Number(formData.get("priceInCents")),
             features: formData.get("features"),
-        })
+        });
 
         if (!validatedFields.success) {
+            console.error("Validation errors:", validatedFields.error.flatten());
             return {
                 error: "Validation failed",
                 fieldErrors: validatedFields.error.flatten().fieldErrors,
-            }
+            };
         }
 
-        const token = getToken()
+        const token = await getToken()
+        if (!token) {
+            throw new Error("Authentication token not found")
+        }
+
+        const payload = {
+            name: validatedFields.data.name,
+            description: validatedFields.data.description,
+            priceInCents: validatedFields.data.priceInCents,
+            features: validatedFields.data.features || undefined
+        };
+
+        console.log("Sending payload:", payload)
+
         const response = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
-            body: JSON.stringify(validatedFields.data)
+            body: JSON.stringify(payload)
         })
 
+        const responseText = await response.text()
+
         if (!response.ok) {
-            throw new Error("Failed to create tier")
+            try {
+                const errorData = JSON.parse(responseText);
+                console.error("API Error:", {
+                    status: response.status,
+                    error: errorData
+                });
+                throw new Error(errorData.error || "Failed to create tier")
+            } catch {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
         }
 
         revalidatePath("/admin/tiers")
         return { success: true }
     } catch (error) {
+        console.error("Create tier error:", error)
         return {
             error: error instanceof Error ? error.message : "Failed to create tier",
-        }
+        };
     }
 }
 
@@ -155,13 +179,12 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
         }
 
         const { tierId, name, description, features, priceInCents } = validatedFields.data;
-        const token = await getToken();
+        const token = await getToken()
 
         if (!token) {
             throw new Error("Authentication token not found");
         }
 
-        // 1. Primeiro atualiza o produto (nome, descrição, features)
         const updateProductResponse = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/${tierId}`, {
             method: "PUT",
             headers: {
@@ -176,11 +199,10 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
         });
 
         if (!updateProductResponse.ok) {
-            const errorData = await updateProductResponse.json().catch(() => ({}));
-            throw new Error(errorData.error || "Failed to update product details");
+            const errorData = await updateProductResponse.json().catch(() => ({}))
+            throw new Error(errorData.error || "Failed to update product details")
         }
 
-        // 2. Depois adiciona novo preço (não podemos atualizar preços existentes no Stripe)
         const addPriceResponse = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/${tierId}/price`, {
             method: "POST",
             headers: {
@@ -193,14 +215,14 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
         });
 
         if (!addPriceResponse.ok) {
-            const errorData = await addPriceResponse.json().catch(() => ({}));
-            throw new Error(errorData.error || "Failed to update price");
+            const errorData = await addPriceResponse.json().catch(() => ({}))
+            throw new Error(errorData.error || "Failed to update price")
         }
 
-        revalidatePath("/admin/tiers");
-        return { success: true };
+        revalidatePath("/admin/tiers")
+        return { success: true }
     } catch (error) {
-        console.error("Update error:", error);
+        console.error("Update error:", error)
         return {
             error: error instanceof Error ? error.message : "Failed to update tier",
         };
@@ -211,32 +233,53 @@ export async function deleteTier(prevState: ActionState, formData: FormData): Pr
     try {
         const validatedFields = deleteTierSchema.safeParse({
             tierId: formData.get("tierId"),
-        })
+        });
 
         if (!validatedFields.success) {
+            console.error("Validation error:", validatedFields.error)
             return {
-                error: "Invalid tier ID",
-            }
+                error: "Invalid tier ID format",
+            };
         }
 
-        const token = getToken()
-        const response = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/${validatedFields.data.tierId}`, {
+        const token = await getToken();
+        if (!token) {
+            throw new Error("Authentication token not found")
+        }
+
+        const url = `${process.env.API_BASE_URL}/api/admin/tiers/${validatedFields.data.tierId}`
+        console.log("Making DELETE request to:", url)
+
+        const response = await fetch(url, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
-        })
+        });
+
+        const responseText = await response.text()
+        console.log("Raw response:", responseText)
 
         if (!response.ok) {
-            throw new Error("Failed to delete tier")
+            try {
+                const errorData = JSON.parse(responseText)
+                console.error("API Error Details:", {
+                    status: response.status,
+                    error: errorData
+                });
+                throw new Error(errorData.error || `Failed to archive tier (status: ${response.status})`)
+            } catch {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
         }
 
         revalidatePath("/admin/tiers")
         return { success: true }
     } catch (error) {
+        console.error("Archive tier error:", error)
         return {
-            error: error instanceof Error ? error.message : "Failed to delete tier",
-        }
+            error: error instanceof Error ? error.message : "Failed to archive tier",
+        };
     }
 }
