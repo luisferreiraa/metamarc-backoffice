@@ -1,3 +1,4 @@
+// src/components/admin/user-stripe-profile.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -6,48 +7,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { LoadingSpinner } from "../layout/loading-spinner"
 import { CreditCard, Mail } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-
-interface StripeCustomer {
-    email: string
-    name: string
-}
-
-interface Subscription {
-    id: string
-    status: string
-    current_period_end: number
-    cancel_at_period_end: boolean
-}
-
-interface Invoice {
-    id: string
-    amount_paid: number
-    status: string
-    created: number
-    hosted_invoice_url: string
-}
-
-interface PaymentMethod {
-    id: string
-    card?: {
-        brand?: string
-        last4?: string
-        exp_month?: number
-        exp_year?: number
-    }
-}
-
-interface StripeData {
-    customer: StripeCustomer
-    subscriptions: Subscription[]
-    invoices: Invoice[]
-    paymentMethods: PaymentMethod[]
-}
-
-interface UserStripeProfileProps {
-    userId?: string
-    title?: string
-}
+import { StripeData, UserStripeProfileProps } from "@/interfaces/stripe"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
     const [stripeData, setStripeData] = useState<StripeData | null>(null)
@@ -55,16 +16,21 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
     const [error, setError] = useState("")
     const params = useParams()
 
-    const finalUserId = userId || params.id
-
     useEffect(() => {
         async function fetchStripeData() {
             try {
                 setLoading(true)
-                const token = localStorage.getItem("token")
+                setError("")
 
-                const payload = token ? JSON.parse(atob(token.split(".")[1])) : null
-                const resolvedId = finalUserId || payload?.userId
+                const token = localStorage.getItem("token")
+                if (!token) {
+                    setError("No token found")
+                    setLoading(false)
+                    return
+                }
+
+                const payload = JSON.parse(atob(token.split(".")[1]))
+                const resolvedId = userId || params.id || payload?.userId
 
                 if (!resolvedId) {
                     setError("User ID not found")
@@ -72,20 +38,18 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
                     return
                 }
 
-                const res = await fetch(`http://89.28.236.11:3000/api/admin/users/stripe/${resolvedId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                const data = await fetchWithAuth(`http://89.28.236.11:3000/api/admin/users/stripe/${resolvedId}`, {
+                    method: "GET",
                 })
 
-                if (res.status === 404) {
+                if (data?.error) {
+                    setError(data.error)
                     setStripeData(null)
-                    setError("")
-                } else if (!res.ok) {
-                    throw new Error(`Failed to fetch: ${res.statusText}`)
                 } else {
-                    const data = await res.json()
                     setStripeData(data)
                     setError("")
                 }
+
             } catch (err: any) {
                 setError(err.message || "Error fetching Stripe data")
             } finally {
@@ -94,7 +58,7 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
         }
 
         fetchStripeData()
-    }, [finalUserId])
+    }, [userId, params.id])
 
     if (loading) return <LoadingSpinner />
     if (error) return <p className="text-red-500">{error}</p>

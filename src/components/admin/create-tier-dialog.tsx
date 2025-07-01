@@ -8,6 +8,7 @@ import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
 import { Loader2 } from "lucide-react"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 interface CreateTierDialogProps {
     open: boolean
@@ -30,30 +31,22 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
         setError("")
 
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch("http://89.28.236.11:3000/api/admin/tiers/", {
+            await fetchWithAuth("http://89.28.236.11:3000/api/admin/tiers/", {
                 method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData)
+                body: formData
             })
 
-            if (response.ok) {
-                onTierCreated()
-                onOpenChange(false)
-                setFormData({
-                    name: "",
-                    description: "",
-                    priceInCents: 0,
-                })
-            } else {
-                const errorData = await response.json()
-                setError(errorData.message || "Error creating tier")
-            }
-        } catch (err) {
-            setError("Connection error. Try again.")
+            onTierCreated()
+            onOpenChange(false)
+
+            setFormData({
+                name: "",
+                description: "",
+                priceInCents: 0,
+            })
+
+        } catch (err: any) {
+            setError(err.message || "Error creating tier")
         } finally {
             setIsLoading(false)
         }

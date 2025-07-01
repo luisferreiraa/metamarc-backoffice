@@ -10,104 +10,66 @@ import { Pencil } from "lucide-react"
 import { EditOwnProfileDialog } from "@/components/dashboard/edit-own-profile-dialog"
 import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
-
-// Interface que define a estrutura dos dados do user
-interface UserData {
-    id: string
-    name: string
-    email: string
-    role: string
-    tier: string
-    isActive: boolean
-    apiKey: string
-    apiKeyExpiresAt: string
-    createdAt: string
-}
+import { UserDashboardData } from "@/interfaces/user"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 // Component principal do dashboard do user
 export function UserDashboard() {
     // Estados para armazenar os dados do user e status de loading
-    const [user, setUser] = useState<UserData | null>(null)
+    const [user, setUser] = useState<UserDashboardData | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [showEditDialog, setShowEditDialog] = useState(false)
 
     // Efeito que roda quando o component é montado para buscar os dados do user
     useEffect(() => {
         const fetchUserData = async () => {
-            // Obtém token e dados do user do localStorage
-            const token = localStorage.getItem("token")
             const userData = localStorage.getItem("user")
 
-            // Se não houver token ou dados, finaliza o loading
-            if (!token || !userData) {
+            if (!userData) {
                 setIsLoading(false)
                 return
             }
 
             try {
-                // Faz requisição para a API para obter a API Key
-                const response = await fetch("http://89.28.236.11:3000/api/auth/get-api-key", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                const apiData = await fetchWithAuth("http://89.28.236.11:3000/api/auth/get-api-key", {
+                    method: "GET"
                 })
 
-                if (response.ok) {
-                    const apiData = await response.json()
-
-                    // Atualiza o estado com os dados combinados
-                    setUser({
-                        id: apiData.id,
-                        name: apiData.name,
-                        email: apiData.email,
-                        role: apiData.role,
-                        tier: apiData.tier,
-                        isActive: apiData.isActive,
-                        apiKey: apiData.apiKey,
-                        apiKeyExpiresAt: apiData.apiKeyExpiresAt,
-                        createdAt: apiData.createdAt
-                    })
-                } else {
-                    console.error("Failed to fetch API key")
-                }
+                setUser({
+                    id: apiData.id,
+                    name: apiData.name,
+                    email: apiData.email,
+                    role: apiData.role,
+                    tier: apiData.tier,
+                    isActive: apiData.isActive,
+                    apiKey: apiData.apiKey,
+                    apiKeyExpiresAt: apiData.apiKeyExpiresAt,
+                    createdAt: apiData.createdAt
+                })
             } catch (error) {
                 console.error("Error fetching user data:", error)
+            } finally {
+                setIsLoading(false)
             }
-
-            setIsLoading(false)
         }
 
         fetchUserData()
-    }, [])      // Array de dependências vazio = executa apenas no mount
+    }, [])
 
     // Função para renovar a API Key
     const handleRenewApiKey = async () => {
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch("http://89.28.236.11:3000/api/apiKey/renew-api-key", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const data = await fetchWithAuth("http://89.28.236.11:3000/api/apiKey/renew-api-key", {
+                method: "POST"
             })
 
-            if (response.ok) {
-                const data = await response.json()
+            if (data?.apiKey) {
                 // Atualiza apenas a API Key no estado
                 setUser((prev) => (prev ? { ...prev, apiKey: data.apiKey } : null))
             }
         } catch (error) {
-            console.error("Error renovating API Key:", error)
+            console.error("Error renewing API Key:", error)
         }
-    }
-
-    // Função para fazer logout
-    const handleLogout = () => {
-        // Remove os itens de autenticação do localStorage
-        localStorage.removeItem("token")
-        localStorage.removeItem("user")
-        // Redireciona para a página principal
-        window.location.href = "/"
     }
 
     // Exibe loading spinner enquanto os dados são buscados

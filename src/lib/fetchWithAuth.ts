@@ -31,6 +31,10 @@ export const fetchWithAuth = async (url: string, options?: FetchOptions) => {
 
     const response = await fetch(finalUrl, fetchOptions)
 
+    if (response.status === 404) {
+        return null // Devolve null para o caso de não existir dados
+    }
+
     if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`)
     }

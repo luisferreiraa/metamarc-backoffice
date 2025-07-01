@@ -22,6 +22,7 @@ import {
 } from "../ui/dialog"
 import { Alert, AlertDescription } from "../ui/alert"
 import { Loader2 } from "lucide-react"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 // Props que o component recebe do component pai
 interface CreateUserDialogProps {
@@ -44,37 +45,29 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
     // Função chamada ao submeter o formulário
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setIsLoading(true)      // Ativa o loading
-        setError("")        // Limpa error anteriores
+        setIsLoading(true)
+        setError("")
 
         try {
-            const token = localStorage.getItem("token")     // Obtém o token de autenticação
-            const response = await fetch("http://89.28.236.11:3000/api/admin/users", {
+            await fetchWithAuth("http://89.28.236.11:3000/api/admin/users", {
                 method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData)
+                body: formData,
             })
 
-            if (response.ok) {
-                onUserCreated()     // Notifica o pai que um novo utilizador foi criado
-                onOpenChange(false)     // Fecha o dialog
-                setFormData({
-                    name: "",
-                    email: "",
-                    role: "CLIENT",
-                    tier: "FREE",
-                })
-            } else {
-                const errorData = await response.json()
-                setError(errorData.message || "Error creating user")    // Mostra o erro do backend
-            }
-        } catch (err) {
-            setError("Connection error. Try again.")    // Erro de rede
+            onUserCreated()
+            onOpenChange(false)
+
+            setFormData({
+                name: "",
+                email: "",
+                role: "CLIENT",
+                tier: "FREE",
+            })
+
+        } catch (err: any) {
+            setError(err.message || "Error creating user")
         } finally {
-            setIsLoading(false)     // Desativa o loading
+            setIsLoading(false)
         }
     }
 

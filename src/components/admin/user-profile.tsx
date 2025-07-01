@@ -10,34 +10,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ShieldCheck, Mail, UserRoundCheck, CalendarDays, ArrowLeft } from "lucide-react"
 import { DashboardLayout } from "../layout/dashboard-layout"
 import Link from "next/link"
-
-// Interface para representar os dados o utilizdor
-interface User {
-    id: string
-    name: string
-    email: string
-    role: string
-    tier: string
-    isActive: string
-    createdAt: string
-}
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
+import type { UserProfile as UserProfileType } from "@/interfaces/user"
 
 // Componente principal para usar em /app/admin/users/[id]
 export function UserProfile() {
-    const [user, setUser] = useState<User | null>(null)     // Estado para guardar os dados do utilizador
+    const [user, setUser] = useState<UserProfileType | null>(null)     // Estado para guardar os dados do utilizador
     const [loading, setLoading] = useState(true)        // Estado para controlar o loading
     const { id } = useParams()      // Hook do Next.js para obter o ID da URL
 
     useEffect(() => {
         const fetchUser = async () => {
-            const token = localStorage.getItem("token")
-            if (!token) return
-
             try {
-                const res = await axios.get(`http://89.28.236.11:3000/api/admin/users/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                const data = await fetchWithAuth(`http://89.28.236.11:3000/api/admin/users/${id}`, {
+                    method: "GET",
                 })
-                setUser(res.data)
+
+                if (data) {
+                    setUser(data)
+                } else {
+                    console.error("Failed to fetch user or no data returned")
+                }
+
             } catch (error) {
                 console.error("Error fetching user:", error)
             } finally {

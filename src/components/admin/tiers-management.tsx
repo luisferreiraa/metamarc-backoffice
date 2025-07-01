@@ -14,6 +14,7 @@ import { EditTierDialog } from "./edit-tier-dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
 import { toast } from "react-toastify"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 interface Tier {
     id: string
@@ -39,26 +40,20 @@ export function TiersManagement() {
 
     const fetchTiers = async () => {
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch("http://89.28.236.11:3000/api/admin/tiers/", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
+            const data = await fetchWithAuth("http://89.28.236.11:3000/api/admin/tiers/")
 
-            if (response.ok) {
-                const data = await response.json()
-                // A API retorna um array de objetos com product e prices
-                const formattedTiers = data.map((item: any) => ({
-                    id: item.product.id,
-                    active: item.product.active,
-                    created: item.product.created,
-                    description: item.product.description,
-                    name: item.product.name,
-                    prices: item.prices
-                }))
-                setTiers(formattedTiers)
-            }
+            // A API retorna um array de objetos com product e prices
+            const formattedTiers = data.map((item: any) => ({
+                id: item.product.id,
+                active: item.product.active,
+                created: item.product.created,
+                description: item.product.description,
+                name: item.product.name,
+                prices: item.prices
+            }))
+
+            setTiers(formattedTiers)
+
         } catch (error) {
             console.error("Error loading tiers:", error)
         } finally {

@@ -1,3 +1,4 @@
+// src/components/dashboard/edit-own-profile.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 interface EditOwnProfileDialogProps {
     open: boolean
@@ -47,29 +49,20 @@ export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }
         setError("")
 
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch(`http://89.28.236.11:3000/api/users/me`, {
+            await fetchWithAuth(`http://89.28.236.11:3000/api/users/me`, {
                 method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
+                body: {
                     name: formData.name,
                     email: formData.email,
-                    password: formData.password || undefined, // Só envia se o user quiser mudar
-                }),
+                    password: formData.password || undefined, // Só envia se existir password
+                }
             })
 
-            if (response.ok) {
-                onUserUpdated()
-                onOpenChange(false)
-            } else {
-                const errorData = await response.json()
-                setError(errorData.error || "Error updating profile")
-            }
-        } catch (err) {
-            setError("Connection error. Try again.")
+            onUserUpdated()
+            onOpenChange(false)
+
+        } catch (err: any) {
+            setError(err.message || "Error updating profile")
         } finally {
             setIsLoading(false)
         }

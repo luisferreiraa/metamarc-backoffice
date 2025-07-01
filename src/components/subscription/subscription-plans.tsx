@@ -12,6 +12,7 @@ import { LoadingSpinner } from "../layout/loading-spinner"
 import { fetchTiers } from "@/lib/fetchTiers"
 import { Tier } from "@/interfaces/stripe-tier"
 import { UserData } from "@/interfaces/user-data"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 export default function SubscriptionPlans() {
     const [loading, setLoading] = useState(false)       // Estado geral de carregamento
@@ -31,30 +32,21 @@ export default function SubscriptionPlans() {
         }
 
         const fetchUserData = async () => {
-            const token = localStorage.getItem("token")
             const userData = localStorage.getItem("user")
 
-            if (!token || !userData) {
+            if (!userData) {
                 setUserLoading(false)
                 return
             }
 
             try {
-                const response = await fetch("http://89.28.236.11:3000/api/auth/get-api-key", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                const apiData = await fetchWithAuth("http://89.28.236.11:3000/api/auth/get-api-key")
+
+                setUser({
+                    id: apiData.id,
+                    tier: apiData.tier,
                 })
 
-                if (response.ok) {
-                    const apiData = await response.json()
-                    setUser({
-                        id: apiData.id,
-                        tier: apiData.tier,
-                    })
-                } else {
-                    console.error("Failed to fetch API key")
-                }
             } catch (error) {
                 console.error("Error fetching user data:", error)
             } finally {
