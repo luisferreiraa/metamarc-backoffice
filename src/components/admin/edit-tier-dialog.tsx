@@ -27,15 +27,16 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         name: "",
         description: "",
         priceInCents: 0,
+        features: ""
     })
 
-    // Sempre que o prop "tier" muda, atualiza os dados do form para os valores do tier
     useEffect(() => {
         if (tier) {
             setFormData({
                 name: tier.name || "",
                 description: tier.description || "",
                 priceInCents: tier.priceInCents || 0,
+                features: tier.metadata?.features || ""
             })
         }
     }, [tier])
@@ -47,7 +48,6 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         }))
     }
 
-    // Função chamada quando o form é submetido
     const handleSaveChanges = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
@@ -60,16 +60,15 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
         }
 
         try {
-            // Atualiza nome e descrição
             await fetchWithAuth(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}`, {
                 method: "PUT",
                 body: {
                     newName: formData.name,
                     newDescription: formData.description,
+                    features: formData.features
                 },
             })
 
-            // Atualiza preço
             await fetchWithAuth(`http://89.28.236.11:3000/api/admin/tiers/${tier.id}/replace-price`, {
                 method: "POST",
                 body: {
@@ -78,9 +77,9 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
             })
 
             toast.success("Tier updated successfully!")
-
             onTierUpdated()
             onOpenChange(false)
+
         } catch (err: any) {
             setError(err.message || "Unexpected error")
             toast.error("Failed to update tier. Try again.")
@@ -106,6 +105,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                 )}
 
                 <form onSubmit={handleSaveChanges} className="grid gap-4 py-4">
+
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="name" className="text-right text-white">Name</Label>
                         <Input
@@ -129,6 +129,17 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                     </div>
 
                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="features" className="text-right text-white">Features</Label>
+                        <Input
+                            id="features"
+                            value={formData.features}
+                            onChange={(e) => handleChange("features", e.target.value)}
+                            placeholder="Separate features with ;"
+                            className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="priceInCents" className="text-white">Price (in cents)</Label>
                         <Input
                             id="priceInCents"
@@ -140,7 +151,6 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                         />
                     </div>
 
-                    {/* Botões no rodapé do diálogo */}
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
                         <Button type="submit" variant="ghost" disabled={isLoading} className="text-white hover:bg-white/10 transition-all">

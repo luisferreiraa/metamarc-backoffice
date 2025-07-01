@@ -28,6 +28,10 @@ interface Tier {
         currency: string
         unit_amount: number
     }[]
+    metadata: {
+        features?: string
+    }
+    priceInCents?: number
 }
 
 export function TiersManagement() {
@@ -49,7 +53,8 @@ export function TiersManagement() {
                 created: item.product.created,
                 description: item.product.description,
                 name: item.product.name,
-                prices: item.prices
+                prices: item.prices,
+                metadata: item.product.metadata
             }))
 
             setTiers(formattedTiers)
@@ -141,7 +146,10 @@ export function TiersManagement() {
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuItem
                                                 onClick={() => {
-                                                    setSelectedTier(tier);
+                                                    setSelectedTier({
+                                                        ...tier,
+                                                        priceInCents: tier.prices[0]?.unit_amount || 0
+                                                    });
                                                     setShowEditDialog(true);
                                                 }}
                                             >

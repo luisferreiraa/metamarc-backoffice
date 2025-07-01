@@ -22,7 +22,8 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
     const [formData, setFormData] = useState({
         name: "",
         description: "",
-        priceInCents: 0
+        priceInCents: 0,
+        features: "",  // <-- Campo extra para features separadas por ;
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +34,12 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
         try {
             await fetchWithAuth("http://89.28.236.11:3000/api/admin/tiers/", {
                 method: "POST",
-                body: formData
+                body: {
+                    name: formData.name,
+                    description: formData.description,
+                    priceInCents: formData.priceInCents,
+                    features: formData.features,  // <-- Envia as features como string separada por ;
+                }
             })
 
             onTierCreated()
@@ -43,6 +49,7 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
                 name: "",
                 description: "",
                 priceInCents: 0,
+                features: ""
             })
 
         } catch (err: any) {
@@ -55,7 +62,7 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({
             ...prev,
-            [field]: value
+            [field]: field === "priceInCents" ? parseInt(value) || 0 : value
         }))
     }
 
@@ -75,57 +82,61 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
                             </Alert>
                         )}
 
-                        {/* Campo: Nome */}
+                        {/* Nome */}
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right text-white">
-                                Name
-                            </Label>
+                            <Label htmlFor="name" className="text-right text-white">Name</Label>
                             <Input
                                 id="name"
                                 value={formData.name}
                                 onChange={(e) => handleChange("name", e.target.value)}
-                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
+                                className="col-span-3 border border-white/10 bg-[#111111] text-white"
                                 required
                             />
                         </div>
 
-                        {/* Campo: Descrição */}
+                        {/* Descrição */}
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="description" className="text-right text-white">
-                                Description
-                            </Label>
+                            <Label htmlFor="description" className="text-right text-white">Description</Label>
                             <Input
                                 id="description"
                                 value={formData.description}
-                                onChange={(e) => handleChange("description", e.target.value)}  // Corrigido
-                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
+                                onChange={(e) => handleChange("description", e.target.value)}
+                                className="col-span-3 border border-white/10 bg-[#111111] text-white"
                                 required
                             />
                         </div>
 
-                        {/* Campo: Preço em cêntimos */}
+                        {/* Preço em cêntimos */}
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="priceInCents" className="text-white">
-                                Price (in cents)
-                            </Label>
+                            <Label htmlFor="priceInCents" className="text-white">Price (in cents)</Label>
                             <Input
                                 id="priceInCents"
                                 type="number"
                                 value={formData.priceInCents}
-                                onChange={(e) => handleChange("priceInCents", e.target.value)}  // Corrigido
-                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none"
+                                onChange={(e) => handleChange("priceInCents", e.target.value)}
+                                className="col-span-3 border border-white/10 bg-[#111111] text-white"
                                 required
+                            />
+                        </div>
+
+                        {/* Features */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="features" className="text-white">Features</Label>
+                            <Input
+                                id="features"
+                                placeholder="Feature1; Feature2; Feature3"
+                                value={formData.features}
+                                onChange={(e) => handleChange("features", e.target.value)}
+                                className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30"
                             />
                         </div>
                     </div>
 
-                    {/* Botões de ação no rodapé do diálogo */}
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                             Cancel
                         </Button>
-                        <Button type="submit" variant={"ghost"} disabled={isLoading} className="text-white hover:bg-white/10 transition-all">
-                            {/* Ícone de loading enquanto envia */}
+                        <Button type="submit" variant={"ghost"} disabled={isLoading} className="text-white hover:bg-white/10">
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create Tier
                         </Button>
