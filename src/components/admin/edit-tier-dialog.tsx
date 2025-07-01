@@ -1,15 +1,25 @@
 // src/components/admin/edit-tier-dialog.tsx
 "use client"
 
-import { Dialog, DialogDescription, DialogTitle, DialogContent, DialogFooter, DialogHeader } from "../ui/dialog"
-import { useEffect, useState } from "react"
-import { Alert, AlertDescription } from "../ui/alert"
-import { Label } from "../ui/label"
-import { Input } from "../ui/input"
-import { Button } from "../ui/button"
+import { useActionState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
-import { EditTierData } from "@/interfaces/stripe-tier"
-import { fetchWithAuth } from "@/lib/fetchWithAuth"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+
+import { updateTier, type ActionState } from "@/lib/actions/tier-actions"
+
 import { toast } from "react-toastify"
 
 // Props do component, incluindo o tier a editar e callbacks para abrir/fechar e atualização

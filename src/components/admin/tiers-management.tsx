@@ -175,7 +175,10 @@ export function TiersManagement() {
                 <CreateTierDialog
                     open={showCreateDialog}
                     onOpenChange={setShowCreateDialog}
-                    onTierCreated={fetchTiers}
+                    onTierCreated={() => {
+                        fetchTiers() // Recarrega a lista
+                        setShowCreateDialog(false) // Fecha o dialog
+                    }}
                 />
                 {selectedTier && (
                     <EditTierDialog
