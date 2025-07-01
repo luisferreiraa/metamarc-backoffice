@@ -5,7 +5,7 @@ import { z } from "zod"
 import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
 
-// Schemas de validação
+// Schema de validação para criar tiers
 const createTierSchema = z.object({
     name: z.string().min(1, "Name is required"),
     description: z.string().min(1, "Description is required"),
@@ -13,6 +13,7 @@ const createTierSchema = z.object({
     features: z.string().optional(),
 })
 
+// Schema de validação para atualizar tiers
 const updateTierSchema = z.object({
     tierId: z.string().min(1, "Tier ID is required"),
     name: z.string().min(1, "Name is required"),
@@ -21,19 +22,22 @@ const updateTierSchema = z.object({
     features: z.string().optional(),
 })
 
+// Schema de validação para eliminar tiers
 const deleteTierSchema = z.object({
     tierId: z.string().min(1, "Tier ID is required"),
 })
 
-// Types
+// Estado genérico de uma ação, usado para devolução de sucesso ou erros
 export type ActionState = {
-    success?: boolean
-    error?: string
-    fieldErrors?: Record<string, string[]>
+    success?: boolean       // Indica se a operação teve sucesso
+    error?: string      // Mensagem de erro, caso ocorra
+    fieldErrors?: Record<string, string[]>      // Erros específicos por campo, ex: { name: ["Name is required"] }
 }
 
+// Tipo específico para criação de Tier, atualmente igual a ActioState mas separado para clareza
 export type CreateTierState = ActionState
 
+// Definição do formato de dados de um Tier, ral como recebido da API
 export type Tier = {
     id: string
     active: boolean
@@ -52,27 +56,28 @@ export type Tier = {
     priceInCents?: number
 }
 
-// Server Actions
+// Função assíncrona para ler o token do cookie
 export async function getToken() {
     try {
         const cookieStore = await cookies()
         const token = cookieStore.get("token")?.value
-        return token || ""
+        return token || ""      // Se não existir token, devolve string vazia
     } catch (error) {
         return ""
     }
 }
 
+// Busca todos os tiers disponíveis
 export async function getTiers(): Promise<Tier[]> {
     try {
 
-        const token = getToken()
+        const token = getToken()        // Obtém o token JWT do cookie
         const response = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/`, {
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${token}`      // Envia token no cabeçalho para autenticação
             },
-            cache: "no-store",
+            cache: "no-store",      // Desativa o cache para garantir dados atualizados
         })
 
         if (!response.ok) {
@@ -81,6 +86,7 @@ export async function getTiers(): Promise<Tier[]> {
 
         const data = await response.json()
 
+        // Mapeia a resposta da API para o formato esperado no frontend
         return data.map((item: any) => ({
             id: item.product.id,
             active: item.product.active,
@@ -96,15 +102,18 @@ export async function getTiers(): Promise<Tier[]> {
     }
 }
 
+// Cria um novo tier
 export async function createTier(prevState: CreateTierState, formData: FormData): Promise<CreateTierState> {
     try {
+        // Validação dos campos recebidos via FormData
         const validatedFields = createTierSchema.safeParse({
             name: formData.get("name"),
             description: formData.get("description"),
-            priceInCents: Number(formData.get("priceInCents")),
+            priceInCents: Number(formData.get("priceInCents")),     // Converte para número
             features: formData.get("features"),
         });
 
+        // Se falhar a validação, devolve os erros por campo
         if (!validatedFields.success) {
             console.error("Validation errors:", validatedFields.error.flatten());
             return {
@@ -115,9 +124,10 @@ export async function createTier(prevState: CreateTierState, formData: FormData)
 
         const token = await getToken()
         if (!token) {
-            throw new Error("Authentication token not found")
+            throw new Error("Authentication token not found")       // Sem token, não se prossegue
         }
 
+        // Monta o corpo do pedido
         const payload = {
             name: validatedFields.data.name,
             description: validatedFields.data.description,
@@ -127,6 +137,7 @@ export async function createTier(prevState: CreateTierState, formData: FormData)
 
         console.log("Sending payload:", payload)
 
+        // Faz o pedido POST à API
         const response = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/`, {
             method: "POST",
             headers: {
@@ -136,9 +147,10 @@ export async function createTier(prevState: CreateTierState, formData: FormData)
             body: JSON.stringify(payload)
         })
 
-        const responseText = await response.text()
+        const responseText = await response.text()      // Lê resposta como texto
 
         if (!response.ok) {
+            // Tenta converter o erro em JSON, se possível
             try {
                 const errorData = JSON.parse(responseText);
                 console.error("API Error:", {
@@ -151,7 +163,7 @@ export async function createTier(prevState: CreateTierState, formData: FormData)
             }
         }
 
-        revalidatePath("/admin/tiers")
+        revalidatePath("/admin/tiers")      // Atualiza a página do frontend para refletir as mudanças
         return { success: true }
     } catch (error) {
         console.error("Create tier error:", error)
@@ -161,6 +173,7 @@ export async function createTier(prevState: CreateTierState, formData: FormData)
     }
 }
 
+// Atualiza um tier existente
 export async function updateTier(prevState: ActionState, formData: FormData): Promise<ActionState> {
     try {
         const validatedFields = updateTierSchema.safeParse({
@@ -185,6 +198,7 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
             throw new Error("Authentication token not found");
         }
 
+        // Primeiro, atualiza nome, descrição e features do produto
         const updateProductResponse = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/${tierId}`, {
             method: "PUT",
             headers: {
@@ -203,6 +217,7 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
             throw new Error(errorData.error || "Failed to update product details")
         }
 
+        // Depois, adiciona o novo preço
         const addPriceResponse = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/${tierId}/price`, {
             method: "POST",
             headers: {
@@ -229,6 +244,7 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
     }
 }
 
+// Função para eliminar (arquivar) um tier
 export async function deleteTier(prevState: ActionState, formData: FormData): Promise<ActionState> {
     try {
         const validatedFields = deleteTierSchema.safeParse({

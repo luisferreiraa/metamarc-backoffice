@@ -1,4 +1,4 @@
-// src/components/admin/edit-tier-dialog.tsx
+// src/components/admin/user/edit-user-dialog.tsx
 "use client"
 
 import { useActionState, useEffect } from "react"
@@ -18,41 +18,41 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
-import { Tier, updateTier, type ActionState } from "@/lib/actions/tier-actions"
+import { User, updateUser, type ActionState } from "@/lib/actions/user-actions"
 
 import { toast } from "react-toastify"
 
-interface EditTierDialogProps {
+interface EditUserDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    tier: Tier
-    onTierUpdated?: () => void
+    user: User
+    onUserUpdated?: () => void
 }
 
 const initialState: ActionState = {}
 
-export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: EditTierDialogProps) {
-    const [state, formAction, isPending] = useActionState(updateTier, initialState)
+export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: EditUserDialogProps) {
+    const [state, formAction, isPending] = useActionState(updateUser, initialState)
 
     // Lidar com atualização bem sucedida
     useEffect(() => {
         if (state.success) {
-            onTierUpdated?.()
+            onUserUpdated?.()
             onOpenChange(false)
         }
-    }, [state.success, onTierUpdated, onOpenChange])
+    }, [state.success, onUserUpdated, onOpenChange])
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px] bg-[#0a0a0a] border-white/10 [font-family:var(--font-poppins)]">
                 <DialogHeader>
-                    <DialogTitle className="text-[#66b497]">Edit Tier</DialogTitle>
-                    <DialogDescription className="text-white/70">Update the tier information below</DialogDescription>
+                    <DialogTitle className="text-[#66b497]">Edit User</DialogTitle>
+                    <DialogDescription className="text-white/70">Update the user information below</DialogDescription>
                 </DialogHeader>
 
                 <form action={formAction} className="space-y-4">
                     {/* Hidden field para o ID do tier */}
-                    <input type="hidden" name="tierId" value={tier.id} />
+                    <input type="hidden" name="tierId" value={user.id} />
 
                     {state.error && (
                         <Alert variant="destructive">
@@ -68,7 +68,7 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
                             id="edit-name"
                             name="name"
                             type="text"
-                            defaultValue={tier.name}
+                            defaultValue={user.name}
                             className="border-white/10 bg-[#111111] text-white"
                             required
                             disabled={isPending}
@@ -78,12 +78,12 @@ export function EditTierDialog({ open, onOpenChange, tier, onTierUpdated }: Edit
 
                     <div className="space-y-2">
                         <Label htmlFor="edit-description" className="text-white">
-                            Description
+                            Email
                         </Label>
                         <Textarea
-                            id="edit-description"
-                            name="description"
-                            defaultValue={tier.description}
+                            id="edit-email"
+                            name="email"
+                            defaultValue={user.email}
                             className="border-white/10 bg-[#111111] text-white resize-none"
                             rows={3}
                             required
