@@ -57,10 +57,11 @@ export async function getToken() {
     try {
         const cookieStore = await cookies()
         const token = cookieStore.get("token")?.value
-
-        return token
+        console.log("Token:", token ? "Exists" : "Missing") // Debug
+        return token || ""
     } catch (error) {
-        console.error("Failed to get token")
+        console.error("Failed to get token:", error)
+        return ""
     }
 }
 
@@ -144,37 +145,65 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
             description: formData.get("description"),
             priceInCents: Number(formData.get("priceInCents")),
             features: formData.get("features"),
-        })
+        });
 
         if (!validatedFields.success) {
             return {
                 error: "Validation failed",
                 fieldErrors: validatedFields.error.flatten().fieldErrors,
-            }
+            };
         }
 
-        const { tierId, ...updateData } = validatedFields.data
+        const { tierId, name, description, features, priceInCents } = validatedFields.data;
+        const token = await getToken();
 
-        const token = getToken()
-        const response = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/${tierId}`, {
+        if (!token) {
+            throw new Error("Authentication token not found");
+        }
+
+        // 1. Primeiro atualiza o produto (nome, descrição, features)
+        const updateProductResponse = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/${tierId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
-            body: JSON.stringify(updateData),
-        })
+            body: JSON.stringify({
+                newName: name,
+                newDescription: description,
+                features: features || ""
+            }),
+        });
 
-        if (!response.ok) {
-            throw new Error("Failed to update tier")
+        if (!updateProductResponse.ok) {
+            const errorData = await updateProductResponse.json().catch(() => ({}));
+            throw new Error(errorData.error || "Failed to update product details");
         }
 
-        revalidatePath("/admin/tiers")
-        return { success: true }
+        // 2. Depois adiciona novo preço (não podemos atualizar preços existentes no Stripe)
+        const addPriceResponse = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/${tierId}/price`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                priceInCents: priceInCents
+            }),
+        });
+
+        if (!addPriceResponse.ok) {
+            const errorData = await addPriceResponse.json().catch(() => ({}));
+            throw new Error(errorData.error || "Failed to update price");
+        }
+
+        revalidatePath("/admin/tiers");
+        return { success: true };
     } catch (error) {
+        console.error("Update error:", error);
         return {
             error: error instanceof Error ? error.message : "Failed to update tier",
-        }
+        };
     }
 }
 
