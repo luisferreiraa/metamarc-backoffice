@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import { User } from "@/lib/actions/user-actions"
 import { EditUserDialog } from "./users/edit-user-dialog"
+import { DeleteUserDialog } from "./users/delete-user-dialog"
 
 interface UsersTableProps {
     users: User[],

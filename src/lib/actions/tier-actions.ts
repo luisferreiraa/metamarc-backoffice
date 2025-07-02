@@ -111,7 +111,7 @@ export async function createTier(prevState: CreateTierState, formData: FormData)
             description: formData.get("description"),
             priceInCents: Number(formData.get("priceInCents")),     // Converte para número
             features: formData.get("features"),
-        });
+        })
 
         // Se falhar a validação, devolve os erros por campo
         if (!validatedFields.success) {
@@ -119,7 +119,7 @@ export async function createTier(prevState: CreateTierState, formData: FormData)
             return {
                 error: "Validation failed",
                 fieldErrors: validatedFields.error.flatten().fieldErrors,
-            };
+            }
         }
 
         const token = await getToken()
@@ -133,7 +133,7 @@ export async function createTier(prevState: CreateTierState, formData: FormData)
             description: validatedFields.data.description,
             priceInCents: validatedFields.data.priceInCents,
             features: validatedFields.data.features || undefined
-        };
+        }
 
         console.log("Sending payload:", payload)
 
@@ -182,20 +182,20 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
             description: formData.get("description"),
             priceInCents: Number(formData.get("priceInCents")),
             features: formData.get("features"),
-        });
+        })
 
         if (!validatedFields.success) {
             return {
                 error: "Validation failed",
                 fieldErrors: validatedFields.error.flatten().fieldErrors,
-            };
+            }
         }
 
-        const { tierId, name, description, features, priceInCents } = validatedFields.data;
+        const { tierId, name, description, features, priceInCents } = validatedFields.data
         const token = await getToken()
 
         if (!token) {
-            throw new Error("Authentication token not found");
+            throw new Error("Authentication token not found")
         }
 
         // Primeiro, atualiza nome, descrição e features do produto
@@ -210,7 +210,7 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
                 newDescription: description,
                 features: features || ""
             }),
-        });
+        })
 
         if (!updateProductResponse.ok) {
             const errorData = await updateProductResponse.json().catch(() => ({}))
@@ -240,7 +240,7 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
         console.error("Update error:", error)
         return {
             error: error instanceof Error ? error.message : "Failed to update tier",
-        };
+        }
     }
 }
 
@@ -249,16 +249,16 @@ export async function deleteTier(prevState: ActionState, formData: FormData): Pr
     try {
         const validatedFields = deleteTierSchema.safeParse({
             tierId: formData.get("tierId"),
-        });
+        })
 
         if (!validatedFields.success) {
             console.error("Validation error:", validatedFields.error)
             return {
                 error: "Invalid tier ID format",
-            };
+            }
         }
 
-        const token = await getToken();
+        const token = await getToken()
         if (!token) {
             throw new Error("Authentication token not found")
         }
@@ -272,7 +272,7 @@ export async function deleteTier(prevState: ActionState, formData: FormData): Pr
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
-        });
+        })
 
         const responseText = await response.text()
         console.log("Raw response:", responseText)

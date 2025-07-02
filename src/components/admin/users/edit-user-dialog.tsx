@@ -1,7 +1,7 @@
 // src/components/admin/user/edit-user-dialog.tsx
 "use client"
 
-import { useActionState, useEffect } from "react"
+import { useActionState, useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -16,11 +16,11 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 
 import { User, updateUser, type ActionState } from "@/lib/actions/user-actions"
 
 import { toast } from "react-toastify"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface EditUserDialogProps {
     open: boolean
@@ -34,6 +34,24 @@ const initialState: ActionState = {}
 export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: EditUserDialogProps) {
     const [state, formAction, isPending] = useActionState(updateUser, initialState)
 
+    // Estado local do formulário
+    const [formData, setFormData] = useState({
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        tier: user.tier,
+    })
+
+    // Atualiza formData sempre que abrir popup com outro user
+    useEffect(() => {
+        setFormData({
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            tier: user.tier,
+        })
+    }, [user])
+
     // Lidar com atualização bem sucedida
     useEffect(() => {
         if (state.success) {
@@ -41,6 +59,14 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
             onOpenChange(false)
         }
     }, [state.success, onUserUpdated, onOpenChange])
+
+    // Função genérica para atualizar o estado do form com o campo alterado
+    const handleChange = (field: keyof typeof formData, value: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+        }))
+    }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -80,12 +106,12 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                         <Label htmlFor="edit-description" className="text-white">
                             Email
                         </Label>
-                        <Textarea
+                        <Input
                             id="edit-email"
                             name="email"
+                            type="text"
                             defaultValue={user.email}
                             className="border-white/10 bg-[#111111] text-white resize-none"
-                            rows={3}
                             required
                             disabled={isPending}
                         />
@@ -94,41 +120,36 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                         )}
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="edit-priceInCents" className="text-white">
-                            Price (in cents)
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="role" className="text-right text-white">
+                            Role
                         </Label>
-                        <Input
-                            id="edit-priceInCents"
-                            name="priceInCents"
-                            type="number"
-                            min="0"
-                            step="1"
-                            defaultValue={tier.priceInCents}
-                            className="border-white/10 bg-[#111111] text-white"
-                            required
-                            disabled={isPending}
-                        />
-                        {state.fieldErrors?.priceInCents && (
-                            <p className="text-sm text-red-500">{state.fieldErrors.priceInCents[0]}</p>
-                        )}
+                        <Select value={user.role} onValueChange={(value) => handleChange("role", value)}>
+                            <SelectTrigger className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="CLIENT">Client</SelectItem>
+                                <SelectItem value="ADMIN">Admin</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="edit-features" className="text-white">
-                            Features
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="user" className="text-right text-white">
+                            Tier
                         </Label>
-                        <Textarea
-                            id="edit-features"
-                            name="features"
-                            defaultValue={tier.metadata.features || ""}
-                            placeholder="Separate features with semicolons (;)"
-                            className="border-white/10 bg-[#111111] text-white placeholder-white/30 resize-none"
-                            rows={3}
-                            disabled={isPending}
-                        />
-                        <p className="text-xs text-white/50">Optional: List features separated by semicolons</p>
-                        {state.fieldErrors?.features && <p className="text-sm text-red-500">{state.fieldErrors.features[0]}</p>}
+                        <Select value={user.tier} onValueChange={(value) => handleChange("tier", value)}>
+                            <SelectTrigger className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="FREE">Free</SelectItem>
+                                <SelectItem value="PRO">Pro</SelectItem>
+                                <SelectItem value="PREMIUM">Premium</SelectItem>
+                                <SelectItem value="ENTERPRISE">Enterprise</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <DialogFooter>
@@ -142,6 +163,6 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                     </DialogFooter>
                 </form>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     )
 }
