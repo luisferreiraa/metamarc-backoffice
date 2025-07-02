@@ -27,6 +27,18 @@ interface UsersResponse {
     }
 }
 
+// Pârametros de busca e filtros que corresponde ao backend
+export interface GetUsersParams {
+    page?: number
+    limit?: number
+    name?: string
+    email?: string
+    role?: string
+    tier?: string
+    isActive?: string
+    order?: "asc" | "desc"
+}
+
 // Schema de validação para criar users
 const createUserSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -73,7 +85,7 @@ export async function getToken() {
 // Buscar todos os users disponíveis
 export async function getUsers(page = 1, limit = 10): Promise<UsersResponse> {
     try {
-        const token = getToken()
+        const token = await getToken()
         const params = new URLSearchParams({ page: String(page), limit: String(limit) })
 
         const response = await fetch(`http://89.28.236.11:3000/api/admin/users?${params.toString()}`, {
@@ -89,11 +101,6 @@ export async function getUsers(page = 1, limit = 10): Promise<UsersResponse> {
         }
 
         const result = await response.json()
-
-        // Validar que result.data existe e é array
-        if (!result.data || Array.isArray(result.data)) {
-            throw new Error("Unexpected result structure")
-        }
 
         const users = result.data.map((item: any) => ({
             id: item.id,
@@ -145,7 +152,7 @@ export async function createUser(prevState: CreateUserState, formData: FormData)
         // Monta o corpo do pedido
         const payload = {
             name: validatedFields.data.name,
-            description: validatedFields.data.email,
+            email: validatedFields.data.email,
             role: validatedFields.data.role,
             tier: validatedFields.data.tier
         }
@@ -218,10 +225,10 @@ export async function updateUser(prevState: ActionState, formData: FormData): Pr
                 "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
-                newName: name,
-                newEmail: email,
-                newRole: role,
-                newTier: tier
+                name,
+                email,
+                role,
+                tier
             }),
         })
 

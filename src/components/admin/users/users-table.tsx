@@ -10,8 +10,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 import { User } from "@/lib/actions/user-actions"
-import { EditUserDialog } from "./users/edit-user-dialog"
-import { DeleteUserDialog } from "./users/delete-user-dialog"
+import { EditUserDialog } from "../users/edit-user-dialog"
+import { DeleteUserDialog } from "../users/delete-user-dialog"
+import Link from "next/link"
 
 interface UsersTableProps {
     users: User[],
@@ -25,7 +26,7 @@ export function UsersTable({ users, onUserUpdated }: UsersTableProps) {
 
     const handleEditUser = (user: User) => {
         setSelectedUser(user)
-        setShowEditDialog(false)
+        setShowEditDialog(true)
     }
 
     return (
@@ -53,7 +54,11 @@ export function UsersTable({ users, onUserUpdated }: UsersTableProps) {
                         ) : (
                             users.map((user) => (
                                 <TableRow key={user.id} className="hover:bg-white/5 transition-colors border-b border-white/10">
-                                    <TableCell className="font-medium text-white">{user.name}</TableCell>
+                                    <TableCell className="text-white/80">
+                                        <Link href={`/admin/users/${user.id}`} className="hover:opacity-80 transition">
+                                            {user.name}
+                                        </Link>
+                                    </TableCell>
                                     <TableCell className="text-white/80 max-w-xs truncate" title={user.email}>
                                         {user.email}
                                     </TableCell>

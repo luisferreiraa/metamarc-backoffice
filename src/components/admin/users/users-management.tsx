@@ -1,35 +1,34 @@
-// src/components/admin/tiers-management.tsx
+// src/components/admin/users-management.tsx
 "use client"
 
-import { Suspense, useState, useEffect } from "react"
-import Link from "next/link"
-import { ArrowLeft, Plus, RefreshCw } from "lucide-react"
+import { Suspense, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { Plus, ArrowLeft, RefreshCw } from "lucide-react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { LoadingSpinner } from "@/components/layout/loading-spinner"
+import { CreateUserDialog } from "@/components/admin/users/create-user-dialog"
+import Link from "next/link"
+import { LoadingSpinner } from "../../layout/loading-spinner"
+import { UsersTable } from "./users-table"
+import { User } from "@/lib/actions/user-actions"
 
-import type { Tier } from "@/lib/actions/tier-actions"
-import { CreateTierDialog } from "./create-tier-dialog"
-import { TiersTable } from "./tiers-table"
-
-interface TiersManagementProps {
-    initialTiers: Tier[]
+interface UsersManagementProps {
+    initialUsers: User[]
 }
 
-export function TiersManagement({ initialTiers }: TiersManagementProps) {
+export function UsersManagement({ initialUsers }: UsersManagementProps) {
     const [showCreateDialog, setShowCreateDialog] = useState(false)
-    const [tiers, setTiers] = useState<Tier[]>(initialTiers)
+    const [users, setUsers] = useState<User[]>(initialUsers)
     const [isRefreshing, setIsRefreshing] = useState(false)
 
-    // Função para atualizar a lista de tiers
-    const refreshTiers = async () => {
+    // Função para atualizar a lista de users
+    const refreshUsers = async () => {
         setIsRefreshing(true)
         try {
             // Recarrega a página para buscar dados frescos do servidor
             window.location.reload()
         } catch (error) {
-            console.error("Error refreshing tiers:", error)
+            console.error("Error refreshing users:", error)
         } finally {
             setIsRefreshing(false)
         }
@@ -37,13 +36,13 @@ export function TiersManagement({ initialTiers }: TiersManagementProps) {
 
     // Atualiza o estado local quando initialTiers muda
     useEffect(() => {
-        setTiers(initialTiers)
-    }, [initialTiers])
+        setUsers(initialUsers)
+    }, [initialUsers])
 
-    const handleTierCreated = () => {
+    const handleUserCreated = () => {
         setShowCreateDialog(false)
-        // Recarrega a página para mostrar o novo tier
-        refreshTiers()
+        // Recarrega a página para mostrar o novo user
+        refreshUsers()
     }
 
     return (
@@ -63,8 +62,8 @@ export function TiersManagement({ initialTiers }: TiersManagementProps) {
                             </Button>
                         </Link>
                         <div>
-                            <h1 className="text-3xl lg:text-4xl font-bold text-white">Tiers Management</h1>
-                            <p className="text-white/60 mt-1">Manage your subscription tiers and pricing</p>
+                            <h1 className="text-3xl lg:text-4xl font-bold text-white">Users Management</h1>
+                            <p className="text-white/60 mt-1">Manage Users Information</p>
                         </div>
                     </div>
 
@@ -74,53 +73,44 @@ export function TiersManagement({ initialTiers }: TiersManagementProps) {
                             onClick={() => setShowCreateDialog(true)}
                         >
                             <Plus className="mr-2 h-4 w-4" />
-                            New Tier
+                            New User
                         </Button>
                     </div>
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                        <div className="text-2xl font-bold text-white">{tiers.length}</div>
-                        <div className="text-white/60 text-sm">Total Tiers</div>
-                    </div>
-                    <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                        <div className="text-2xl font-bold text-[#66b497]">{tiers.filter((tier) => tier.active).length}</div>
-                        <div className="text-white/60 text-sm">Active Tiers</div>
-                    </div>
-                    <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                        <div className="text-2xl font-bold text-red-400">{tiers.filter((tier) => !tier.active).length}</div>
-                        <div className="text-white/60 text-sm">Inactive Tiers</div>
-                    </div>
-                </div>
-
                 {/* Empty State */}
-                {tiers.length === 0 ? (
+                {users.length === 0 ? (
                     <div className="text-center py-12">
                         <div className="bg-white/5 border border-white/10 rounded-lg p-8 max-w-md mx-auto">
-                            <h3 className="text-xl font-semibold text-white mb-2">No tiers found</h3>
-                            <p className="text-white/60 mb-4">Get started by creating your first subscription tier.</p>
+                            <h3 className="text-xl font-semibold text-white mb-2">No users found</h3>
+                            <p className="text-white/60 mb-4">Get started by creating a first user.</p>
                             <Button className="bg-[#66b497] text-black hover:bg-[#5aa88b]" onClick={() => setShowCreateDialog(true)}>
                                 <Plus className="mr-2 h-4 w-4" />
-                                Create First Tier
+                                Create First User
                             </Button>
                         </div>
                     </div>
                 ) : (
                     /* Table */
-                    <Suspense fallback={<LoadingSpinner message="Loading tiers..." />}>
-                        <TiersTable tiers={tiers} onTierUpdated={refreshTiers} />
+                    <Suspense fallback={<LoadingSpinner message="Loading users..." />}>
+                        <UsersTable users={users} onUserUpdated={refreshUsers} />
                     </Suspense>
                 )}
 
                 {/* Create Dialog */}
-                <CreateTierDialog
+                <CreateUserDialog
                     open={showCreateDialog}
                     onOpenChange={setShowCreateDialog}
-                    onTierCreated={handleTierCreated}
+                    onUserCreated={handleUserCreated}
                 />
             </div>
         </DashboardLayout>
     )
+
+
+
+
+
+
+
 }

@@ -77,8 +77,10 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                 </DialogHeader>
 
                 <form action={formAction} className="space-y-4">
-                    {/* Hidden field para o ID do tier */}
-                    <input type="hidden" name="tierId" value={user.id} />
+
+                    <input type="hidden" name="userId" value={user.id} />
+                    <input type="hidden" name="role" value={formData.role} />
+                    <input type="hidden" name="tier" value={formData.tier} />
 
                     {state.error && (
                         <Alert variant="destructive">
@@ -87,14 +89,13 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                     )}
 
                     <div className="space-y-2">
-                        <Label htmlFor="edit-name" className="text-white">
-                            Name
-                        </Label>
+                        <Label htmlFor="edit-name" className="text-white">Name</Label>
                         <Input
                             id="edit-name"
                             name="name"
                             type="text"
-                            defaultValue={user.name}
+                            value={formData.name}
+                            onChange={(e) => handleChange("name", e.target.value)}
                             className="border-white/10 bg-[#111111] text-white"
                             required
                             disabled={isPending}
@@ -103,30 +104,25 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="edit-description" className="text-white">
-                            Email
-                        </Label>
+                        <Label htmlFor="edit-email" className="text-white">Email</Label>
                         <Input
                             id="edit-email"
                             name="email"
                             type="text"
-                            defaultValue={user.email}
-                            className="border-white/10 bg-[#111111] text-white resize-none"
+                            value={formData.email}
+                            onChange={(e) => handleChange("email", e.target.value)}
+                            className="border-white/10 bg-[#111111] text-white"
                             required
                             disabled={isPending}
                         />
-                        {state.fieldErrors?.description && (
-                            <p className="text-sm text-red-500">{state.fieldErrors.description[0]}</p>
-                        )}
+                        {state.fieldErrors?.email && <p className="text-sm text-red-500">{state.fieldErrors.email[0]}</p>}
                     </div>
 
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="role" className="text-right text-white">
-                            Role
-                        </Label>
-                        <Select value={user.role} onValueChange={(value) => handleChange("role", value)}>
-                            <SelectTrigger className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none">
-                                <SelectValue />
+                        <Label className="text-right text-white">Role</Label>
+                        <Select value={formData.role} onValueChange={(value) => handleChange("role", value)} disabled={isPending}>
+                            <SelectTrigger className="col-span-3 border border-white/10 bg-[#111111] text-white">
+                                <SelectValue placeholder="Select role" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="CLIENT">Client</SelectItem>
@@ -136,12 +132,10 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                     </div>
 
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="user" className="text-right text-white">
-                            Tier
-                        </Label>
-                        <Select value={user.tier} onValueChange={(value) => handleChange("tier", value)}>
-                            <SelectTrigger className="col-span-3 border border-white/10 bg-[#111111] text-white placeholder-white/30 focus:border-[#66b497] focus:ring-[#66b497] focus:outline-none">
-                                <SelectValue />
+                        <Label className="text-right text-white">Tier</Label>
+                        <Select value={formData.tier} onValueChange={(value) => handleChange("tier", value)} disabled={isPending}>
+                            <SelectTrigger className="col-span-3 border border-white/10 bg-[#111111] text-white">
+                                <SelectValue placeholder="Select tier" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="FREE">Free</SelectItem>
@@ -158,11 +152,11 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                         </Button>
                         <Button type="submit" disabled={isPending} className="bg-white text-black hover:bg-white/90">
                             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Update Tier
+                            Update User
                         </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
-        </Dialog >
+        </Dialog>
     )
 }
