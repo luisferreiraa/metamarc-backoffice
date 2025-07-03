@@ -202,12 +202,29 @@ export async function deleteLog(prevState: ActionState, formData: FormData): Pro
 // Deletar múltiplos logs por IDs
 export async function bulkDeleteLogsByIds(prevState: ActionState, formData: FormData): Promise<ActionState> {
     try {
+        // Get the JSON string from the hidden input
         const idsString = formData.get("ids") as string
-        const ids = JSON.parse(idsString)
+
+        if (!idsString) {
+            return {
+                error: "No IDs provided",
+            }
+        }
+
+        let ids: string[]
+        try {
+            ids = JSON.parse(idsString)
+        } catch (parseError) {
+            console.error("Error parsing IDs:", parseError)
+            return {
+                error: "Invalid IDs format",
+            }
+        }
 
         const validatedFields = bulkDeleteByIdsSchema.safeParse({ ids })
 
         if (!validatedFields.success) {
+            console.error("Validation error:", validatedFields.error)
             return {
                 error: "Invalid IDs format",
                 fieldErrors: validatedFields.error.flatten().fieldErrors,
@@ -220,7 +237,9 @@ export async function bulkDeleteLogsByIds(prevState: ActionState, formData: Form
             throw new Error("Authentication token not found")
         }
 
-        const response = await fetch(`${process.env.API_BASE_URL}/api/admin/logs/bulk-delete`, {
+        console.log("Sending bulk delete request with IDs:", validatedFields.data.ids)
+
+        const response = await fetch(`${process.env.API_BASE_URL}/api/admin/logs`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -229,17 +248,30 @@ export async function bulkDeleteLogsByIds(prevState: ActionState, formData: Form
             body: JSON.stringify({ ids: validatedFields.data.ids }),
         })
 
+        const responseText = await response.text()
+        console.log("Bulk delete response:", responseText)
+
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}))
-            throw new Error(errorData.error || "Failed to delete logs")
+            try {
+                const errorData = JSON.parse(responseText)
+                console.error("API Error:", errorData)
+                throw new Error(errorData.error || "Failed to delete logs")
+            } catch {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
         }
 
-        const result = await response.json()
+        let result
+        try {
+            result = JSON.parse(responseText)
+        } catch {
+            result = { deletedCount: 0 }
+        }
 
         revalidatePath("/admin/logs")
         return {
             success: true,
-            deletedCount: result.deletedCount,
+            deletedCount: result.deletedCount || 0,
         }
     } catch (error) {
         console.error("Error bulk deleting logs:", error)

@@ -126,28 +126,6 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
                             <p className="text-white/60 mt-1">Monitor system activity and user actions</p>
                         </div>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={refreshLogs}
-                            disabled={isRefreshing}
-                            className="border border-white/10 text-white hover:bg-white/10 bg-transparent"
-                        >
-                            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-                            Refresh
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowBulkDeleteDialog(true)}
-                            className="border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Bulk Delete
-                        </Button>
-                    </div>
                 </div>
 
                 {/* Stats Cards */}

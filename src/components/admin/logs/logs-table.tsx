@@ -76,6 +76,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
             order: newFilters.order || order,
         }
 
+        setSelectedLogs([])  // Limpa seleção ao aplicar filtros ou mudar de página
         onFiltersChange(filters)
     }
 
@@ -150,6 +151,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
         setIp("")
         setLimit(10)
         setOrder("desc")
+        setSelectedLogs([])  // Limpa seleção ao limpar filtros
 
         applyFilters({
             page: 1,
@@ -226,10 +228,10 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
 
     return (
         <>
-            {/* Search and Filters */}
+            {/* Área de Pesquisa e Filtros */}
             <div className="space-y-4 mb-6">
                 {/* Search Bar */}
-                <div className="relative">
+                <div className="relative max-w-md">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
                     <Input
                         placeholder="Search logs by action..."
@@ -239,8 +241,8 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                     />
                 </div>
 
-                {/* Filters */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                {/* Grid de filtros adicionais */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     <div>
                         <Input
                             type="datetime-local"
@@ -341,22 +343,13 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                             </Button>
                         )}
                         <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
                             onClick={toggleOrder}
                             className="border-white/10 text-white hover:bg-white/10 bg-transparent"
                         >
                             <ArrowUpDown className="h-4 w-4 mr-1" />
                             {order === "desc" ? "Newest first" : "Oldest first"}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowBulkDeleteDialog(true)}
-                            className="border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
-                        >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Bulk Delete
                         </Button>
                     </div>
                 </div>
