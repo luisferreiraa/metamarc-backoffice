@@ -4,7 +4,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { Plus, ArrowLeft, RefreshCw } from "lucide-react"
+import { Plus, ArrowLeft } from "lucide-react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { CreateUserDialog } from "@/components/admin/users/create-user-dialog"
 import Link from "next/link"
@@ -12,9 +12,10 @@ import { LoadingSpinner } from "../../layout/loading-spinner"
 import { UsersTable, type UserFilters } from "./users-table"
 import { getUsersWithSearch, User } from "@/lib/actions/user-actions"
 
+// Tipagem das props que o componente recebe
 interface UsersManagementProps {
-    initialUsers: User[]
-    initialMeta?: {
+    initialUsers: User[]        // Lista inicial de utilizadores (vinda do servidor na renderização)
+    initialMeta?: {     // Informação adicional de paginação e contagem
         total: number
         page: number
         limit: number
@@ -23,12 +24,16 @@ interface UsersManagementProps {
 }
 
 export function UsersManagement({ initialUsers, initialMeta }: UsersManagementProps) {
+
+    // Estado que controla se o modal para criar utilizador está aberto
     const [showCreateDialog, setShowCreateDialog] = useState(false)
+    // Estado com a lista de utilizadores atual
     const [users, setUsers] = useState<User[]>(initialUsers)
+    // Estados para controlar loading durante o fetch dos dados
     const [isLoading, setIsLoading] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
 
-    // Pagination and filter states
+    // Estados para controlar a paginação e os filtros
     const [totalUsers, setTotalUsers] = useState(initialMeta?.total || 0)
     const [currentPage, setCurrentPage] = useState(initialMeta?.page || 1)
     const [totalPages, setTotalPages] = useState(initialMeta?.pages || 1)
@@ -42,10 +47,11 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
         order: "desc",
     })
 
-    // Função para buscar users com filtros
+    // Função responsável por buscar os utilizadores no servidor, aplicando filtros
     const fetchUsers = useCallback(async (filters: UserFilters) => {
-        setIsLoading(true)
+        setIsLoading(true)      // Ativa o loading visual
         try {
+            // Prepara os parâmetros para o pedido, apenas envia os filtros que não são "all"
             const params = {
                 page: filters.page,
                 limit: filters.limit,
@@ -56,34 +62,34 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
                 order: filters.order,
             }
 
-            const response = await getUsersWithSearch(params)
+            const response = await getUsersWithSearch(params)       // Faz o pedido ao servidor
 
+            // Atualiza o estado com os dados recebidos
             setUsers(response.data)
             setTotalUsers(response.meta.total)
             setCurrentPage(response.meta.page)
             setTotalPages(response.meta.pages)
         } catch (error) {
             console.error("Error fetching users:", error)
-            // Optionally show toast error message
         } finally {
             setIsLoading(false)
         }
     }, [])
 
-    // Handle filter changes
+    // Função que lida com a alteração dos filtros (chamada pela tabela)
     const handleFiltersChange = useCallback(
         (filters: UserFilters) => {
             setCurrentFilters(filters)
-            fetchUsers(filters)
+            fetchUsers(filters)     // Faz o fetch com os novos filtros
         },
-        [fetchUsers],
+        [fetchUsers],       // Garantimos que esta função depende apenas do fetchUsers
     )
 
-    // Função para atualizar a lista de users
+    // Função para atualizar os utilizadores, recarregando a página inteira
     const refreshUsers = async () => {
         setIsRefreshing(true)
         try {
-            // Recarrega a página para buscar dados frescos do servidor
+            // Recarrega a página, forçando novo fetch no servidor
             window.location.reload()
         } catch (error) {
             console.error("Error refreshing users:", error)
@@ -92,7 +98,7 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
         }
     }
 
-    // Atualiza o estado local quando initialUsers muda
+    // Sempre que os dados iniciais mudarem (por exemplo, renderização no servidor), atualizamos o estado local
     useEffect(() => {
         setUsers(initialUsers)
         if (initialMeta) {
@@ -102,12 +108,13 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
         }
     }, [initialUsers, initialMeta])
 
+    // Quando um novo utilizador for criado, fechamos o modal e atualizamos a lista
     const handleUserCreated = () => {
         setShowCreateDialog(false)
-        // Recarrega a página para mostrar o novo user
-        refreshUsers()
+        refreshUsers()      // Recarrega para ver o novo utilizador na lista
     }
 
+    // Quando um utilizador for editado, atualizamos a lista
     const handleUserUpdated = async () => {
         await refreshUsers()
     }
@@ -115,8 +122,11 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
     return (
         <DashboardLayout>
             <div className="container mx-auto px-4 py-20 space-y-6 font-[family-name:var(--font-poppins)]">
-                {/* Header */}
+
+                {/* Cabeçalho da página */}
                 <div className="flex items-center justify-between flex-wrap gap-4">
+
+                    {/* Botão para voltar atrás e título */}
                     <div className="flex items-center gap-4">
                         <Link href="/admin">
                             <Button
@@ -128,12 +138,15 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
                                 Back
                             </Button>
                         </Link>
+
+                        {/* Título e subtítulo */}
                         <div>
                             <h1 className="text-3xl lg:text-4xl font-bold text-white">Users Management</h1>
                             <p className="text-white/60 mt-1">Manage Users Information</p>
                         </div>
                     </div>
 
+                    {/* Botão para abrir o modal de criação de utilizador */}
                     <div className="flex items-center gap-2">
                         <Button
                             className="bg-[#66b497] text-black hover:bg-[#5aa88b] transition-colors"
@@ -145,7 +158,7 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
                     </div>
                 </div>
 
-                {/* Empty State */}
+                {/* Caso não existam utilizadores, mostra estado vazio */}
                 {users.length === 0 ? (
                     <div className="text-center py-12">
                         <div className="bg-white/5 border border-white/10 rounded-lg p-8 max-w-md mx-auto">
@@ -158,7 +171,7 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
                         </div>
                     </div>
                 ) : (
-                    /* Table */
+                    /* Se houver utilizadores, mostra a tabela */
                     <Suspense fallback={<LoadingSpinner message="Loading users..." />}>
                         <UsersTable users={users}
                             totalUsers={totalUsers}
@@ -169,7 +182,7 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
                     </Suspense>
                 )}
 
-                {/* Create Dialog */}
+                {/* Modal para criar novo utilizador */}
                 <CreateUserDialog
                     open={showCreateDialog}
                     onOpenChange={setShowCreateDialog}

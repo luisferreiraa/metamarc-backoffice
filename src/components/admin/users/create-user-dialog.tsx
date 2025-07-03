@@ -20,22 +20,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { createUser, type CreateUserState } from "@/lib/actions/user-actions"
 
+// Props esperadas no componente
 interface CreateUserDialogProps {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    onUserCreated: () => void
+    open: boolean       // Estado de visibilidade do dialog
+    onOpenChange: (open: boolean) => void       // Função para abrir e fechar o dialog
+    onUserCreated: () => void       // Função callback após criação bem sucedida
 }
 
+// Estado inicial do formulário (sem error nem sucesso)
 const initialState: CreateUserState = {}
 
 export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUserDialogProps) {
+    // useActionState gere o envio do form e o estado associado (erros, sucesso)
     const [state, formAction, isPending] = useActionState(createUser, initialState)
 
-    // Estado local para os selects (necessário para componentes controlados)
+    // Estados locais para controlar os Selects do Role e do Tier
     const [selectedRole, setSelectedRole] = useState("CLIENT")
     const [selectedTier, setSelectedTier] = useState("FREE")
 
-    // Reset ao abrir o dialog
+    // Sempre que o Dialog abre, faz reset ao Role e Tier
     useEffect(() => {
         if (open) {
             setSelectedRole("CLIENT")
@@ -43,13 +46,12 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
         }
     }, [open])
 
-    // Lidar com criação bem sucedida
+    // Quando a criação do user for bem-sucedida
     useEffect(() => {
         if (state.success) {
-            onUserCreated()
-            onOpenChange(false)
-            // Reset form
-            setSelectedRole("CLIENT")
+            onUserCreated()     // Atualiza tabela ou dados no componente pai
+            onOpenChange(false)     // Fecha o Dialog
+            setSelectedRole("CLIENT")       // Faz reset aos campos
             setSelectedTier("FREE")
         }
     }, [state.success, onUserCreated, onOpenChange])
@@ -57,19 +59,24 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px] bg-[#0a0a0a] border-white/10 font-[family-name:var(--font-poppins)]">
+
+                {/* Cabeçalho do Dialog */}
                 <DialogHeader>
                     <DialogTitle className="text-[#66b497]">Create New User</DialogTitle>
                     <DialogDescription className="text-white/70">Fill in the data to create a new user</DialogDescription>
                 </DialogHeader>
 
+                {/* Formulário */}
                 <form action={formAction} className="space-y-4">
+
+                    {/* Exibir mensagem de erro geral se existir */}
                     {state.error && (
                         <Alert variant="destructive">
                             <AlertDescription>{state.error}</AlertDescription>
                         </Alert>
                     )}
 
-                    {/* Name Field */}
+                    {/* Campo de Nome */}
                     <div className="space-y-2">
                         <Label htmlFor="name" className="text-white">
                             Name
@@ -83,10 +90,11 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                             disabled={isPending}
                             placeholder="Enter user's full name"
                         />
+                        {/* Exibe erro de validação se existir */}
                         {state.fieldErrors?.name && <p className="text-sm text-red-500">{state.fieldErrors.name[0]}</p>}
                     </div>
 
-                    {/* Email Field */}
+                    {/* Campo de Email */}
                     <div className="space-y-2">
                         <Label htmlFor="email" className="text-white">
                             Email
@@ -103,7 +111,7 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                         {state.fieldErrors?.email && <p className="text-sm text-red-500">{state.fieldErrors.email[0]}</p>}
                     </div>
 
-                    {/* Role Field */}
+                    {/* Select do Role (Admin ou Client) */}
                     <div className="space-y-2">
                         <Label htmlFor="role" className="text-white">
                             Role
@@ -121,12 +129,12 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                                 </SelectItem>
                             </SelectContent>
                         </Select>
-                        {/* Hidden input para enviar o valor do select */}
+                        {/* Campo escondido obrigatório para enviar o valor do Select no form */}
                         <input type="hidden" name="role" value={selectedRole} />
                         {state.fieldErrors?.role && <p className="text-sm text-red-500">{state.fieldErrors.role[0]}</p>}
                     </div>
 
-                    {/* Tier Field */}
+                    {/* Select do Tier (plano do utilizador) */}
                     <div className="space-y-2">
                         <Label htmlFor="tier" className="text-white">
                             Tier
@@ -150,11 +158,12 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                                 </SelectItem>
                             </SelectContent>
                         </Select>
-                        {/* Hidden input para enviar o valor do select */}
+                        {/* Campo escondido para garantir que o valor do Tier vai no FormData */}
                         <input type="hidden" name="tier" value={selectedTier} />
                         {state.fieldErrors?.tier && <p className="text-sm text-red-500">{state.fieldErrors.tier[0]}</p>}
                     </div>
 
+                    {/* Botões de ação */}
                     <DialogFooter>
                         <Button
                             type="button"
@@ -166,6 +175,7 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isPending} className="bg-white text-black hover:bg-white/90">
+                            {/* Mostra ícone de loading enquanto envia */}
                             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create User
                         </Button>

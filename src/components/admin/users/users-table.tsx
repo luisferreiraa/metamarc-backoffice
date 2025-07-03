@@ -16,15 +16,17 @@ import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+// Tipagem das props que o componente recebe
 interface UsersTableProps {
-    users: User[]
-    totalUsers: number
-    currentPage: number
-    totalPages: number
-    onFiltersChange: (filters: UserFilters) => void
-    onUserUpdated?: () => Promise<void>
+    users: User[]       // Lista de utilizadores a apresentar na tabela
+    totalUsers: number      // Total de utilizadores (com ou sem filtros)
+    currentPage: number     // Página atual da listagem
+    totalPages: number      // Total de páginas
+    onFiltersChange: (filters: UserFilters) => void     // Função que comunica ao pai alteração nos filtros
+    onUserUpdated?: () => Promise<void>     // Função opcional a executar após atualizar um utilizador
 }
 
+// Estrutura dos filtros que controlam a tabela
 export interface UserFilters {
     page: number
     limit: number
@@ -36,11 +38,15 @@ export interface UserFilters {
 }
 
 export function UsersTable({ users, totalUsers, currentPage, totalPages, onFiltersChange, onUserUpdated }: UsersTableProps) {
+
+    // Estado para controlar qual utilizador está selecionado para edição
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
+    // Estadoo que controla se a janela de edição está aberta
     const [showEditDialog, setShowEditDialog] = useState(false)
+    // Estado que guarda o ID do utilizador que queremos eliminar
     const [userIdToDelete, setUserIdToDelete] = useState<string | null>(null)
 
-    // Filter states
+    // Estado principal dos filtros da tabela
     const [filters, setFilters] = useState<UserFilters>({
         page: currentPage,
         limit: 10,
@@ -51,27 +57,30 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
         order: "desc",
     })
 
-    // Debounce search
+    // Estado separado apenas para controlar o valor do input de pesquisa (para fazer debounce)
     const [searchTerm, setSearchTerm] = useState("")
 
+    // Efeito que aplica um atraso de 500ms ao alterar o campo de pesquisa (debounce)
     useEffect(() => {
         const timer = setTimeout(() => {
-            setFilters((prev) => ({ ...prev, search: searchTerm, page: 1 }))
+            setFilters((prev) => ({ ...prev, search: searchTerm, page: 1 }))        // Aplica pesquisa e volta à primeira página
         }, 500)
 
-        return () => clearTimeout(timer)
+        return () => clearTimeout(timer)        // Limpa o timeout se o utilizador continuar a escrever
     }, [searchTerm])
 
-    // Apply filters when they change
+    // Sempre que os filtros mudares, informamos o componente pai
     useEffect(() => {
         onFiltersChange(filters)
     }, [filters, onFiltersChange])
 
+    // Quando clicamos para editar um utilizador
     const handleEditUser = (user: User) => {
         setSelectedUser(user)
         setShowEditDialog(true)
     }
 
+    // Função genérica para atualizar qualquer campo do estado dos filtros
     const updateFilter = (key: keyof UserFilters, value: string | number) => {
         setFilters((prev) => ({
             ...prev,
@@ -80,6 +89,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
         }))
     }
 
+    // Limpa todos os filtros, exceto o número de registos por página
     const clearFilters = () => {
         setSearchTerm("")
         setFilters({
@@ -93,22 +103,25 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
         })
     }
 
+    // Verifica se existem filtros ativos além do padrão
     const hasActiveFilters =
         filters.search || filters.role !== "all" || filters.tier !== "all" || filters.isActive !== "all"
 
+    // Função que altera a página atual
     const handlePageChange = (page: number) => {
         updateFilter("page", page)
     }
 
+    // Alterna entre ordem ascendente e descendente
     const toggleOrder = () => {
         updateFilter("order", filters.order === "desc" ? "asc" : "desc")
     }
 
     return (
         <>
-            {/* Search e Filtros */}
+            {/* Área de Pesquisa e Filtros */}
             <div className="space-y-4 mb-6">
-                {/* Search em destaque na primeira linha */}
+                {/* Input de pesquisa com ícone */}
                 <div className="relative max-w-md">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
                     <Input
@@ -119,9 +132,10 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                     />
                 </div>
 
-                {/* Grid de Filtros */}
+                {/* Grid de filtros adicionais */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
 
+                    {/* Filtro por role */}
                     <Select value={filters.role} onValueChange={(value) => updateFilter("role", value)}>
                         <SelectTrigger className="border-white/10 bg-[#111111] text-white w-full">
                             <SelectValue placeholder="Filter by role" />
@@ -133,6 +147,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                         </SelectContent>
                     </Select>
 
+                    {/* Filtro por tier */}
                     <Select value={filters.tier} onValueChange={(value) => updateFilter("tier", value)}>
                         <SelectTrigger className="border-white/10 bg-[#111111] text-white w-full">
                             <SelectValue placeholder="Filter by tier" />
@@ -146,6 +161,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                         </SelectContent>
                     </Select>
 
+                    {/* Filtro por estado ativo/inativo */}
                     <Select value={filters.isActive} onValueChange={(value) => updateFilter("isActive", value)}>
                         <SelectTrigger className="border-white/10 bg-[#111111] text-white w-full">
                             <SelectValue placeholder="Filter by status" />
@@ -157,6 +173,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                         </SelectContent>
                     </Select>
 
+                    {/* Filtro pelo número de registos por página */}
                     <Select value={filters.limit.toString()} onValueChange={(value) => updateFilter("limit", Number.parseInt(value))}>
                         <SelectTrigger className="border-white/10 bg-[#111111] text-white w-full">
                             <SelectValue placeholder="Per page" />
@@ -169,6 +186,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                         </SelectContent>
                     </Select>
 
+                    {/* Botão para limpar filtros, visível apenas se houver filtros ativos */}
                     {hasActiveFilters && (
                         <Button variant="default" onClick={clearFilters} className="border-white/10 text-white hover:bg-white/10 w-full">
                             Clear Filters
@@ -176,7 +194,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                     )}
                 </div>
 
-                {/* Resumo dos resultados */}
+                {/* Resumo dos resultados e ordenação */}
                 <div className="flex justify-between items-center text-sm text-white/60">
                     <span>
                         Showing {users.length} of {totalUsers} users
@@ -197,6 +215,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                 </div>
             </div>
 
+            {/* Tabela principal dos utilizadores */}
             <div className="rounded-md border border-white/10 overflow-hidden">
                 <Table>
                     <TableHeader>
@@ -211,6 +230,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                         </TableRow>
                     </TableHeader>
                     <TableBody>
+                        {/* Mensagem caso não existam utilizadores */}
                         {users.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center text-white/60 py-8">
@@ -297,7 +317,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                 </Table>
             </div>
 
-            {/* Paginação */}
+            {/* Paginação - apenas visível se existirem várias páginas */}
             {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-6">
                     <div className="text-sm text-white/60">
@@ -315,7 +335,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                             Previous
                         </Button>
 
-                        {/* Page Numbers */}
+                        {/* Números das páginas, adaptativo consoante o total de páginas */}
                         <div className="flex items-center space-x-1">
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                                 let pageNumber
@@ -361,10 +381,10 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                 </div>
             )}
 
-            {/* Edit Dialog */}
+            {/* Diálogo para editar utilizador */}
             {selectedUser && <EditUserDialog open={showEditDialog} onOpenChange={setShowEditDialog} user={selectedUser} />}
 
-            {/* Delete Dialog */}
+            {/* Diálogo para eliminar utilizador */}
             <DeleteUserDialog open={!!userIdToDelete} onOpenChange={() => setUserIdToDelete(null)} userId={userIdToDelete} />
         </>
     )
