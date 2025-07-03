@@ -1,7 +1,7 @@
 // src/components/admin/users-management.tsx
 "use client"
 
-import { Suspense, useEffect, useState } from "react"
+import { Suspense, useCallback, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Plus, ArrowLeft, RefreshCw } from "lucide-react"
@@ -9,17 +9,75 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { CreateUserDialog } from "@/components/admin/users/create-user-dialog"
 import Link from "next/link"
 import { LoadingSpinner } from "../../layout/loading-spinner"
-import { UsersTable } from "./users-table"
-import { User } from "@/lib/actions/user-actions"
+import { UsersTable, type UserFilters } from "./users-table"
+import { getUsersWithSearch, User } from "@/lib/actions/user-actions"
 
 interface UsersManagementProps {
     initialUsers: User[]
+    initialMeta?: {
+        total: number
+        page: number
+        limit: number
+        pages: number
+    }
 }
 
-export function UsersManagement({ initialUsers }: UsersManagementProps) {
+export function UsersManagement({ initialUsers, initialMeta }: UsersManagementProps) {
     const [showCreateDialog, setShowCreateDialog] = useState(false)
     const [users, setUsers] = useState<User[]>(initialUsers)
+    const [isLoading, setIsLoading] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
+
+    // Pagination and filter states
+    const [totalUsers, setTotalUsers] = useState(initialMeta?.total || 0)
+    const [currentPage, setCurrentPage] = useState(initialMeta?.page || 1)
+    const [totalPages, setTotalPages] = useState(initialMeta?.pages || 1)
+    const [currentFilters, setCurrentFilters] = useState<UserFilters>({
+        page: 1,
+        limit: 10,
+        search: "",
+        role: "all",
+        tier: "all",
+        isActive: "all",
+        order: "desc",
+    })
+
+    // Função para buscar users com filtros
+    const fetchUsers = useCallback(async (filters: UserFilters) => {
+        setIsLoading(true)
+        try {
+            const params = {
+                page: filters.page,
+                limit: filters.limit,
+                search: filters.search,
+                role: filters.role !== "all" ? filters.role : undefined,
+                tier: filters.tier !== "all" ? filters.tier : undefined,
+                isActive: filters.isActive !== "all" ? filters.isActive : undefined,
+                order: filters.order,
+            }
+
+            const response = await getUsersWithSearch(params)
+
+            setUsers(response.data)
+            setTotalUsers(response.meta.total)
+            setCurrentPage(response.meta.page)
+            setTotalPages(response.meta.pages)
+        } catch (error) {
+            console.error("Error fetching users:", error)
+            // Optionally show toast error message
+        } finally {
+            setIsLoading(false)
+        }
+    }, [])
+
+    // Handle filter changes
+    const handleFiltersChange = useCallback(
+        (filters: UserFilters) => {
+            setCurrentFilters(filters)
+            fetchUsers(filters)
+        },
+        [fetchUsers],
+    )
 
     // Função para atualizar a lista de users
     const refreshUsers = async () => {
@@ -34,15 +92,24 @@ export function UsersManagement({ initialUsers }: UsersManagementProps) {
         }
     }
 
-    // Atualiza o estado local quando initialTiers muda
+    // Atualiza o estado local quando initialUsers muda
     useEffect(() => {
         setUsers(initialUsers)
-    }, [initialUsers])
+        if (initialMeta) {
+            setTotalUsers(initialMeta.total)
+            setCurrentPage(initialMeta.page)
+            setTotalPages(initialMeta.pages)
+        }
+    }, [initialUsers, initialMeta])
 
     const handleUserCreated = () => {
         setShowCreateDialog(false)
         // Recarrega a página para mostrar o novo user
         refreshUsers()
+    }
+
+    const handleUserUpdated = async () => {
+        await refreshUsers()
     }
 
     return (
@@ -93,7 +160,12 @@ export function UsersManagement({ initialUsers }: UsersManagementProps) {
                 ) : (
                     /* Table */
                     <Suspense fallback={<LoadingSpinner message="Loading users..." />}>
-                        <UsersTable users={users} onUserUpdated={refreshUsers} />
+                        <UsersTable users={users}
+                            totalUsers={totalUsers}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onFiltersChange={handleFiltersChange}
+                            onUserUpdated={handleUserUpdated} />
                     </Suspense>
                 )}
 

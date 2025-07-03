@@ -4,7 +4,7 @@ import { AuthGuard } from "@/components/auth/auth-guard"
 import { getUsers } from "@/lib/actions/user-actions"
 
 export default async function AdminUsersPage() {
-    const { data: initialUsers } = await getUsers()
+    const { data: initialUsers } = await getUsers({ page: 1, limit: 10 })
 
     return (
         <AuthGuard requiredRole="ADMIN">

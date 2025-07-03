@@ -83,12 +83,25 @@ export async function getToken() {
 }
 
 // Buscar todos os users disponíveis
-export async function getUsers(page = 1, limit = 10): Promise<UsersResponse> {
+export async function getUsers(params: GetUsersParams = {}): Promise<UsersResponse> {
     try {
+        const { page = 1, limit = 10, name = "", email = "", role = "", tier = "", isActive = "", order = "desc" } = params
         const token = await getToken()
-        const params = new URLSearchParams({ page: String(page), limit: String(limit) })
 
-        const response = await fetch(`http://89.28.236.11:3000/api/admin/users?${params.toString()}`, {
+        const searchParams = new URLSearchParams({
+            page: String(page),
+            limit: String(limit),
+            order,
+        })
+
+        // Adiciona parâmetros de filtro apenas se não estiverem vaioz ou "all"
+        if (name) searchParams.append("name", name)
+        if (email) searchParams.append("email", email)
+        if (role && role !== "all") searchParams.append("role", role)
+        if (tier && tier != "all") searchParams.append("tier", tier)
+        if (isActive && isActive !== "all") searchParams.append("isActive", isActive)
+
+        const response = await fetch(`http://89.28.236.11:3000/api/admin/users?${searchParams.toString()}`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`      // Envia token no cabeçalho para autenticação
@@ -122,6 +135,26 @@ export async function getUsers(page = 1, limit = 10): Promise<UsersResponse> {
         console.error("Error fetching users:", error)
         throw new Error("Failed to load users")
     }
+}
+
+// Função helper para processar search term em name e email
+export async function getUsersWithSearch(params: GetUsersParams & { search?: string }): Promise<UsersResponse> {
+    const { search, ...otherParams } = params
+
+    // Se há um termo de busca, aplica tanto para name quanto email
+    if (search && search.trim()) {
+        // Primeiro tenta buscar por nome
+        const nameResults = await getUsers({ ...otherParams, name: search })
+
+        // Se não encontrou resultados por nome, tenta por email
+        if (nameResults.data.length === 0) {
+            return await getUsers({ ...otherParams, email: search })
+        }
+
+        return nameResults
+    }
+
+    return await getUsers(otherParams)
 }
 
 // Criar um novo user
