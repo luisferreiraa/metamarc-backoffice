@@ -1,9 +1,4 @@
 // src/components/admin/admin-dashboard.tsx
-
-// Sugestões:
-// - Considerar usar useCallback para fetchStats se pretendo reutilizá-la noutros efeitos ou components
-// - Para segurança e melhores práticas, o token deve idealmente ser gerido via contexto ou cookies HttpOnly, não localStorage
-
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
