@@ -1,4 +1,4 @@
-// src/components/admin/tiers-management.tsx
+// src/components/admin/tiers/tiers-management.tsx
 "use client"
 
 import { Suspense, useState, useEffect } from "react"
@@ -10,8 +10,8 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { LoadingSpinner } from "@/components/layout/loading-spinner"
 
 import type { Tier } from "@/lib/actions/tier-actions"
-import { CreateTierDialog } from "./create-tier-dialog"
-import { TiersTable } from "./tiers-table"
+import { CreateTierDialog } from "../tiers/create-tier-dialog"
+import { TiersTable } from "../tiers/tiers-table"
 
 interface TiersManagementProps {
     initialTiers: Tier[]

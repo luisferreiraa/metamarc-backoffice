@@ -1,4 +1,4 @@
-import { TiersManagement } from "@/components/admin/tiers-management";
+import { TiersManagement } from "@/components/admin/tiers/tiers-management";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { getTiers } from "@/lib/actions/tier-actions";
 

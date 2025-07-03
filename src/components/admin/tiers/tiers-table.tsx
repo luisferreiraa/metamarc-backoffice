@@ -1,3 +1,4 @@
+// src/components/admin/tiers/tiers-table.tsx
 "use client"
 
 import { useState } from "react"
@@ -10,8 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import type { Tier } from "@/lib/actions/tier-actions"
 
-import { EditTierDialog } from "./edit-tier-dialog"
-import { DeleteTierDialog } from "./delete-tier-dialog"
+import { EditTierDialog } from "@/components/admin/tiers/edit-tier-dialog"
+import { DeleteTierDialog } from "@/components/admin/tiers/delete-tier-dialog"
 
 interface TiersTableProps {
     tiers: Tier[],
