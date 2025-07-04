@@ -1,8 +1,8 @@
 // src/components/admin/logs/bulk-delete-logs-dialog.tsx
 "use client"
 
-import { useActionState, useEffect, useState } from "react"
-import { Loader2, Calendar, Filter } from "lucide-react"
+import { useActionState, useEffect } from "react"
+import { Loader2 } from "lucide-react"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -14,19 +14,18 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { bulkDeleteLogsByIds, bulkDeleteLogsByFilter, type ActionState } from "@/lib/actions/log-actions"
+import { bulkDeleteLogsByIds, type ActionState } from "@/lib/actions/log-actions"
 
+// Interface para as props do componente
 interface BulkDeleteLogsDialogProps {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    selectedIds?: string[]
-    onLogsDeleted?: () => Promise<void>
+    open: boolean       // Controla se o diálogo está aberto
+    onOpenChange: (open: boolean) => void       // Callback para mudar o estado
+    selectedIds?: string[]      // IDs dos logs selecionados
+    onLogsDeleted?: () => Promise<void>     // Callback após exclusão bem-sucedida
 }
 
+// Estado inicial para a ação
 const initialState: ActionState = {}
 
 export function BulkDeleteLogsDialog({
@@ -35,19 +34,21 @@ export function BulkDeleteLogsDialog({
     selectedIds = [],
     onLogsDeleted,
 }: BulkDeleteLogsDialogProps) {
+    // Gerencia o estado da ação de exclusão
     const [state, formAction, isPending] = useActionState(bulkDeleteLogsByIds, initialState)
 
-    // Handle successful deletion
+    // Lida com exclusão bem sucedida
     useEffect(() => {
         if (state.success) {
-            onLogsDeleted?.()
-            onOpenChange(false)
+            onLogsDeleted?.()       // Executa o callback se fornecido
+            onOpenChange(false)     // Fecha o dialog
         }
     }, [state.success, onLogsDeleted, onOpenChange])
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px] bg-[#1a1a1a] border border-white/10">
+                {/* Cabeçalho do diálogo */}
                 <DialogHeader>
                     <DialogTitle className="text-white font-semibold">Bulk Delete Logs</DialogTitle>
                     <DialogDescription className="text-white/70">
@@ -55,21 +56,25 @@ export function BulkDeleteLogsDialog({
                     </DialogDescription>
                 </DialogHeader>
 
+                {/* Formulário para envio dos IDs */}
                 <form action={formAction}>
-                    {/* Send IDs as JSON string in a single hidden input */}
+                    {/* Input oculto contendo os IDs em formato JSON */}
                     <input type="hidden" name="ids" value={JSON.stringify(selectedIds)} />
 
+                    {/* Exibe erros se houver */}
                     {state.error && (
                         <Alert variant="destructive" className="mb-4">
                             <AlertDescription>{state.error}</AlertDescription>
                         </Alert>
                     )}
 
+                    {/* Área de resumo da operação */}
                     <div className="bg-[#0f0f0f] border border-white/10 rounded-lg p-4 mb-4">
                         <p className="text-white/80 text-sm">
                             You are about to delete <span className="font-semibold text-[#66b497]">{selectedIds.length}</span>{" "}
                             selected log entries.
                         </p>
+                        {/* Lista os primeiros 5 IDs (para preview) */}
                         {selectedIds.length > 0 && (
                             <div className="mt-2 max-h-32 overflow-y-auto">
                                 <p className="text-xs text-white/60 mb-1">Selected IDs:</p>
@@ -85,6 +90,7 @@ export function BulkDeleteLogsDialog({
                         )}
                     </div>
 
+                    {/* Rodapé do diálogo com botões de ação */}
                     <DialogFooter className="gap-2">
                         <Button
                             type="button"
@@ -107,7 +113,7 @@ export function BulkDeleteLogsDialog({
                     </DialogFooter>
                 </form>
 
-                {/* Success message */}
+                {/* Mensagem de sucesso após exclusão */}
                 {state.success && (
                     <Alert className="border-green-500/20 bg-green-500/10 mt-4">
                         <AlertDescription className="text-green-400">

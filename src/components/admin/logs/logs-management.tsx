@@ -1,3 +1,4 @@
+// src/components/adming/logs/logs-management.tsx
 "use client"
 
 import { Suspense, useCallback, useEffect, useState } from "react"
