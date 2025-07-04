@@ -165,7 +165,9 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
         })
     }
 
-    const hasActiveFilters = searchTerm || startDate || endDate || userId || ip
+    /* const hasActiveFilters = searchTerm || startDate || endDate || userId || ip */
+
+    const hasActiveFilters = Boolean(searchTerm || startDate || endDate || userId || ip)
 
     const handlePageChange = (page: number) => {
         applyFilters({ page })
@@ -249,7 +251,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                             placeholder="Start date"
                             value={startDate}
                             onChange={(e) => handleFilterChange("startDate", e.target.value)}
-                            className="border-white/10 bg-[#111111] text-white"
+                            className="border-white/10 bg-[#111111] text-white/40"
                         />
                     </div>
 
@@ -259,7 +261,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                             placeholder="End date"
                             value={endDate}
                             onChange={(e) => handleFilterChange("endDate", e.target.value)}
-                            className="border-white/10 bg-[#111111] text-white"
+                            className="border-white/10 bg-[#111111] text-white/40"
                         />
                     </div>
 
@@ -277,7 +279,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                             placeholder="IP Address"
                             value={ip}
                             onChange={(e) => handleFilterChange("ip", e.target.value)}
-                            className="border-white/10 bg-[#111111] text-white placeholder-white/40"
+                            className="pl-10 border-white/10 bg-[#111111] text-white placeholder-white/40"
                         />
                     </div>
 
@@ -286,7 +288,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                             value={limit.toString()}
                             onValueChange={(value) => handleImmediateChange("limit", Number.parseInt(value))}
                         >
-                            <SelectTrigger className="border-white/10 bg-[#111111] text-white">
+                            <SelectTrigger className="border-white/10 bg-[#111111] text-white w-full">
                                 <SelectValue placeholder="Per page" />
                             </SelectTrigger>
                             <SelectContent className="bg-[#1a1a1a] border-white/10">
@@ -306,6 +308,20 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                         </Select>
                     </div>
                 </div>
+
+                {/* Botão Clear Filters abaixo do grid, alinhado à direita */}
+                {hasActiveFilters && (
+                    <div className="flex justify-end mt-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={clearFilters}
+                            className="border-white/10 text-white hover:bg-white/10 bg-transparent"
+                        >
+                            Clear Filters
+                        </Button>
+                    </div>
+                )}
 
                 {/* Actions and Results Summary */}
                 <div className="flex justify-between items-center text-sm">
@@ -472,7 +488,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                     </div>
                     <div className="flex items-center space-x-2">
                         <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage <= 1}
@@ -499,7 +515,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                                 return (
                                     <Button
                                         key={pageNumber}
-                                        variant={currentPage === pageNumber ? "default" : "outline"}
+                                        variant={currentPage === pageNumber ? "default" : "default"}
                                         size="sm"
                                         onClick={() => handlePageChange(pageNumber)}
                                         className={
@@ -515,7 +531,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                         </div>
 
                         <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage >= totalPages}

@@ -201,7 +201,6 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                         {hasActiveFilters && " (filtered)"}
                     </span>
                     <div className="flex items-center gap-2">
-                        <span>Sort by created date:</span>
                         <Button
                             variant="outline"
                             size="sm"
@@ -352,7 +351,7 @@ export function UsersTable({ users, totalUsers, currentPage, totalPages, onFilte
                                 return (
                                     <Button
                                         key={pageNumber}
-                                        variant={currentPage === pageNumber ? "default" : "outline"}
+                                        variant={currentPage === pageNumber ? "default" : "default"}
                                         size="sm"
                                         onClick={() => handlePageChange(pageNumber)}
                                         className={
