@@ -11,6 +11,8 @@ import {
     Calendar,
     User,
     Monitor,
+    Wifi,
+    UserRoundSearch,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -30,6 +32,7 @@ interface LogsTableProps {
     totalLogs: number
     currentPage: number
     totalPages: number
+    filters: LogFilters
     onFiltersChange: (filters: LogFilters) => void
     onLogUpdated?: () => Promise<void>
 }
@@ -45,48 +48,57 @@ export interface LogFilters {
     order: "asc" | "desc"
 }
 
-export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersChange, onLogUpdated }: LogsTableProps) {
+export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, onFiltersChange, onLogUpdated }: LogsTableProps) {
     const [logIdToDelete, setLogIdToDelete] = useState<string | null>(null)
     const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
     const [selectedLogs, setSelectedLogs] = useState<string[]>([])
 
-    // Local filter states - não conectados diretamente ao useEffect
-    const [searchTerm, setSearchTerm] = useState("")
-    const [startDate, setStartDate] = useState("")
-    const [endDate, setEndDate] = useState("")
-    const [userId, setUserId] = useState("")
-    const [ip, setIp] = useState("")
-    const [limit, setLimit] = useState(10)
-    const [order, setOrder] = useState<"asc" | "desc">("desc")
+    // Estados locais de filtros sincronizados com props.filters
+    const [searchTerm, setSearchTerm] = useState(filters.search)
+    const [startDate, setStartDate] = useState(filters.startDate)
+    const [endDate, setEndDate] = useState(filters.endDate)
+    const [userId, setUserId] = useState(filters.userId)
+    const [ip, setIp] = useState(filters.ip)
+    const [limit, setLimit] = useState(filters.limit)
+    const [order, setOrder] = useState(filters.order)
 
-    // Refs para evitar dependências desnecessárias
+    // Sincroniza estados locais quando filters do pai mudam
+    useEffect(() => {
+        setSearchTerm(filters.search)
+        setStartDate(filters.startDate)
+        setEndDate(filters.endDate)
+        setUserId(filters.userId)
+        setIp(filters.ip)
+        setLimit(filters.limit)
+        setOrder(filters.order)
+    }, [filters])
+
+    // Refs para debounce
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
     const filtersTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Função para aplicar filtros - chamada diretamente, não via useEffect
+    // Aplica filtros: chama onFiltersChange no pai
     const applyFilters = (newFilters: Partial<LogFilters> = {}) => {
-        const filters: LogFilters = {
-            page: newFilters.page || 1,
-            limit: newFilters.limit || limit,
+        const mergedFilters: LogFilters = {
+            page: newFilters.page !== undefined ? newFilters.page : 1,
+            limit: newFilters.limit !== undefined ? newFilters.limit : limit,
             search: newFilters.search !== undefined ? newFilters.search : searchTerm,
             startDate: newFilters.startDate !== undefined ? newFilters.startDate : startDate,
             endDate: newFilters.endDate !== undefined ? newFilters.endDate : endDate,
             userId: newFilters.userId !== undefined ? newFilters.userId : userId,
             ip: newFilters.ip !== undefined ? newFilters.ip : ip,
-            order: newFilters.order || order,
+            order: newFilters.order !== undefined ? newFilters.order : order,
         }
 
-        setSelectedLogs([])  // Limpa seleção ao aplicar filtros ou mudar de página
-        onFiltersChange(filters)
+        setSelectedLogs([]) // limpa seleção ao aplicar filtros ou mudar página
+        onFiltersChange(mergedFilters)
     }
 
-    // Debounce para search
+    // Debounce search
     const handleSearchChange = (value: string) => {
         setSearchTerm(value)
 
-        if (searchTimeoutRef.current) {
-            clearTimeout(searchTimeoutRef.current)
-        }
+        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
 
         searchTimeoutRef.current = setTimeout(() => {
             applyFilters({ search: value, page: 1 })
@@ -95,7 +107,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
 
     // Debounce para outros filtros
     const handleFilterChange = (key: keyof LogFilters, value: string | number) => {
-        // Atualiza o estado local imediatamente
+        // Atualiza estado local imediatamente
         switch (key) {
             case "startDate":
                 setStartDate(value as string)
@@ -117,20 +129,17 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                 break
         }
 
-        // Debounce para aplicar filtros
-        if (filtersTimeoutRef.current) {
-            clearTimeout(filtersTimeoutRef.current)
-        }
+        if (filtersTimeoutRef.current) clearTimeout(filtersTimeoutRef.current)
 
         filtersTimeoutRef.current = setTimeout(() => {
             applyFilters({
                 [key]: value,
-                page: key !== "page" ? 1 : typeof value === "number" ? value : Number(value)
+                page: key !== "page" ? 1 : typeof value === "number" ? value : Number(value),
             })
         }, 300)
     }
 
-    // Mudanças imediatas (sem debounce)
+    // Mudanças imediatas (sem debounce) para limit e order
     const handleImmediateChange = (key: keyof LogFilters, value: string | number) => {
         switch (key) {
             case "limit":
@@ -140,7 +149,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                 setOrder(value as "asc" | "desc")
                 break
         }
-        applyFilters({ [key]: value, page: key !== "page" ? 1 : typeof value === "number" ? value : Number(value) })
+        applyFilters({ [key]: value, page: 1 })
     }
 
     const clearFilters = () => {
@@ -151,7 +160,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
         setIp("")
         setLimit(10)
         setOrder("desc")
-        setSelectedLogs([])  // Limpa seleção ao limpar filtros
+        setSelectedLogs([])
 
         applyFilters({
             page: 1,
@@ -165,9 +174,12 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
         })
     }
 
-    /* const hasActiveFilters = searchTerm || startDate || endDate || userId || ip */
-
-    const hasActiveFilters = Boolean(searchTerm || startDate || endDate || userId || ip)
+    const hasActiveFilters =
+        Boolean(searchTerm) ||
+        Boolean(startDate) ||
+        Boolean(endDate) ||
+        Boolean(userId) ||
+        Boolean(ip)
 
     const handlePageChange = (page: number) => {
         applyFilters({ page })
@@ -199,12 +211,8 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
     // Cleanup timeouts
     useEffect(() => {
         return () => {
-            if (searchTimeoutRef.current) {
-                clearTimeout(searchTimeoutRef.current)
-            }
-            if (filtersTimeoutRef.current) {
-                clearTimeout(filtersTimeoutRef.current)
-            }
+            if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+            if (filtersTimeoutRef.current) clearTimeout(filtersTimeoutRef.current)
         }
     }, [])
 
@@ -265,16 +273,18 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                         />
                     </div>
 
-                    <div>
+                    <div className="relative max-w-md">
+                        <UserRoundSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
                         <Input
                             placeholder="User ID"
                             value={userId}
                             onChange={(e) => handleFilterChange("userId", e.target.value)}
-                            className="border-white/10 bg-[#111111] text-white placeholder-white/40"
+                            className="pl-10 border-white/10 bg-[#111111] text-white placeholder-white/40"
                         />
                     </div>
 
-                    <div>
+                    <div className="relative max-w-md">
+                        <Wifi className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
                         <Input
                             placeholder="IP Address"
                             value={ip}
@@ -313,7 +323,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
                 {hasActiveFilters && (
                     <div className="flex justify-end mt-2">
                         <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
                             onClick={clearFilters}
                             className="border-white/10 text-white hover:bg-white/10 bg-transparent"
@@ -562,3 +572,4 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, onFiltersC
         </>
     )
 }
+

@@ -32,6 +32,18 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
     const [currentPage, setCurrentPage] = useState(initialMeta?.page || 1)
     const [totalPages, setTotalPages] = useState(initialMeta?.pages || 1)
 
+    // Estado que guarda os filtros atuais usados
+    const [filters, setFilters] = useState<LogFilters>({
+        page: initialMeta?.page || 1,
+        limit: initialMeta?.limit || 10,
+        search: "",
+        startDate: "",
+        endDate: "",
+        userId: "",
+        ip: "",
+        order: "desc",
+    })
+
     // Função para buscar logs com filtros
     const fetchLogs = useCallback(async (filters: LogFilters) => {
         setIsLoading(true)
@@ -53,6 +65,7 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
             setTotalLogs(response.meta.total)
             setCurrentPage(response.meta.page)
             setTotalPages(response.meta.pages)
+            setFilters(filters)
         } catch (error) {
             console.error("Error fetching logs:", error)
         } finally {
@@ -62,8 +75,8 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
 
     // Handle filter changes - simplified without comparison
     const handleFiltersChange = useCallback(
-        (filters: LogFilters) => {
-            fetchLogs(filters)
+        (newfilters: LogFilters) => {
+            fetchLogs(newfilters)
         },
         [fetchLogs],
     )
@@ -72,17 +85,8 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
     const refreshLogs = async () => {
         setIsRefreshing(true)
         try {
-            // Use current filters for refresh
-            const currentFilters: LogFilters = {
-                page: 1,
-                limit: 10,
-                search: "",
-                startDate: "",
-                endDate: "",
-                userId: "",
-                ip: "",
-                order: "desc",
-            }
+            // Usa os filtros atuais para refresh, resetando a página para 1
+            const currentFilters: LogFilters = { ...filters, page: 1 }
             await fetchLogs(currentFilters)
         } catch (error) {
             console.error("Error refreshing logs:", error)
@@ -163,6 +167,7 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
                             totalLogs={totalLogs}
                             currentPage={currentPage}
                             totalPages={totalPages}
+                            filters={filters}
                             onFiltersChange={handleFiltersChange}
                             onLogUpdated={handleLogUpdated}
                         />
