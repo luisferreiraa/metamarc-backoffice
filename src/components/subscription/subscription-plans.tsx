@@ -6,7 +6,7 @@ import axios from 'axios'
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "../ui/button"
-import { ArrowLeft, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, CheckCircle2, Crown, Rocket, Star } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { LoadingSpinner } from "../layout/loading-spinner"
 import { fetchTiers } from "@/lib/fetchTiers"
@@ -135,31 +135,47 @@ export default function SubscriptionPlans() {
                 </div>
 
                 {/* Grid dos planos */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-                    {Array.isArray(tiers) && tiers.map((tierObj) => {
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {tiers.map((tierObj) => {
                         const product = tierObj.product
-                        const price = tierObj.prices[0]  // Assume que sempre tem pelo menos 1 preço
-                        const isCurrentPlan = user?.tier === product.name       // Verifica se é o plano atual
+                        const price = tierObj.prices[0]
+                        const isCurrentPlan = user?.tier === product.name
 
                         return (
-                            <Card
+                            <div
                                 key={product.id}
-                                className="bg-[#1a1a1a] border border-white/10 hover:border-[#66b497] transition-colors"
+                                className="flex flex-col justify-between bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/10 hover:border-[#66b497]/50 rounded-xl p-6 space-y-4 transition-all duration-300"
                             >
-                                <CardHeader>
-                                    <CardTitle className="text-xl text-white mb-2 [font-family:var(--font-poppins)]">
-                                        {product.name}
-                                    </CardTitle>
-                                    <div className="text-3xl font-bold text-[#66b497] [font-family:var(--font-poppins)]">
-                                        {price
-                                            ? `€${(price.unit_amount / 100).toFixed(2)}/mo`
-                                            : "No price"}
-                                    </div>
-                                </CardHeader>
+                                <div>
+                                    {/* Ícone por tipo de plano */}
+                                    {product.name === "PRO" && (
+                                        <Rocket className="h-10 w-10 text-[#66b497]" />
+                                    )}
+                                    {product.name === "PREMIUM" && (
+                                        <Star className="h-10 w-10 text-[#66b497]" />
+                                    )}
+                                    {product.name === "ENTERPRISE" && (
+                                        <Crown className="h-10 w-10 text-[#66b497]" />
+                                    )}
 
-                                <CardContent>
-                                    {/* Lista de features do plano */}
+                                    {/* Nome do plano e badge */}
+                                    <div className="flex items-center mt-5">
+                                        <h2 className="text-xl text-white font-semibold [font-family:var(--font-poppins)]">
+                                            {product.name}
+                                        </h2>
+                                        {isCurrentPlan && (
+                                            <span className="ml-auto bg-[#66b497]/10 text-[#66b497] text-xs border border-[#66b497]/50 px-2 py-0.5 rounded">
+                                                Your Plan
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Preço */}
+                                    <div className="text-3xl font-bold text-[#66b497] mb-4 [font-family:var(--font-poppins)]">
+                                        {price ? `€${(price.unit_amount / 100).toFixed(2)}/mo` : "No price"}
+                                    </div>
+
+                                    {/* Features */}
                                     <ul className="space-y-3 my-4">
                                         {product.metadata?.features
                                             ? product.metadata.features.split(";").map((feature, idx) => (
@@ -171,29 +187,31 @@ export default function SubscriptionPlans() {
                                             : <li className="text-white/80 text-sm">No features available</li>
                                         }
                                     </ul>
+                                </div>
 
-                                    {/* Botão de assinatura */}
-                                    <button
-                                        onClick={() => handleSubscribe(product.name)}
-                                        disabled={loading || isCurrentPlan}
-                                        className={`w-full mt-2 py-2 rounded transition-all ${isCurrentPlan
-                                            ? "bg-white/10 text-white cursor-not-allowed"
-                                            : "bg-[#66b497] text-black hover:bg-[#5aa88b] disabled:bg-white/20"
-                                            }`}
-                                    >
-                                        {loading
-                                            ? "Processing..."
-                                            : isCurrentPlan
-                                                ? "Your plan"
-                                                : product.name === "ENTERPRISE"
-                                                    ? "Contact us"
-                                                    : "Subscribe"}
-                                    </button>
-                                </CardContent>
-                            </Card>
+
+                                {/* Botão de Subscrição */}
+                                <Button
+                                    onClick={() => handleSubscribe(product.name)}
+                                    disabled={loading || isCurrentPlan}
+                                    className={`w-full border border-white/10 text-white hover:border-[#66b497] transition-all ${isCurrentPlan
+                                        ? "bg-white/10 text-white cursor-not-allowed"
+                                        : "bg-[#66b497] text-black hover:bg-[#5aa88b] disabled:bg-white/20"
+                                        }`}
+                                >
+                                    {loading
+                                        ? "Processing..."
+                                        : isCurrentPlan
+                                            ? "Your Plan"
+                                            : product.name === "ENTERPRISE"
+                                                ? "Contact Us"
+                                                : "Subscribe"}
+                                </Button>
+                            </div>
                         )
                     })}
                 </div>
+
             </div>
         </div>
     )

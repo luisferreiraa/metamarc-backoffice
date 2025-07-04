@@ -133,7 +133,7 @@ export function Navigation() {
                                     className="text-white hover:bg-white/10 transition-all"
                                 >
                                     <Shield className="mr-2 h-4 w-4 text-[#66b497]" />
-                                    Admin
+                                    Dashboard
                                 </Button>
                             </Link>
                         </RoleGuard>
@@ -146,7 +146,7 @@ export function Navigation() {
                                 className="text-white hover:bg-white/10 transition-all"
                             >
                                 <LucideUser className="mr-2 h-4 w-4 text-[#66b497]" />
-                                Dashboard
+                                User Profile
                             </Button>
                         </Link>
 

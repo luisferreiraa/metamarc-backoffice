@@ -81,7 +81,7 @@ export function UserDashboard() {
 
                 {/* Cabeçalho */}
                 <div className="flex items-center justify-between">
-                    <h1 className="text-3xl lg:text-4xl font-bold text-white">Dashboard</h1>
+                    <h1 className="text-3xl lg:text-4xl font-bold text-white">Your Profile</h1>
                 </div>
 
                 {/* Grid dos Cards */}

@@ -28,18 +28,31 @@ interface EditOwnProfileDialogProps {
 }
 
 export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }: EditOwnProfileDialogProps) {
-    const [formData, setFormData] = useState({ name: "", email: "", password: "" })
+    const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "" })
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState("")
+    const [passwordError, setPasswordError] = useState("")
 
     useEffect(() => {
         if (user) {
-            setFormData({ name: user.name, email: user.email, password: "" })
+            setFormData({ name: user.name, email: user.email, password: "", confirmPassword: "" })
+            setPasswordError("")
         }
     }, [user])
 
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }))
+
+        // Validação de confirmação de password
+        if (field === "confirmPassword" || (field === "password" && formData.confirmPassword)) {
+            if (field === "confirmPassword" && value !== formData.password) {
+                setPasswordError("Passwords do not match")
+            } else if (field === "password" && formData.confirmPassword && value !== formData.confirmPassword) {
+                setPasswordError("Passwords do not match")
+            } else {
+                setPasswordError("")
+            }
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -69,7 +82,6 @@ export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px] bg-[#0a0a0a] border border-white/10 text-white [font-family:var(--font-poppins)]">
 
-                {/* Cabeçalho do Dialog */}
                 <DialogHeader>
                     <DialogTitle className="text-[#66b497]">Edit Your Profile</DialogTitle>
                     <DialogDescription className="text-white/70">
@@ -77,17 +89,13 @@ export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }
                     </DialogDescription>
                 </DialogHeader>
 
-                {/* Formulário */}
                 <form onSubmit={handleSubmit} className="space-y-4">
-
-                    {/* Mensagem de erro global */}
                     {error && (
                         <Alert variant="destructive">
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     )}
 
-                    {/* Campo Nome */}
                     <div className="space-y-2">
                         <Label htmlFor="name" className="text-white">Name</Label>
                         <Input
@@ -102,7 +110,6 @@ export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }
                         />
                     </div>
 
-                    {/* Campo Email */}
                     <div className="space-y-2">
                         <Label htmlFor="email" className="text-white">Email</Label>
                         <Input
@@ -117,7 +124,6 @@ export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }
                         />
                     </div>
 
-                    {/* Campo Password */}
                     <div className="space-y-2">
                         <Label htmlFor="password" className="text-white">New Password</Label>
                         <Input
@@ -131,7 +137,24 @@ export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }
                         />
                     </div>
 
-                    {/* Botões de ação */}
+                    {formData.password && (
+                        <div className="space-y-2">
+                            <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
+                            <Input
+                                id="confirmPassword"
+                                type="password"
+                                value={formData.confirmPassword}
+                                onChange={(e) => handleChange("confirmPassword", e.target.value)}
+                                className="border border-white/10 bg-[#111111] text-white"
+                                disabled={isLoading}
+                                placeholder="Re-enter new password"
+                            />
+                            {passwordError && (
+                                <p className="text-sm text-red-500">{passwordError}</p>
+                            )}
+                        </div>
+                    )}
+
                     <DialogFooter className="flex justify-end gap-2 pt-2">
                         <Button
                             type="button"
@@ -142,7 +165,11 @@ export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isLoading} className="bg-white text-black hover:bg-white/90">
+                        <Button
+                            type="submit"
+                            disabled={isLoading || (!!formData.password && !!passwordError)}
+                            className="bg-white text-black hover:bg-white/90"
+                        >
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Update
                         </Button>

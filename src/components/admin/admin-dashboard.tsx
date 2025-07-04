@@ -85,7 +85,7 @@ export function AdminDashboard() {
                 {/* Header com ações */}
                 <div className="flex items-center justify-between">
                     <div className="text-center lg:text-left">
-                        <h2 className="text-3xl lg:text-4xl font-bold text-white mb-2">Admin Panel</h2>
+                        <h2 className="text-3xl lg:text-4xl font-bold text-white mb-2">Dashboard</h2>
                         <p className="text-white/60">Monitor and manage your platform</p>
                     </div>
                     <div className="flex items-center gap-3">
