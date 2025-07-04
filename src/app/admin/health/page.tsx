@@ -1,4 +1,5 @@
-import { SystemStatusCheck } from "@/components/admin/system-status";
+// src/app/admin/health/page.tsx
+import { SystemStatusCheck } from "@/components/admin/health/system-status";
 import { AuthGuard } from "@/components/auth/auth-guard";
 
 export default function SystemStatusPage() {

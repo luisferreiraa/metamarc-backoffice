@@ -1,4 +1,3 @@
-// src/components/dashboard/edit-own-profile.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -54,13 +53,11 @@ export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }
                 body: {
                     name: formData.name,
                     email: formData.email,
-                    password: formData.password || undefined, // Só envia se existir password
+                    password: formData.password || undefined,
                 }
             })
-
             onUserUpdated()
             onOpenChange(false)
-
         } catch (err: any) {
             setError(err.message || "Error updating profile")
         } finally {
@@ -70,65 +67,82 @@ export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px] bg-[#1a1a1a]">
+            <DialogContent className="sm:max-w-[425px] bg-[#0a0a0a] border border-white/10 text-white [font-family:var(--font-poppins)]">
+
+                {/* Cabeçalho do Dialog */}
                 <DialogHeader>
-                    <DialogTitle className="text-3xl font-semibold text-[#66b497]">Edit Your Profile</DialogTitle>
-                    <DialogDescription className="text-sm text-white/70">
+                    <DialogTitle className="text-[#66b497]">Edit Your Profile</DialogTitle>
+                    <DialogDescription className="text-white/70">
                         Update your account information
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+                {/* Formulário */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+
+                    {/* Mensagem de erro global */}
                     {error && (
                         <Alert variant="destructive">
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     )}
 
-                    <div className="flex items-center gap-4">
-                        <Label htmlFor="name" className="w-1/4 text-right text-white flex items-center">
-                            Name
-                        </Label>
+                    {/* Campo Nome */}
+                    <div className="space-y-2">
+                        <Label htmlFor="name" className="text-white">Name</Label>
                         <Input
                             id="name"
+                            type="text"
                             value={formData.name}
                             onChange={(e) => handleChange("name", e.target.value)}
-                            className="w-3/4 border border-white/10 bg-[#111111] text-white h-10"
+                            className="border border-white/10 bg-[#111111] text-white"
                             required
+                            disabled={isLoading}
+                            placeholder="Enter your name"
                         />
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <Label htmlFor="email" className="w-1/4 text-right text-white flex items-center">
-                            Email
-                        </Label>
+                    {/* Campo Email */}
+                    <div className="space-y-2">
+                        <Label htmlFor="email" className="text-white">Email</Label>
                         <Input
                             id="email"
                             type="email"
                             value={formData.email}
                             onChange={(e) => handleChange("email", e.target.value)}
-                            className="w-3/4 border border-white/10 bg-[#111111] text-white h-10"
+                            className="border border-white/10 bg-[#111111] text-white"
                             required
+                            disabled={isLoading}
+                            placeholder="Enter your email"
                         />
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <Label htmlFor="password" className="w-1/4 text-white flex items-center">
-                            New Password
-                        </Label>
+                    {/* Campo Password */}
+                    <div className="space-y-2">
+                        <Label htmlFor="password" className="text-white">New Password</Label>
                         <Input
                             id="password"
                             type="password"
-                            placeholder="Leave blank to keep current"
                             value={formData.password}
                             onChange={(e) => handleChange("password", e.target.value)}
-                            className="w-3/4 border border-white/10 bg-[#111111] text-white h-10"
+                            className="border border-white/10 bg-[#111111] text-white"
+                            disabled={isLoading}
+                            placeholder="Leave blank to keep current password"
                         />
                     </div>
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                        <Button type="submit" variant="ghost" disabled={isLoading} className="text-white hover:bg-white/10">
+                    {/* Botões de ação */}
+                    <DialogFooter className="flex justify-end gap-2 pt-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => onOpenChange(false)}
+                            disabled={isLoading}
+                            className="border-white/10 text-white hover:bg-white/10 bg-transparent"
+                        >
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={isLoading} className="bg-white text-black hover:bg-white/90">
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Update
                         </Button>

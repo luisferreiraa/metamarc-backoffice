@@ -1,4 +1,5 @@
 // src/app/admin/users/[id]
+
 "use client"
 import { useParams } from "next/navigation"
 import { UserProfile } from "@/components/admin/user-profile"
