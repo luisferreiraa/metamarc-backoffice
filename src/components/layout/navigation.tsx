@@ -1,13 +1,14 @@
 // src/components/layout/navigation.tsx
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MessageCircle, LogOut, Shield, LucideUser } from "lucide-react"
 import { RoleGuard } from "@/components/auth/role-guard"
 import axios from "axios"
+import { usePathname } from "next/navigation"
 
 // Interface para tipagem dos dados do user
 interface UserType {
@@ -23,6 +24,8 @@ export function Navigation() {
     // Estado para armazenar dados do user
     const [user, setUser] = useState<UserType | null>(null)
     const [hasUnread, setHasUnread] = useState(false)
+    const ws = useRef<WebSocket | null>(null)
+    const pathname = usePathname()
 
     // Efeito que roda quando o component é montado
     useEffect(() => {
@@ -37,32 +40,43 @@ export function Navigation() {
         }
     }, [])      // Array de dependências vazio = executa apenas no mount
 
-    // Polling para verificar novas mensagens
+    // Estado para conectar WebSocket
     useEffect(() => {
-        if (!user?.id) return;
+        if (!user?.id) return
 
-        const checkUnread = async () => {
-            const token = localStorage.getItem("token");
-            if (!token) return;
+        const socket = new WebSocket("ws://89.28.236.11:3000")
 
+        socket.onopen = () => {
+            console.log("WebSocket connected [Navigation]")
+            socket.send(JSON.stringify({
+                type: "auth",
+                userId: user.id
+            }))
+        }
+
+        socket.onmessage = (event) => {
             try {
-                const res = await axios.get("http://89.28.236.11:3000/api/chat/unread", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setHasUnread(res.data.hasUnread);
-            } catch (error) {
-                console.error("Failed to check unread messages:", error);
+                const msg = JSON.parse(event.data)
+
+                // Se o admin estiver fora da página de chat, ativa badge
+                if (pathname !== "/admin/chats") {
+                    setHasUnread(true)
+                }
+            } catch (err) {
+                console.error("Invalid WebSocket message [Navigation]", err)
             }
         }
 
-        // Verificação imediata
-        checkUnread();
+        socket.onclose = () => {
+            console.log("WebSocket disconnected [Navigation]")
+        }
 
-        // Polling a cada 3 segundos (ajuste conforme necessidade)
-        const interval = setInterval(checkUnread, 3000);
+        ws.current = socket
 
-        return () => clearInterval(interval);
-    }, [user?.id]);
+        return () => {
+            socket.close()
+        }
+    }, [user?.id, pathname])
 
     // Função para lidar com logout
     const handleLogout = () => {

@@ -27,6 +27,42 @@ export function ChatPanel({ withUserId, withUserName, currentUserId }: ChatPanel
     const [historyLoading, setHistoryLoading] = useState(true)
     const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
+    useEffect(() => {
+        fetchHistory()
+
+        const ws = new WebSocket("ws:/89.28.236.11:3000")
+
+        ws.onopen = () => {
+            console.log("WebSocket connected")
+
+            ws.send(JSON.stringify({
+                type: "auth",
+                userId: currentUserId
+            }))
+        }
+
+        ws.onmessage = (event) => {
+            const messageData = JSON.parse(event.data)
+
+            // Verifica se a mensagem é para esta conversa
+            if (
+                (messageData.from === withUserId && messageData.to === currentUserId) ||
+                (messageData.from === currentUserId && messageData.to === withUserId)
+            ) {
+                setMessages((prev) => [...prev, messageData])
+                scrollToBottom()
+            }
+        }
+
+        ws.onclose = () => {
+            console.log("WebSocket disconnected")
+        }
+
+        return () => {
+            ws.close()
+        }
+    }, [withUserId])
+
     const fetchHistory = async () => {
         const token = localStorage.getItem("token")
         if (!token) return
