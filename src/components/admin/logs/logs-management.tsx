@@ -12,6 +12,7 @@ import { BulkDeleteLogsDialog } from "@/components/admin/logs/bulk-delete-logs-d
 import { type Log, getLogsWithSearch } from "@/lib/actions/log-actions"
 import { LoadingSpinner } from "@/components/layout/loading-spinner"
 
+// Interface para as props do componente
 interface LogsManagementProps {
     initialLogs: Log[]
     initialMeta?: {
@@ -23,17 +24,17 @@ interface LogsManagementProps {
 }
 
 export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps) {
-    const [logs, setLogs] = useState<Log[]>(initialLogs)
-    const [isLoading, setIsLoading] = useState(false)
-    const [isRefreshing, setIsRefreshing] = useState(false)
-    const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+    const [logs, setLogs] = useState<Log[]>(initialLogs)        // Lista de logs
+    const [isLoading, setIsLoading] = useState(false)       // Estado de carregamento
+    const [isRefreshing, setIsRefreshing] = useState(false)     //Estado de refresh
+    const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)     // Controlo do dialog
 
-    // Pagination and filter states
+    // Estados de paginação
     const [totalLogs, setTotalLogs] = useState(initialMeta?.total || 0)
     const [currentPage, setCurrentPage] = useState(initialMeta?.page || 1)
     const [totalPages, setTotalPages] = useState(initialMeta?.pages || 1)
 
-    // Estado que guarda os filtros atuais usados
+    // Estado dos filtros atuais
     const [filters, setFilters] = useState<LogFilters>({
         page: initialMeta?.page || 1,
         limit: initialMeta?.limit || 10,
@@ -45,28 +46,34 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
         order: "desc",
     })
 
-    // Função para buscar logs com filtros
+    /**
+     * Função para buscar logs com filtros
+     * useCallback é usado para memorização e evitar recriações desnecessárias
+     */
     const fetchLogs = useCallback(async (filters: LogFilters) => {
         setIsLoading(true)
         try {
+            // Prepara os parâmetros para a requisição
             const params = {
                 page: filters.page,
                 limit: filters.limit,
                 search: filters.search,
-                startDate: filters.startDate || undefined,
+                startDate: filters.startDate || undefined,      // Converte string vazia para undefined
                 endDate: filters.endDate || undefined,
                 userId: filters.userId || undefined,
                 ip: filters.ip || undefined,
                 order: filters.order,
             }
 
+            // Faz a requisição para a API
             const response = await getLogsWithSearch(params)
 
+            // Atualiza estados com a resposta
             setLogs(response.data)
             setTotalLogs(response.meta.total)
             setCurrentPage(response.meta.page)
             setTotalPages(response.meta.pages)
-            setFilters(filters)
+            setFilters(filters)     // Armazena os filtros atuais
         } catch (error) {
             console.error("Error fetching logs:", error)
         } finally {
@@ -74,7 +81,10 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
         }
     }, [])
 
-    // Handle filter changes - simplified without comparison
+    /**
+     * Manipulador de mudanças de filtro
+     * Chama fetchLogs com os novos filtros
+     */
     const handleFiltersChange = useCallback(
         (newfilters: LogFilters) => {
             fetchLogs(newfilters)
@@ -82,7 +92,10 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
         [fetchLogs],
     )
 
-    // Função para atualizar a lista de logs
+    /**
+     * Função para atualizar a lista de logs
+     * Faz reset para a primeira página ao atualizar
+     */
     const refreshLogs = async () => {
         setIsRefreshing(true)
         try {
@@ -96,7 +109,7 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
         }
     }
 
-    // Atualiza o estado local quando initialLogs muda (apenas uma vez)
+    // Inicializa estados com os valores iniciais
     useEffect(() => {
         setLogs(initialLogs)
         if (initialMeta) {
@@ -104,8 +117,12 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
             setCurrentPage(initialMeta.page)
             setTotalPages(initialMeta.pages)
         }
-    }, []) // Empty dependency array - only run once
+    }, []) // Executa apenas uma vez no mount
 
+    /**
+     * Callback para quando um log é atualizado
+     * Atualiza a lsita de logs
+     */
     const handleLogUpdated = async () => {
         await refreshLogs()
     }
@@ -113,7 +130,7 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
     return (
         <DashboardLayout>
             <div className="container mx-auto px-4 py-20 space-y-6 font-[family-name:var(--font-poppins)]">
-                {/* Header */}
+                {/* Cabeçadlho */}
                 <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
                         <Link href="/admin">
@@ -133,35 +150,42 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
                     </div>
                 </div>
 
-                {/* Stats Cards */}
+                {/* Cartões de estatísticas */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    {/* Total de logs */}
                     <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                         <div className="text-2xl font-bold text-white">{totalLogs}</div>
                         <div className="text-white/60 text-sm">Total Logs</div>
                     </div>
+
+                    {/* Eventos de login */}
                     <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                         <div className="text-2xl font-bold text-[#66b497]">
                             {logs.filter((log) => log.action.toLowerCase().includes("login")).length}
                         </div>
                         <div className="text-white/60 text-sm">Login Events</div>
                     </div>
+
+                    {/* Ações de delete */}
                     <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                         <div className="text-2xl font-bold text-red-400">
                             {logs.filter((log) => log.action.toLowerCase().includes("delete")).length}
                         </div>
                         <div className="text-white/60 text-sm">Delete Actions</div>
                     </div>
+
+                    {/* Utilizadores únicos */}
                     <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                         <div className="text-2xl font-bold text-blue-400">{new Set(logs.map((log) => log.userId)).size}</div>
                         <div className="text-white/60 text-sm">Unique Users</div>
                     </div>
                 </div>
 
-                {/* Loading State */}
+                {/* Estado de carregamento */}
                 {isLoading ? (
                     <LoadingSpinner message="Loading logs..." />
                 ) : (
-                    /* Table */
+                    /* Tabela de logs com Suspense para fallback */
                     <Suspense fallback={<LoadingSpinner message="Loading logs..." />}>
                         <LogsTable
                             logs={logs}
@@ -175,7 +199,7 @@ export function LogsManagement({ initialLogs, initialMeta }: LogsManagementProps
                     </Suspense>
                 )}
 
-                {/* Bulk Delete Dialog */}
+                {/* Dialog para bulk delete */}
                 <BulkDeleteLogsDialog
                     open={showBulkDeleteDialog}
                     onOpenChange={setShowBulkDeleteDialog}

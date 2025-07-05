@@ -1,4 +1,6 @@
+// src/components/chat/chat-box.tsx
 "use client"
+
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"

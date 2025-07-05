@@ -1,3 +1,4 @@
+// src/components/adming/logs/logs-table.tsx
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -27,16 +28,18 @@ import type { Log } from "@/lib/actions/log-actions"
 import { DeleteLogDialog } from "./delete-log-dialog"
 import { BulkDeleteLogsDialog } from "./bulk-delete-logs-dialog"
 
+// Interface para as props do componente
 interface LogsTableProps {
-    logs: Log[]
-    totalLogs: number
-    currentPage: number
-    totalPages: number
-    filters: LogFilters
-    onFiltersChange: (filters: LogFilters) => void
-    onLogUpdated?: () => Promise<void>
+    logs: Log[]     // Array de logs para exibir
+    totalLogs: number       // Total de logs (incluindo outras páginas)
+    currentPage: number     // Página atual
+    totalPages: number      // Total de páginas
+    filters: LogFilters     // Filtros ativos
+    onFiltersChange: (filters: LogFilters) => void      // Callback para atualizar os filtros
+    onLogUpdated?: () => Promise<void>      // Callback após atualização
 }
 
+// Interface para os filtros 
 export interface LogFilters {
     page: number
     limit: number
@@ -49,6 +52,7 @@ export interface LogFilters {
 }
 
 export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, onFiltersChange, onLogUpdated }: LogsTableProps) {
+    // Estados para operações de exclusão
     const [logIdToDelete, setLogIdToDelete] = useState<string | null>(null)
     const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
     const [selectedLogs, setSelectedLogs] = useState<string[]>([])
@@ -77,7 +81,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
     const filtersTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Aplica filtros: chama onFiltersChange no pai
+    // Aplica filtros e notifica o componente pai
     const applyFilters = (newFilters: Partial<LogFilters> = {}) => {
         const mergedFilters: LogFilters = {
             page: newFilters.page !== undefined ? newFilters.page : 1,
@@ -90,11 +94,11 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
             order: newFilters.order !== undefined ? newFilters.order : order,
         }
 
-        setSelectedLogs([]) // limpa seleção ao aplicar filtros ou mudar página
+        setSelectedLogs([]) // Limpa seleção ao aplicar filtros
         onFiltersChange(mergedFilters)
     }
 
-    // Debounce search
+    // Debounce para pesquisa (500ms)
     const handleSearchChange = (value: string) => {
         setSearchTerm(value)
 
@@ -105,7 +109,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         }, 500)
     }
 
-    // Debounce para outros filtros
+    // Debounce para outros filtros (300ms)
     const handleFilterChange = (key: keyof LogFilters, value: string | number) => {
         // Atualiza estado local imediatamente
         switch (key) {
@@ -152,6 +156,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         applyFilters({ [key]: value, page: 1 })
     }
 
+    // Limpa todos os filtros
     const clearFilters = () => {
         setSearchTerm("")
         setStartDate("")
@@ -174,6 +179,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         })
     }
 
+    // Verifica se há filtros ativos
     const hasActiveFilters =
         Boolean(searchTerm) ||
         Boolean(startDate) ||
@@ -181,17 +187,19 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         Boolean(userId) ||
         Boolean(ip)
 
+    // Navegação entre páginas
     const handlePageChange = (page: number) => {
         applyFilters({ page })
     }
 
+    // Altera ordenação
     const toggleOrder = () => {
         const newOrder = order === "desc" ? "asc" : "desc"
         setOrder(newOrder)
         applyFilters({ order: newOrder })
     }
 
-    // Selection handlers
+    // Seleciona todos os logs
     const handleSelectAll = (checked: boolean) => {
         if (checked) {
             setSelectedLogs(logs.map((log) => log.id))
@@ -200,6 +208,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         }
     }
 
+    // Seleciona um log
     const handleSelectLog = (logId: string, checked: boolean) => {
         if (checked) {
             setSelectedLogs((prev) => [...prev, logId])
@@ -208,7 +217,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         }
     }
 
-    // Cleanup timeouts
+    // Limpa os timeouts
     useEffect(() => {
         return () => {
             if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
@@ -216,6 +225,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         }
     }, [])
 
+    // Formata data para exibição
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleString("pt-PT", {
             year: "numeric",
@@ -226,6 +236,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         })
     }
 
+    // Retorna classe CSS para badge baseado na acção
     const getActionBadgeColor = (action: string) => {
         const actionLower = action.toLowerCase()
         if (actionLower.includes("login")) return "bg-green-500/10 text-green-400 border-green-500/30"
@@ -240,7 +251,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         <>
             {/* Área de Pesquisa e Filtros */}
             <div className="space-y-4 mb-6">
-                {/* Search Bar */}
+                {/* Barra de pesquisa */}
                 <div className="relative max-w-md">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
                     <Input
@@ -254,6 +265,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                 {/* Grid de filtros adicionais */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     <div>
+                        {/* Filtros de data */}
                         <Input
                             type="datetime-local"
                             placeholder="Start date"
@@ -273,6 +285,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                         />
                     </div>
 
+                    {/* Filtros por utilizador */}
                     <div className="relative max-w-md">
                         <UserRoundSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
                         <Input
@@ -283,6 +296,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                         />
                     </div>
 
+                    {/* Filtros por IP */}
                     <div className="relative max-w-md">
                         <Wifi className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
                         <Input
@@ -293,6 +307,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                         />
                     </div>
 
+                    {/* Itens por página */}
                     <div>
                         <Select
                             value={limit.toString()}
@@ -333,7 +348,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                     </div>
                 )}
 
-                {/* Actions and Results Summary */}
+                {/* Resumo e Acções */}
                 <div className="flex justify-between items-center text-sm">
                     <div className="flex items-center gap-4">
                         <span className="text-white/60">
@@ -381,7 +396,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                 </div>
             </div>
 
-            {/* Table */}
+            {/* Tabela de logs */}
             <div className="rounded-md border border-white/10 overflow-hidden">
                 <Table>
                     <TableHeader>
@@ -490,7 +505,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                 </Table>
             </div>
 
-            {/* Pagination */}
+            {/* Paginação */}
             {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-6">
                     <div className="text-sm text-white/60">
@@ -508,9 +523,10 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                             Previous
                         </Button>
 
-                        {/* Page Numbers */}
+                        {/* Números de página */}
                         <div className="flex items-center space-x-1">
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                // Lógica para determinar números de página a mostrar
                                 let pageNumber
                                 if (totalPages <= 5) {
                                     pageNumber = i + 1
@@ -554,7 +570,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                 </div>
             )}
 
-            {/* Delete Dialog */}
+            {/* Dialog para delete */}
             <DeleteLogDialog
                 open={!!logIdToDelete}
                 onOpenChange={() => setLogIdToDelete(null)}
@@ -562,7 +578,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                 onLogDeleted={onLogUpdated}
             />
 
-            {/* Bulk Delete Dialog */}
+            {/* Dialog para bulk delete*/}
             <BulkDeleteLogsDialog
                 open={showBulkDeleteDialog}
                 onOpenChange={setShowBulkDeleteDialog}
