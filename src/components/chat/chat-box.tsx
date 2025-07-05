@@ -46,7 +46,6 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
         if (!token) return;
 
         try {
-            // Envia via HTTP
             await axios.post("http://89.28.236.11:3000/api/chat/send", {
                 to: withUserId,
                 message: newMessage
@@ -54,19 +53,9 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Adiciona a mensagem localmente imediatamente
-            const newMsg = {
-                from: currentUserId,
-                to: withUserId,
-                message: newMessage,
-                timestamp: new Date().toISOString()
-            };
-
-            setMessages(prev => [...prev, newMsg]);
             setNewMessage("");
         } catch (error) {
             console.error("Failed to send message:", error);
-            // Tentar reconectar o WebSocket se falhar
             if (!wsConnected) setupWebSocket();
         }
     };
@@ -80,24 +69,18 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
             ws.current.close();
         }
 
-        // Usa ws:// em vez de wss:// se não estiver usando HTTPS
-        const socket = new WebSocket(`ws://89.28.236.11:3000`);
+        const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+        const socket = new WebSocket(`${protocol}://89.28.236.11:3000?token=${token}`);
 
         socket.onopen = () => {
             console.log("WebSocket connected");
             setWsConnected(true);
-            // Envia mensagem de autenticação
-            socket.send(JSON.stringify({
-                type: "auth",
-                token: token
-            }));
         };
 
         socket.onmessage = (event) => {
             try {
                 const msg = JSON.parse(event.data);
 
-                // Verifica se a mensagem é para esta conversa
                 if ((msg.from === withUserId && msg.to === currentUserId) ||
                     (msg.from === currentUserId && msg.to === withUserId)) {
                     setMessages(prev => [...prev, msg]);
@@ -115,7 +98,6 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
         socket.onclose = () => {
             console.log("WebSocket disconnected");
             setWsConnected(false);
-            // Tentar reconectar após 5 segundos
             setTimeout(setupWebSocket, 5000);
         };
 
