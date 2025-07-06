@@ -1,12 +1,12 @@
-// src/components/chat/chat-box.tsx
 "use client"
 
+import type React from "react"
 import { useEffect, useState, useRef, useCallback } from "react"
 import axios from "axios"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { AlertCircle, Wifi, WifiOff } from "lucide-react"
+import { AlertCircle, Wifi, WifiOff, RefreshCw } from "lucide-react"
 
 interface ChatBoxProps {
     withUserId: string
@@ -21,33 +21,69 @@ interface Message {
     timestamp: string
 }
 
-export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProps) {
+export function ChatBoxImproved({ withUserId, withUserName, currentUserId }: ChatBoxProps) {
     const [messages, setMessages] = useState<Message[]>([])
     const [newMessage, setNewMessage] = useState("")
     const [wsConnected, setWsConnected] = useState(false)
     const [connectionError, setConnectionError] = useState<string | null>(null)
     const [isReconnecting, setIsReconnecting] = useState(false)
+    const [debugInfo, setDebugInfo] = useState<string[]>([])
     const ws = useRef<WebSocket | null>(null)
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
     const reconnectAttemptsRef = useRef(0)
-    const maxReconnectAttempts = 5
+    const maxReconnectAttempts = 3
+
+    const addDebugLog = (message: string) => {
+        const timestamp = new Date().toLocaleTimeString()
+        console.log(`[WebSocket Debug] ${message}`)
+        setDebugInfo((prev) => [...prev.slice(-9), `[${timestamp}] ${message}`])
+    }
+
+    // Verificar se o servidor está acessível
+    const checkServerHealth = async () => {
+        try {
+            addDebugLog("Checking server health...")
+            const response = await fetch("http://89.28.236.11:3000/health", {
+                method: "GET",
+                mode: "cors",
+                timeout: 5000,
+            } as any)
+
+            if (response.ok) {
+                addDebugLog("✅ Server is accessible via HTTP")
+                return true
+            } else {
+                addDebugLog(`❌ Server HTTP error: ${response.status}`)
+                return false
+            }
+        } catch (error) {
+            addDebugLog(`❌ Server not accessible: ${error}`)
+            return false
+        }
+    }
 
     const fetchHistory = async () => {
         const token = localStorage.getItem("token")
         if (!token) {
             setConnectionError("No authentication token found")
+            addDebugLog("❌ No token found in localStorage")
             return
         }
 
         try {
+            addDebugLog("Fetching chat history...")
             const res = await axios.get(`http://89.28.236.11:3000/api/chat/history/${withUserId}`, {
                 headers: { Authorization: `Bearer ${token}` },
+                timeout: 10000,
             })
             setMessages(res.data)
             setConnectionError(null)
-        } catch (error) {
+            addDebugLog(`✅ Loaded ${res.data.length} messages`)
+        } catch (error: any) {
             console.error("Failed to fetch chat history:", error)
-            setConnectionError("Failed to load chat history")
+            const errorMsg = error.response?.data?.message || error.message || "Unknown error"
+            setConnectionError(`Failed to load chat history: ${errorMsg}`)
+            addDebugLog(`❌ History fetch failed: ${errorMsg}`)
         }
     }
 
@@ -61,6 +97,7 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
         }
 
         try {
+            addDebugLog("Sending message...")
             await axios.post(
                 "http://89.28.236.11:3000/api/chat/send",
                 {
@@ -69,31 +106,42 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
                 },
                 {
                     headers: { Authorization: `Bearer ${token}` },
+                    timeout: 10000,
                 },
             )
             setNewMessage("")
             setConnectionError(null)
-        } catch (error) {
+            addDebugLog("✅ Message sent successfully")
+        } catch (error: any) {
             console.error("Failed to send message:", error)
-            setConnectionError("Failed to send message")
+            const errorMsg = error.response?.data?.message || error.message || "Unknown error"
+            setConnectionError(`Failed to send message: ${errorMsg}`)
+            addDebugLog(`❌ Send failed: ${errorMsg}`)
 
-            // Tentar reconectar se não estiver conectado
             if (!wsConnected) {
                 setupWebSocket()
             }
         }
     }
 
-    const setupWebSocket = useCallback(() => {
+    const setupWebSocket = useCallback(async () => {
         const token = localStorage.getItem("token")
         if (!token) {
             setConnectionError("No authentication token found")
+            addDebugLog("❌ No token for WebSocket connection")
             return
         }
 
         // Verificar se já existe uma conexão ativa
         if (ws.current?.readyState === WebSocket.OPEN) {
-            console.log("WebSocket already connected")
+            addDebugLog("WebSocket already connected")
+            return
+        }
+
+        // Verificar saúde do servidor primeiro
+        const serverHealthy = await checkServerHealth()
+        if (!serverHealthy) {
+            setConnectionError("Server is not accessible")
             return
         }
 
@@ -107,16 +155,26 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
         setConnectionError(null)
 
         try {
-            // Determinar protocolo baseado na URL atual
-            const protocol = window.location.protocol === "https:" ? "wss" : "ws"
-            const wsUrl = `${protocol}://89.28.236.11:3000?token=${encodeURIComponent(token)}`
+            // Usar sempre ws:// para teste (você pode mudar para wss:// se necessário)
+            const wsUrl = `ws://89.28.236.11:3000?token=${encodeURIComponent(token)}`
 
-            console.log("Attempting WebSocket connection to:", wsUrl)
+            addDebugLog(`Attempting WebSocket connection to: ${wsUrl}`)
 
             const socket = new WebSocket(wsUrl)
 
+            // Timeout para conexão
+            const connectionTimeout = setTimeout(() => {
+                if (socket.readyState === WebSocket.CONNECTING) {
+                    addDebugLog("❌ Connection timeout")
+                    socket.close()
+                    setConnectionError("Connection timeout")
+                    setIsReconnecting(false)
+                }
+            }, 10000)
+
             socket.onopen = () => {
-                console.log("WebSocket connected successfully")
+                clearTimeout(connectionTimeout)
+                addDebugLog("✅ WebSocket connected successfully")
                 setWsConnected(true)
                 setIsReconnecting(false)
                 setConnectionError(null)
@@ -125,77 +183,79 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
 
             socket.onmessage = (event) => {
                 try {
-                    console.log("WebSocket message received:", event.data)
+                    addDebugLog(`📨 Message received: ${event.data}`)
                     const msg = JSON.parse(event.data)
 
-                    // Verificar se a mensagem é relevante para este chat
                     if (
                         (msg.from === withUserId && msg.to === currentUserId) ||
                         (msg.from === currentUserId && msg.to === withUserId)
                     ) {
                         setMessages((prev) => [...prev, msg])
+                        addDebugLog("✅ Message added to chat")
+                    } else {
+                        addDebugLog("ℹ️ Message not for this chat")
                     }
                 } catch (err) {
-                    console.error("Error parsing WebSocket message:", err)
+                    addDebugLog(`❌ Error parsing message: ${err}`)
                     setConnectionError("Error processing message")
                 }
             }
 
             socket.onerror = (error) => {
-                console.error("WebSocket error:", error)
-                console.error("WebSocket error details:", {
-                    readyState: socket.readyState,
-                    url: socket.url,
-                    protocol: socket.protocol,
-                })
+                clearTimeout(connectionTimeout)
+                addDebugLog(`❌ WebSocket error occurred`)
+                addDebugLog(`Error details: readyState=${socket.readyState}, url=${socket.url}`)
+
                 setConnectionError("Connection error occurred")
                 setWsConnected(false)
                 setIsReconnecting(false)
             }
 
             socket.onclose = (event) => {
-                console.log("WebSocket disconnected:", {
-                    code: event.code,
-                    reason: event.reason,
-                    wasClean: event.wasClean,
-                })
+                clearTimeout(connectionTimeout)
+                addDebugLog(`🔌 WebSocket closed: code=${event.code}, reason="${event.reason}", clean=${event.wasClean}`)
 
                 setWsConnected(false)
                 setIsReconnecting(false)
 
-                // Mapear códigos de erro para mensagens mais claras
+                // Mapear códigos de erro
+                let errorMessage = `Connection closed (${event.code})`
                 switch (event.code) {
                     case 1008:
-                        setConnectionError("Authentication failed")
+                        errorMessage = "Authentication failed - check your token"
                         break
                     case 1011:
-                        setConnectionError("Server error")
+                        errorMessage = "Server error occurred"
                         break
                     case 1006:
-                        setConnectionError("Connection lost unexpectedly")
+                        errorMessage = "Connection lost unexpectedly"
                         break
-                    default:
-                        setConnectionError(`Connection closed (${event.code})`)
+                    case 1000:
+                        errorMessage = "Connection closed normally"
+                        break
                 }
 
-                // Tentar reconectar automaticamente se não foi um fechamento intencional
-                if (!event.wasClean && reconnectAttemptsRef.current < maxReconnectAttempts) {
-                    reconnectAttemptsRef.current++
-                    const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000)
+                setConnectionError(errorMessage)
 
-                    console.log(`Attempting reconnection ${reconnectAttemptsRef.current}/${maxReconnectAttempts} in ${delay}ms`)
+                // Tentar reconectar se não foi fechamento normal
+                if (event.code !== 1000 && reconnectAttemptsRef.current < maxReconnectAttempts) {
+                    reconnectAttemptsRef.current++
+                    const delay = Math.min(2000 * reconnectAttemptsRef.current, 10000)
+
+                    addDebugLog(`Scheduling reconnection ${reconnectAttemptsRef.current}/${maxReconnectAttempts} in ${delay}ms`)
 
                     reconnectTimeoutRef.current = setTimeout(() => {
                         setupWebSocket()
                     }, delay)
                 } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
+                    addDebugLog("❌ Max reconnection attempts reached")
                     setConnectionError("Max reconnection attempts reached")
                 }
             }
 
             ws.current = socket
         } catch (error) {
-            console.error("Error creating WebSocket:", error)
+            addDebugLog(`❌ Error creating WebSocket: ${error}`)
             setConnectionError("Failed to create connection")
             setIsReconnecting(false)
         }
@@ -209,22 +269,23 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
     }
 
     const manualReconnect = () => {
+        addDebugLog("Manual reconnection triggered")
         reconnectAttemptsRef.current = 0
         setConnectionError(null)
         setupWebSocket()
     }
 
     useEffect(() => {
+        addDebugLog("Component mounted, initializing...")
         fetchHistory()
         setupWebSocket()
 
         return () => {
-            // Limpar timeout de reconexão
+            addDebugLog("Component unmounting, cleaning up...")
             if (reconnectTimeoutRef.current) {
                 clearTimeout(reconnectTimeoutRef.current)
             }
 
-            // Fechar conexão WebSocket
             if (ws.current?.readyState === WebSocket.OPEN) {
                 ws.current.close(1000, "Component unmounting")
             }
@@ -232,7 +293,7 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
     }, [withUserId, currentUserId, setupWebSocket])
 
     const getConnectionStatus = () => {
-        if (isReconnecting) return { icon: <Wifi className="w-4 h-4 animate-pulse" />, text: "Reconnecting..." }
+        if (isReconnecting) return { icon: <RefreshCw className="w-4 h-4 animate-spin" />, text: "Reconnecting..." }
         if (wsConnected) return { icon: <Wifi className="w-4 h-4 text-green-500" />, text: "Online" }
         return { icon: <WifiOff className="w-4 h-4 text-red-500" />, text: "Offline" }
     }
@@ -256,16 +317,28 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
                     {connectionError && (
                         <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2 flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 text-red-400" />
-                            <span className="text-xs text-red-400">{connectionError}</span>
+                            <span className="text-xs text-red-400 flex-1">{connectionError}</span>
                             <Button
                                 size="sm"
                                 variant="ghost"
                                 onClick={manualReconnect}
-                                className="text-xs text-red-400 hover:text-red-300 ml-auto"
+                                className="text-xs text-red-400 hover:text-red-300"
                             >
                                 Retry
                             </Button>
                         </div>
+                    )}
+
+                    {/* Debug Info */}
+                    {debugInfo.length > 0 && (
+                        <details className="text-left">
+                            <summary className="text-xs text-white/50 cursor-pointer">Debug Info</summary>
+                            <div className="text-xs text-white/40 mt-1 max-h-20 overflow-y-auto">
+                                {debugInfo.map((log, idx) => (
+                                    <div key={idx}>{log}</div>
+                                ))}
+                            </div>
+                        </details>
                     )}
                 </CardHeader>
 
