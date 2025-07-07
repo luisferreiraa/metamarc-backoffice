@@ -471,8 +471,8 @@ export function ChatBoxFinal({ withUserId, withUserName, currentUserId }: ChatBo
                                     <div className="max-w-[80%]">
                                         <div
                                             className={`px-3 py-2 rounded-lg text-sm ${msg.from === currentUserId
-                                                    ? "bg-[#66b497] text-black rounded-br-sm"
-                                                    : "bg-white/10 text-white rounded-bl-sm"
+                                                ? "bg-[#66b497] text-black rounded-br-sm"
+                                                : "bg-white/10 text-white rounded-bl-sm"
                                                 } ${msg.status === "failed" ? "border border-red-500/50" : ""}`}
                                         >
                                             {msg.message}
