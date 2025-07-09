@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AlertCircle, Wifi, WifiOff, RefreshCw, Send, CheckCircle, Clock } from "lucide-react"
+import { getToken } from "@/lib/actions/log-actions"
 
 interface ChatBoxProps {
     withUserId: string
@@ -52,7 +53,7 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
     }, [messages])
 
     const fetchHistory = async () => {
-        const token = localStorage.getItem("token")
+        const token = await getToken()
         if (!token) {
             setConnectionError("No authentication token found")
             addDebugLog("❌ No token found")
@@ -168,11 +169,13 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
             return
         }
 
-        if (ws.current?.readyState === WebSocket.OPEN) {
-            addDebugLog("ℹ️ WebSocket already connected")
+        // Impede duplicação se já existir uma conexão ativa ou em fase de conexão
+        if (ws.current?.readyState === WebSocket.OPEN || ws.current?.readyState === WebSocket.CONNECTING) {
+            addDebugLog("ℹ️ WebSocket already connecting or connected")
             return
         }
 
+        // Fecha conexão antiga caso exista e esteja num estado inesperado
         if (ws.current) {
             ws.current.close()
             ws.current = null
@@ -187,6 +190,7 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
             addDebugLog(`🔌 Connecting to WebSocket: ${wsUrl}`)
 
             const socket = new WebSocket(wsUrl)
+            ws.current = socket
 
             const connectionTimeout = setTimeout(() => {
                 if (socket.readyState === WebSocket.CONNECTING) {
@@ -217,19 +221,17 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
 
                     if (isForThisChat) {
                         setMessages((prev) => {
-                            // Remove temporary message if exists
                             const withoutTemp = prev.filter((existingMsg) => {
                                 if (existingMsg.id?.startsWith("temp-")) {
-                                    const isSameMessage =
+                                    return !(
                                         existingMsg.from === msg.from &&
                                         existingMsg.to === msg.to &&
                                         existingMsg.message === msg.message
-                                    return !isSameMessage
+                                    )
                                 }
                                 return true
                             })
 
-                            // Check for duplicates
                             const exists = withoutTemp.some(
                                 (existingMsg) =>
                                     existingMsg.from === msg.from &&
@@ -249,7 +251,7 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
                 }
             }
 
-            socket.onerror = (error) => {
+            socket.onerror = () => {
                 clearTimeout(connectionTimeout)
                 addDebugLog("❌ WebSocket error occurred")
                 setWsConnected(false)
@@ -265,41 +267,23 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
                 setIsReconnecting(false)
 
                 let errorMessage = "Connection closed"
-                switch (event.code) {
-                    case 1000:
-                        errorMessage = "Connection closed normally"
-                        break
-                    case 1008:
-                        errorMessage = "Authentication failed"
-                        break
-                    case 1011:
-                        errorMessage = "Server error"
-                        break
-                    case 1006:
-                        errorMessage = "Connection lost"
-                        break
-                    default:
-                        errorMessage = `Connection closed (${event.code})`
-                }
+                if (event.code === 1000) errorMessage = "Connection closed normally"
+                else if (event.code === 1008) errorMessage = "Authentication failed"
+                else if (event.code === 1011) errorMessage = "Server error"
+                else if (event.code === 1006) errorMessage = "Connection lost"
 
                 setConnectionError(errorMessage)
 
                 if (event.code !== 1000 && reconnectAttemptsRef.current < maxReconnectAttempts) {
                     reconnectAttemptsRef.current++
                     const delay = Math.min(2000 * reconnectAttemptsRef.current, 10000)
-
                     addDebugLog(`🔄 Scheduling reconnection ${reconnectAttemptsRef.current}/${maxReconnectAttempts} in ${delay}ms`)
-
-                    reconnectTimeoutRef.current = setTimeout(() => {
-                        setupWebSocket()
-                    }, delay)
+                    reconnectTimeoutRef.current = setTimeout(setupWebSocket, delay)
                 } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
                     addDebugLog("❌ Max reconnection attempts reached")
                     setConnectionError("Max reconnection attempts reached")
                 }
             }
-
-            ws.current = socket
         } catch (error) {
             addDebugLog(`❌ Error creating WebSocket: ${error}`)
             setConnectionError("Failed to create connection")
@@ -425,11 +409,11 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
                             {messages.map((msg, idx) => (
                                 <div
                                     key={msg.id || idx}
-                                    className={`flex ${msg.from === currentUserId ? "justify-end" : "justify-start"}`}
+                                    className={`flex ${String(msg.from) === String(currentUserId) ? "justify-end" : "justify-start"}`}
                                 >
                                     <div className="max-w-[80%]">
                                         <div
-                                            className={`px-3 py-2 rounded-lg text-sm ${msg.from === currentUserId
+                                            className={`px-3 py-2 rounded-lg text-sm ${String(msg.from) === String(currentUserId)
                                                 ? "bg-[#66b497] text-black rounded-br-sm"
                                                 : "bg-white/10 text-white rounded-bl-sm"
                                                 } ${msg.status === "failed" ? "border border-red-500/50" : ""}`}
@@ -445,13 +429,14 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
                                             )}
                                         </div>
                                         <div
-                                            className={`text-xs text-gray-500 mt-1 flex items-center gap-1 ${msg.from === currentUserId ? "justify-end" : "justify-start"
-                                                }`}
+                                            className={`text-xs text-gray-500 mt-1 flex items-center gap-1 ${String(msg.from) === String(currentUserId)
+                                                ? "justify-end"
+                                                : "justify-start"}`}
                                         >
                                             <span>
                                                 {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                             </span>
-                                            {msg.from === currentUserId && getMessageStatusIcon(msg.status)}
+                                            {String(msg.from) === String(currentUserId) && getMessageStatusIcon(msg.status)}
                                         </div>
                                     </div>
                                 </div>

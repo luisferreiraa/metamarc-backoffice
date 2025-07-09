@@ -33,4 +33,7 @@ export interface UserDashboardData {
     apiKey: string
     apiKeyExpiresAt: string
     createdAt: string
+    requestsUsed: number
+    requestsRemaining: number
+    resetInSeconds: number | null
 }

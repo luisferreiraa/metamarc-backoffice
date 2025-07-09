@@ -2,7 +2,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Key, User, RefreshCw, CircleFadingArrowUp, Podcast, Pencil } from "lucide-react"
+import { Key, User, RefreshCw, CircleFadingArrowUp, Podcast, Pencil, SquareChartGantt } from "lucide-react"
 import { EditOwnProfileDialog } from "@/components/dashboard/edit-own-profile-dialog"
 import Link from "next/link"
 import { LoadingSpinner } from "../layout/loading-spinner"
@@ -38,7 +38,10 @@ export function UserDashboard() {
                     isActive: apiData.isActive,
                     apiKey: apiData.apiKey,
                     apiKeyExpiresAt: apiData.apiKeyExpiresAt,
-                    createdAt: apiData.createdAt
+                    createdAt: apiData.createdAt,
+                    requestsUsed: apiData.requestsUsed,
+                    requestsRemaining: apiData.requestsRemaining,
+                    resetInSeconds: apiData.resetInSeconds
                 })
             } catch (error) {
                 console.error("Error fetching user data:", error)
@@ -49,6 +52,21 @@ export function UserDashboard() {
 
         fetchUserData()
     }, [])
+
+    const requestsUsed = user?.requestsUsed ?? 0;
+    const requestsRemaining = user?.requestsRemaining ?? 0;
+    const requestsLimit = requestsUsed + requestsRemaining;
+
+    const usedPercentage = requestsLimit > 0 ? (requestsUsed / requestsLimit) * 100 : 0;
+
+    // Define a cor com base na percentagem
+    let badgeClass = "bg-green-500/10 text-green-400 border border-green-400/30";
+
+    if (usedPercentage >= 80) {
+        badgeClass = "bg-red-500/10 text-red-400 border border-red-400/30";
+    } else if (usedPercentage >= 50) {
+        badgeClass = "bg-yellow-500/10 text-yellow-400 border border-yellow-400/30";
+    }
 
     const handleRenewApiKey = async () => {
         try {
@@ -149,6 +167,33 @@ export function UserDashboard() {
                             <RefreshCw className="mr-2 h-4 w-4 text-[#66b497]" />
                             Renovate API Key
                         </Button>
+                    </div>
+                </div>
+
+                <div className="relative bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/10 hover:border-[#66b497]/50 rounded-xl p-6 space-y-6 transition-all duration-300">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl text-white flex items-center gap-2 font-semibold">
+                            <SquareChartGantt className="h-5 w-5 text-[#66b497]" />
+                            API Usage
+                        </h2>
+                    </div>
+
+                    {/* Badge no canto superior direito */}
+                    <Badge className={`absolute top-4 right-4 ${badgeClass}`}>
+                        {usedPercentage.toFixed(1)}% used
+                    </Badge>
+
+                    <div className="space-y-4">
+                        <div className="text-sm text-white mt-1 space-y-1">
+                            <p>Requests Used: <strong>{requestsUsed}</strong></p>
+                            <p>Requests Remaining: <strong>{requestsRemaining}</strong></p>
+                            <p>
+                                Reset on:{" "}
+                                {user.resetInSeconds !== null
+                                    ? <strong>{new Date(Date.now() + user.resetInSeconds * 1000).toLocaleString()}</strong>
+                                    : <span className="text-white/50">∞</span>}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
