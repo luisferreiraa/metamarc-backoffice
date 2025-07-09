@@ -45,35 +45,35 @@ export function Navigation() {
                     {/* Mobile menu button */}
                     <div className="md:hidden">
                         <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                            {isMenuOpen ? <X className="h-5 w-5 text-[#66b497]" /> : <Menu className="h-5 w-5 text-[#66b497]" />}
                         </Button>
                     </div>
                 </div>
 
                 {/* Mobile Navigation */}
                 {isMenuOpen && (
-                    <div className="md:hidden py-4 border-t border-gray-200">
+                    <div className="md:hidden py-4 border-t border-gray-200 [font-family:var(--font-poppins)]">
                         <div className="flex flex-col space-y-4">
-                            <a href="#features" className="text-gray-600 hover:text-slate-800 transition-colors">
+                            <a href="#features" className="text-white hover:text-[#66b497] transition-colors">
                                 Features
                             </a>
-                            <a href="#who-needs" className="text-gray-600 hover:text-slate-800 transition-colors">
+                            <a href="#who-needs" className="text-white hover:text-[#66b497] transition-colors">
                                 Who Needs This
                             </a>
-                            <a href="#api-preview" className="text-gray-600 hover:text-slate-800 transition-colors">
+                            <a href="#api-preview" className="text-white hover:text-[#66b497] transition-colors">
                                 API Preview
                             </a>
-                            <a href="#faq" className="text-gray-600 hover:text-slate-800 transition-colors">
+                            <a href="#faq" className="text-white hover:text-[#66b497] transition-colors">
                                 FAQ
                             </a>
                             <div className="flex flex-col space-y-2 pt-4">
-                                <Link href="/">
-                                    <Button variant="ghost" className="w-full">
+                                <Link href="/login">
+                                    <Button variant={"main"} className="w-full">
                                         Login
                                     </Button>
                                 </Link>
                                 <Link href="/register">
-                                    <Button className="w-full">Get Started</Button>
+                                    <Button variant={"main"} className="w-full">Get Started</Button>
                                 </Link>
                             </div>
                         </div>
