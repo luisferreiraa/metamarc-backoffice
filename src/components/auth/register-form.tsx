@@ -85,14 +85,14 @@ export function RegisterForm() {
     // Se a criação da conta foi bem sucedida, mostra cartão de confirmação
     if (success) {
         return (
-            <Card className="w-full max-w-md">
+            <Card className="w-full max-w-md [font-family:var(--font-poppins)]">
                 <CardHeader>
                     <CardTitle>Account created successfully!</CardTitle>
                     <CardDescription>Your account has been successfully created. Please log in to continue.</CardDescription>
                 </CardHeader>
                 <CardFooter>
-                    <Link href="/" className="w-full">
-                        <Button className="w-full">Go to Login</Button>
+                    <Link href="/login" className="w-full">
+                        <Button className="w-full bg-[#66b497] hover:bg-[#5aa287] text-black font-semibold transition-colors">Go to Login</Button>
                     </Link>
                 </CardFooter>
             </Card>

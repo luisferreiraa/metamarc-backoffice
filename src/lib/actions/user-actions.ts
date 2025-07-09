@@ -283,9 +283,8 @@ export async function updateUser(prevState: ActionState, formData: FormData): Pr
 // Função para eliminar um user existente
 export async function deleteUser(prevState: ActionState, formData: FormData): Promise<ActionState> {
     try {
-        const validatedFields = deleteUserSchema.safeParse({
-            userId: formData.get("userId"),
-        })
+        const userId = String(formData.get("userId") ?? "")
+        const validatedFields = deleteUserSchema.safeParse({ userId })
 
         if (!validatedFields.success) {
             console.error("Validation error:", validatedFields.error)
