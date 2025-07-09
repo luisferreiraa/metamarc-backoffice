@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://:89.28.236.11:3000
