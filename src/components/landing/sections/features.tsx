@@ -34,10 +34,10 @@ export function Features() {
         <section id="features" className="py-20 bg-black">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 [font-family:var(--font-poppins)]">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 [font-family:var(--font-poppins)]">
                         Get Programmatic Access to:
                     </h2>
-                    <p className="text-lg text-white/80 max-w-3xl mx-auto [font-family:var(--font-poppins)]">
+                    <p className="text-base sm:text-lg text-white/80 max-w-3xl mx-auto [font-family:var(--font-poppins)]">
                         Integrate UNIMARC rules directly into your workflows - no manual
                         lookups required.
                     </p>

@@ -13,7 +13,7 @@ export function Navigation() {
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
-                        <Link href="/landing" className="text-2xl font-bold text-[#66b497] [font-family:var(--font-poppins)]">
+                        <Link href="/landing" className="text-xl font-bold text-[#66b497] [font-family:var(--font-poppins)]">
                             Metamarc API
                         </Link>
                     </div>
@@ -45,7 +45,9 @@ export function Navigation() {
                     {/* Mobile menu button */}
                     <div className="md:hidden">
                         <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                            {isMenuOpen ? <X className="h-5 w-5 text-[#66b497]" /> : <Menu className="h-5 w-5 text-[#66b497]" />}
+                            {isMenuOpen
+                                ? <X className="h-7 w-7 text-[#66b497]" />
+                                : <Menu className="h-7 w-7 text-[#66b497]" />}
                         </Button>
                     </div>
                 </div>

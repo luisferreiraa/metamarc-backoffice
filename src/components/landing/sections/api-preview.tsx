@@ -9,13 +9,13 @@ export function ApiPreview() {
     }
 
     return (
-        <section className="bg-black py-20 lg:py-32">
+        <section id="api-preview" className="bg-black py-20 lg:py-32">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl lg:text-5xl font-bold text-white leading-tight [font-family:var(--font-poppins)]">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 [font-family:var(--font-poppins)]">
                         Preview the <span className="text-[#66b497]">Metamarc API</span>
                     </h2>
-                    <p className="mt-4 text-lg text-white/80 [font-family:var(--font-poppins)] max-w-2xl mx-auto">
+                    <p className="mt-4 text-base sm:text-lg text-white/80 max-w-3xl mx-auto [font-family:var(--font-poppins)]">
                         A real look into the request and response structure. Fast, clear, and developer-friendly.
                     </p>
                 </div>

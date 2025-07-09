@@ -28,7 +28,7 @@ export function Hero() {
                             Say goodbye to manual searches - discover the power of programmatic access to comprehensive UNIMARC Bibliographic and Holdings Formats through our lightweight and intuitive API.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex flex-wrap gap-4 justify-start">
                             <Link href="/register">
                                 <Button variant="main" className="px-8 py-6 [font-family:var(--font-poppins)]">
                                     Try free

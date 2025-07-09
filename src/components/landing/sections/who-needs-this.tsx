@@ -41,10 +41,10 @@ export function WhoNeedsThis() {
         <section id="who-needs" className="py-20 bg-black">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4 [font-family:var(--font-poppins)]">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 [font-family:var(--font-poppins)]">
                         Who Needs This?
                     </h2>
-                    <p className="text-lg text-white/80 max-w-2xl mx-auto [font-family:var(--font-poppins)]">
+                    <p className="text-base sm:text-lg text-white/80 max-w-3xl mx-auto [font-family:var(--font-poppins)]">
                         From librarians to developers, our API serves everyone working with UNIMARC data.
                     </p>
                 </div>

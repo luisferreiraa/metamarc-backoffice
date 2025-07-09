@@ -42,8 +42,8 @@ export function FAQ() {
                     <div className="w-16 h-16 bg-[#66b497]/20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <HelpCircle className="h-8 w-8 text-[#66b497]" />
                     </div>
-                    <h2 className="text-3xl lg:text-4xl font-bold mb-4">FAQ</h2>
-                    <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 [font-family:var(--font-poppins)]">FAQ</h2>
+                    <p className="text-base sm:text-lg text-white/80 max-w-3xl mx-auto [font-family:var(--font-poppins)]">
                         Common questions about the Metamarc API project.
                     </p>
                 </div>
