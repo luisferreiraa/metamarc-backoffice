@@ -1,9 +1,17 @@
 // src/components/admin/tiers/create-tier-dialog.tsx
+
+/**
+ * @fileoverview This component defines a modal dialog used in the Admin interface
+ * for creating a new subscription tier (e.g., FREE, PRO, PREMIUM) in the system.
+ * It uses the `useActionState` hook for form submission with Next.js Server Actions.
+ */
+
 "use client"
 
 import { useActionState, useEffect } from "react"
-import { Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"      // Icon for loading state.
 
+// Imports UI components.
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,50 +26,69 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
+// Imports the Server Action function and the state type definition.
 import { createTier, type CreateTierState } from "@/lib/actions/tier-actions"
 
-// Interface para as props esperadas pelo componente
+/**
+ * @interface CreateTierDialogProps
+ * @description Defines the props required for the CreateTierDialog component.
+ */
 interface CreateTierDialogProps {
-    open: boolean       // Controla a visibilidade do dialog
-    onOpenChange: (open: boolean) => void       // Callback para alterar estado
-    onTierCreated: () => void       // Callback após criação bem-sucedida
+    open: boolean       // Controls the visibility of the dialog.
+    onOpenChange: (open: boolean) => void       // Handler to close or open the dialog.
+    onTierCreated: () => void       // Callback function to execute after a tier is successfully created.
 }
 
-// Estado inicial para a ação de criação
+/**
+ * @constant initialState
+ * @description The initial state for the Server Action response.
+ */
 const initialState: CreateTierState = {}
 
+/**
+ * @function CreateTierDialog
+ * @description A dialog component for creating new subscription tiers.
+ *
+ * @param {CreateTierDialogProps} props - The component properties.
+ * @returns {JSX.Element} The rendered dialog component.
+ */
 export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTierDialogProps) {
-    // Gerencia o estado da acção de criação
-    // useActionState é um hook experimental do React para gerenciar estados de formulários
+
+    // 1. Server Action Integration
+    // useActionState hooks up the client form submission to the server-side 'createTier' function.
     const [state, formAction, isPending] = useActionState(createTier, initialState)
 
-    // Lida com criação bem sucedida
+    /**
+     * @hook useEffect
+     * @description Runs side effects when the Server Action state changes.
+     * Triggers the success callback and closes the dialog upon successful tier creation.
+     */
     useEffect(() => {
         if (state.success) {
-            onTierCreated()     // Executa callback de sucesso
-            onOpenChange(false)     // Fecha o dialog
+            onTierCreated()     // Execute callback to notify the parent component.
+            onOpenChange(false)     // Close the dialog.
         }
-    }, [state.success, onTierCreated, onOpenChange])
+    }, [state.success, onTierCreated, onOpenChange])        // Dependencies ensure effects run only when `state.success` changes to true.
 
     return (
+        // Dialog wrapper controls open/close state.
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px] bg-[#0a0a0a] border-white/10 [font-family:var(--font-poppins)]">
-                {/* Cabeçalho do dialog */}
                 <DialogHeader>
                     <DialogTitle className="text-[#66b497]">Create New Tier</DialogTitle>
                     <DialogDescription className="text-white/70">Fill in the data to create a new tier</DialogDescription>
                 </DialogHeader>
 
-                {/* Formulário de criação */}
+                {/* The form element linked to the Server Action */}
                 <form action={formAction} className="space-y-4">
-                    {/* Exibição de erros gerais */}
+                    {/* Display general error message from the Server Action state */}
                     {state.error && (
                         <Alert variant="destructive">
                             <AlertDescription>{state.error}</AlertDescription>
                         </Alert>
                     )}
 
-                    {/* Campo: Nome do Tier */}
+                    {/* Tier Name Input */}
                     <div className="space-y-2">
                         <Label htmlFor="name" className="text-white">
                             Name
@@ -71,14 +98,14 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
                             name="name"
                             type="text"
                             className="border-white/10 bg-[#111111] text-white"
-                            required        // Obrigatório
-                            disabled={isPending}        // Desabilita durante o carregamento
+                            required
+                            disabled={isPending}
                         />
-                        {/* Exibição de erros específicos do campo */}
+                        {/* Display field-specific validation errors */}
                         {state.fieldErrors?.name && <p className="text-sm text-red-500">{state.fieldErrors.name[0]}</p>}
                     </div>
 
-                    {/* Campo: Descrição */}
+                    {/* Description Textarea */}
                     <div className="space-y-2">
                         <Label htmlFor="description" className="text-white">
                             Description
@@ -91,12 +118,13 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
                             required
                             disabled={isPending}
                         />
+                        {/* Display field-specific validation errors */}
                         {state.fieldErrors?.description && (
                             <p className="text-sm text-red-500">{state.fieldErrors.description[0]}</p>
                         )}
                     </div>
 
-                    {/* Campo: Preço (em cêntimos) */}
+                    {/* Price Input */}
                     <div className="space-y-2">
                         <Label htmlFor="priceInCents" className="text-white">
                             Price (in cents)
@@ -111,12 +139,13 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
                             required
                             disabled={isPending}
                         />
+                        {/* Display field-specific validation errors */}
                         {state.fieldErrors?.priceInCents && (
                             <p className="text-sm text-red-500">{state.fieldErrors.priceInCents[0]}</p>
                         )}
                     </div>
 
-                    {/* Campo: Features (opcional) */}
+                    {/* Features Textarea */}
                     <div className="space-y-2">
                         <Label htmlFor="features" className="text-white">
                             Features
@@ -130,11 +159,12 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
                             disabled={isPending}
                         />
                         <p className="text-xs text-white/50">Optional: List features separated by semicolons</p>
+                        {/* Display field-specific validation errors */}
                         {state.fieldErrors?.features && <p className="text-sm text-red-500">{state.fieldErrors.features[0]}</p>}
                     </div>
 
-                    {/* Rodapé do dialog com botões de acção */}
                     <DialogFooter>
+                        {/* Cancel Button */}
                         <Button
                             type="button"
                             variant="outline"
@@ -143,7 +173,9 @@ export function CreateTierDialog({ open, onOpenChange, onTierCreated }: CreateTi
                         >
                             Cancel
                         </Button>
+                        {/* Submit Button (triggers formAction) */}
                         <Button type="submit" disabled={isPending} className="bg-white text-black hover:bg-white/90">
+                            {/* Loading spinner when action is pending */}
                             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create Tier
                         </Button>

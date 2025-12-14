@@ -1,7 +1,15 @@
 // src/components/adming/logs/logs-table.tsx
+
+/**
+ * @fileoverview This component renders the main data table for system logs in the Admin interface.
+ * It manages client-side state for filtering, searching, selection (for bulk operations),
+ * pagination, and handling user interactions with individual log entries.
+ */
+
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+// Imports required icons from Lucide-React.
 import {
     MoreHorizontal,
     Trash2,
@@ -16,6 +24,7 @@ import {
     UserRoundSearch,
 } from "lucide-react"
 
+// Imports UI components (Shadcn UI or similar).
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -24,40 +33,56 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import type { Log } from "@/lib/actions/log-actions"
+import type { Log } from "@/lib/actions/log-actions"        // Imports the Log data structure type.
+// Imports the dialog components for single and bulk deletion.
 import { DeleteLogDialog } from "./delete-log-dialog"
 import { BulkDeleteLogsDialog } from "./bulk-delete-logs-dialog"
 
-// Interface para as props do componente
+/**
+ * @interface LogsTableProps
+ * @description Defines the properties passed to the LogsTable component.
+ */
 interface LogsTableProps {
-    logs: Log[]     // Array de logs para exibir
-    totalLogs: number       // Total de logs (incluindo outras páginas)
-    currentPage: number     // Página atual
-    totalPages: number      // Total de páginas
-    filters: LogFilters     // Filtros ativos
-    onFiltersChange: (filters: LogFilters) => void      // Callback para atualizar os filtros
-    onLogUpdated?: () => Promise<void>      // Callback após atualização
+    logs: Log[]     // The log data for the current page.
+    totalLogs: number       // Total number of logs available (unfiltered or filtered count).
+    currentPage: number     // The current page number.
+    totalPages: number      // The total number of pages.
+    filters: LogFilters     // The current filters applied to the data.
+    onFiltersChange: (filters: LogFilters) => void      // Callback to request a new data based on changed filters.
+    onLogUpdated?: () => Promise<void>      // Callback to refresh data after a successful log operation.
 }
 
-// Interface para os filtros 
+/**
+ * @interface LogFilters
+ * @description Defines the structure for filtering and pagination parameters.
+ */
 export interface LogFilters {
     page: number
-    limit: number
-    search: string
-    startDate: string
-    endDate: string
+    limit: number       // Logs per page.
+    search: string      // General search term.
+    startDate: string       // Start date/time filter.
+    endDate: string     // End date/time filter.
     userId: string
-    ip: string
-    order: "asc" | "desc"
+    ip: string      // IP address filter.
+    order: "asc" | "desc"       // Sorting order (Ascending/Descending by date).
 }
 
+/**
+ * @function LogsTable
+ * @description The main component for displaying and managing log data.
+ *
+ * @param {LogsTableProps} props - The component properties.
+ * @returns {JSX.Element} The rendered log table interface.
+ */
 export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, onFiltersChange, onLogUpdated }: LogsTableProps) {
-    // Estados para operações de exclusão
+    // State to hold the ID of the log currently targeted for single deletion.
     const [logIdToDelete, setLogIdToDelete] = useState<string | null>(null)
+    // State to control the visibility of the bulk deletion dialog.
     const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+    // State to store the IDs of logs selected via checkboxes for bulk actions.
     const [selectedLogs, setSelectedLogs] = useState<string[]>([])
 
-    // Estados locais de filtros sincronizados com props.filters
+    // States for local filter control, synchronized with the `filters` prop.
     const [searchTerm, setSearchTerm] = useState(filters.search)
     const [startDate, setStartDate] = useState(filters.startDate)
     const [endDate, setEndDate] = useState(filters.endDate)
@@ -66,7 +91,11 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
     const [limit, setLimit] = useState(filters.limit)
     const [order, setOrder] = useState(filters.order)
 
-    // Sincroniza estados locais quando filters do pai mudam
+    /**
+     * @hook useEffect
+     * @description Synchronizes local filter states with the external `filters` prop
+     * whenever the prop changes (e.g., when a parent component requests a data refresh).
+     */
     useEffect(() => {
         setSearchTerm(filters.search)
         setStartDate(filters.startDate)
@@ -77,13 +106,20 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         setOrder(filters.order)
     }, [filters])
 
-    // Refs para debounce
+    // Refs for debouncing search and filter changes to prevent excessive API calls.
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
     const filtersTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Aplica filtros e notifica o componente pai
+    /**
+     * @function applyFilters
+     * @description Merges new filter changes with current filters, resets selection,
+     * and calls the `onFiltersChange` callback to request fresh data.
+     *
+     * @param {Partial<LogFilters>} [newFilters={}] - The partial set of filters to update.
+     */
     const applyFilters = (newFilters: Partial<LogFilters> = {}) => {
         const mergedFilters: LogFilters = {
+            // Merges new filters, defaulting to current local state if not provided.
             page: newFilters.page !== undefined ? newFilters.page : 1,
             limit: newFilters.limit !== undefined ? newFilters.limit : limit,
             search: newFilters.search !== undefined ? newFilters.search : searchTerm,
@@ -94,24 +130,36 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
             order: newFilters.order !== undefined ? newFilters.order : order,
         }
 
-        setSelectedLogs([]) // Limpa seleção ao aplicar filtros
-        onFiltersChange(mergedFilters)
+        setSelectedLogs([])     // Clear selections on filter change.
+        onFiltersChange(mergedFilters)      // Notify parent component/data source to fetch new data.
     }
 
-    // Debounce para pesquisa (500ms)
+    /**
+     * @function handleSearchChange
+     * @description Handles changes to the main search input with debouncing.
+     *
+     * @param {string} value - The new search term.
+     */
     const handleSearchChange = (value: string) => {
         setSearchTerm(value)
 
         if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
 
+        // Debounce: Wait 500ms before applying the filter to avoid querying on every keystroke.
         searchTimeoutRef.current = setTimeout(() => {
             applyFilters({ search: value, page: 1 })
         }, 500)
     }
 
-    // Debounce para outros filtros (300ms)
+    /**
+     * @function handleFilterChange
+     * @description Handles changes to secondary filters (date, user ID, IP) with debouncing.
+     *
+     * @param {keyof LogFilters} key - The filter property name.
+     * @param {string | number} value - The new filter value.
+     */
     const handleFilterChange = (key: keyof LogFilters, value: string | number) => {
-        // Atualiza estado local imediatamente
+        // Update local state immediately for input control.
         switch (key) {
             case "startDate":
                 setStartDate(value as string)
@@ -135,15 +183,23 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
 
         if (filtersTimeoutRef.current) clearTimeout(filtersTimeoutRef.current)
 
+        // Debounce: Wait 300ms before applying the filter.
         filtersTimeoutRef.current = setTimeout(() => {
             applyFilters({
                 [key]: value,
+                // Reset to page 1 unless the change was a direct page change itself.
                 page: key !== "page" ? 1 : typeof value === "number" ? value : Number(value),
             })
         }, 300)
     }
 
-    // Mudanças imediatas (sem debounce) para limit e order
+    /**
+     * @function handleImmediateChange
+     * @description Handles filters that should trigger an immediate API call without debouncing (e.g., limit, order).
+     *
+     * @param {keyof LogFilters} key - The filter property name.
+     * @param {string | number} value - The new filter value.
+     */
     const handleImmediateChange = (key: keyof LogFilters, value: string | number) => {
         switch (key) {
             case "limit":
@@ -153,10 +209,13 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                 setOrder(value as "asc" | "desc")
                 break
         }
-        applyFilters({ [key]: value, page: 1 })
+        applyFilters({ [key]: value, page: 1 })     // Always reset to page 1 when changing limit or order.
     }
 
-    // Limpa todos os filtros
+    /**
+     * @function clearFilters
+     * @description Resets all local filter states and applies the cleared filters to request unfiltered data.
+     */
     const clearFilters = () => {
         setSearchTerm("")
         setStartDate("")
@@ -179,7 +238,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         })
     }
 
-    // Verifica se há filtros ativos
+    // Checks if any filters other than default pagination/order are active.
     const hasActiveFilters =
         Boolean(searchTerm) ||
         Boolean(startDate) ||
@@ -187,19 +246,32 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         Boolean(userId) ||
         Boolean(ip)
 
-    // Navegação entre páginas
+    /**
+     * @function handlePageChange
+     * @description Changes the current page number and triggers a data fetch.
+     *
+     * @param {number} page - The page number to navigate to.
+     */
     const handlePageChange = (page: number) => {
         applyFilters({ page })
     }
 
-    // Altera ordenação
+    /**
+     * @function toggleOrder
+     * @description Toggles the sorting order between 'asc' and 'desc' and triggers a data fetch.
+     */
     const toggleOrder = () => {
         const newOrder = order === "desc" ? "asc" : "desc"
         setOrder(newOrder)
         applyFilters({ order: newOrder })
     }
 
-    // Seleciona todos os logs
+    /**
+     * @function handleSelectAll
+     * @description Selects or deselects all logs on the current page.
+     *
+     * @param {boolean} checked - True to select all, false to deselect all.
+     */
     const handleSelectAll = (checked: boolean) => {
         if (checked) {
             setSelectedLogs(logs.map((log) => log.id))
@@ -208,7 +280,13 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         }
     }
 
-    // Seleciona um log
+    /**
+     * @function handleSelectLog
+     * @description Selects or deselects a single log entry.
+     *
+     * @param {string} logId - The ID of the log to toggle.
+     * @param {boolean} checked - True to select, false to deselect.
+     */
     const handleSelectLog = (logId: string, checked: boolean) => {
         if (checked) {
             setSelectedLogs((prev) => [...prev, logId])
@@ -217,7 +295,10 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         }
     }
 
-    // Limpa os timeouts
+    /**
+     * @hook useEffect
+     * @description Cleanup function: clears any pending timeouts when the component unmounts.
+     */
     useEffect(() => {
         return () => {
             if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
@@ -225,7 +306,13 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         }
     }, [])
 
-    // Formata data para exibição
+    /**
+     * @function formatDate
+     * @description Formats a date string into a localized, readable format (pt-PT).
+     *
+     * @param {string} dateString - The raw ISO date string.
+     * @returns {string} The formatted date string.
+     */
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleString("pt-PT", {
             year: "numeric",
@@ -236,7 +323,13 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         })
     }
 
-    // Retorna classe CSS para badge baseado na acção
+    /**
+     * @function getActionBadgeColor
+     * @description Determines the CSS class for a badge based on the log action content.
+     *
+     * @param {string} action - The log action description.
+     * @returns {string} Tailwind CSS class string for styling.
+     */
     const getActionBadgeColor = (action: string) => {
         const actionLower = action.toLowerCase()
         if (actionLower.includes("login")) return "bg-green-500/10 text-green-400 border-green-500/30"
@@ -247,11 +340,11 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
         return "bg-white/10 text-white/80 border-white/20"
     }
 
+    // Component Rendering
     return (
         <>
-            {/* Área de Pesquisa e Filtros */}
             <div className="space-y-4 mb-6">
-                {/* Barra de pesquisa */}
+                {/* 1. Search Input */}
                 <div className="relative max-w-md">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
                     <Input
@@ -262,10 +355,10 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                     />
                 </div>
 
-                {/* Grid de filtros adicionais */}
+                {/* 2. Filter Inputs */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {/* Start Date Filter */}
                     <div>
-                        {/* Filtros de data */}
                         <Input
                             type="datetime-local"
                             placeholder="Start date"
@@ -275,6 +368,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                         />
                     </div>
 
+                    {/* End Date Filter */}
                     <div>
                         <Input
                             type="datetime-local"
@@ -285,7 +379,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                         />
                     </div>
 
-                    {/* Filtros por utilizador */}
+                    {/* User ID Filter */}
                     <div className="relative max-w-md">
                         <UserRoundSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
                         <Input
@@ -296,7 +390,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                         />
                     </div>
 
-                    {/* Filtros por IP */}
+                    {/* IP Address Filter */}
                     <div className="relative max-w-md">
                         <Wifi className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
                         <Input
@@ -307,7 +401,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                         />
                     </div>
 
-                    {/* Itens por página */}
+                    {/* Limit (Items Per Page) Select */}
                     <div>
                         <Select
                             value={limit.toString()}
@@ -334,7 +428,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                     </div>
                 </div>
 
-                {/* Botão Clear Filters abaixo do grid, alinhado à direita */}
+                {/* Clear Filters Button */}
                 {hasActiveFilters && (
                     <div className="flex justify-end mt-2">
                         <Button
@@ -348,8 +442,9 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                     </div>
                 )}
 
-                {/* Resumo e Acções */}
+                {/* Status and Action Row */}
                 <div className="flex justify-between items-center text-sm">
+                    {/* Log Count and Bulk Actions */}
                     <div className="flex items-center gap-4">
                         <span className="text-white/60">
                             Showing {logs.length} of {totalLogs} logs
@@ -360,6 +455,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                                 <Badge variant="outline" className="border-[#66b497]/30 text-[#66b497]">
                                     {selectedLogs.length} selected
                                 </Badge>
+                                {/* Button to open Bulk Delete Dialog */}
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -372,6 +468,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                             </div>
                         )}
                     </div>
+                    {/* Order Toggle */}
                     <div className="flex items-center gap-2">
                         {hasActiveFilters && (
                             <Button
@@ -396,11 +493,12 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                 </div>
             </div>
 
-            {/* Tabela de logs */}
+            {/* 3. Logs Table */}
             <div className="rounded-md border border-white/10 overflow-hidden">
                 <Table>
                     <TableHeader>
                         <TableRow className="border-b border-white/10 hover:bg-transparent">
+                            {/* Select All Checkbox */}
                             <TableHead className="w-12">
                                 <Checkbox
                                     checked={selectedLogs.length === logs.length && logs.length > 0}
@@ -418,6 +516,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                     </TableHeader>
                     <TableBody>
                         {logs.length === 0 ? (
+                            // No Data Row
                             <TableRow>
                                 <TableCell colSpan={7} className="text-center text-white/60 py-8">
                                     {hasActiveFilters ? (
@@ -438,6 +537,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                                 </TableCell>
                             </TableRow>
                         ) : (
+                            // Log Rows
                             logs.map((log) => (
                                 <TableRow key={log.id} className="hover:bg-white/5 transition-colors border-b border-white/10">
                                     <TableCell>
@@ -448,11 +548,13 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                                         />
                                     </TableCell>
                                     <TableCell>
+                                        {/* Log Action Badge */}
                                         <Badge variant="outline" className={getActionBadgeColor(log.action)}>
                                             {log.action}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-white/80">
+                                        {/* User Details */}
                                         <div className="flex items-center gap-2">
                                             <User className="h-4 w-4 text-white/40" />
                                             <div>
@@ -462,21 +564,25 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-white/80">
+                                        {/* IP Address */}
                                         <div className="flex items-center gap-2">
                                             <Monitor className="h-4 w-4 text-white/40" />
                                             {log.ip}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-white/80 max-w-xs truncate" title={log.userAgent}>
+                                        {/* User Agent (Truncated for space) */}
                                         {log.userAgent}
                                     </TableCell>
                                     <TableCell className="text-white/70">
+                                        {/* Creation Date */}
                                         <div className="flex items-center gap-2">
                                             <Calendar className="h-4 w-4 text-white/40" />
                                             {formatDate(log.createdAt)}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right">
+                                        {/* Actions Dropdown Menu (Single Delete) */}
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button
@@ -505,13 +611,14 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                 </Table>
             </div>
 
-            {/* Paginação */}
+            {/* 4. Pagination Controls */}
             {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-6">
                     <div className="text-sm text-white/60">
                         Page {currentPage} of {totalPages} ({totalLogs} total logs)
                     </div>
                     <div className="flex items-center space-x-2">
+                        {/* Previous Button */}
                         <Button
                             variant="default"
                             size="sm"
@@ -523,10 +630,10 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                             Previous
                         </Button>
 
-                        {/* Números de página */}
+                        {/* Page Number Buttons (showing a max of 5 buttons for smart pagination) */}
                         <div className="flex items-center space-x-1">
+                            {/* Dynamically generates page numbers based on current page and total pages */}
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                // Lógica para determinar números de página a mostrar
                                 let pageNumber
                                 if (totalPages <= 5) {
                                     pageNumber = i + 1
@@ -556,6 +663,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                             })}
                         </div>
 
+                        {/* Next Button */}
                         <Button
                             variant="default"
                             size="sm"
@@ -570,7 +678,8 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                 </div>
             )}
 
-            {/* Dialog para delete */}
+            {/* 5. Dialogs */}
+            {/* Single Delete Dialog */}
             <DeleteLogDialog
                 open={!!logIdToDelete}
                 onOpenChange={() => setLogIdToDelete(null)}
@@ -578,7 +687,7 @@ export function LogsTable({ logs, totalLogs, currentPage, totalPages, filters, o
                 onLogDeleted={onLogUpdated}
             />
 
-            {/* Dialog para bulk delete*/}
+            {/* Bulk Delete Dialog */}
             <BulkDeleteLogsDialog
                 open={showBulkDeleteDialog}
                 onOpenChange={setShowBulkDeleteDialog}
