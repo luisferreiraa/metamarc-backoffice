@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         console.log("Tentando fazer login para:", email)
 
         // Fazer uma chamada para a API de autenticação externa
-        const apiResponse = await fetch(`http://89.28.236.11:3000/api/auth/login`, {
+        const apiResponse = await fetch(`http://91.98.29.248:3000/api/auth/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",     // Indica que estamos a enviar JSON
