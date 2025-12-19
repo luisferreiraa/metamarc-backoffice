@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 export function WebSocketTest() {
     const [status, setStatus] = useState<string>("Disconnected")
     const [logs, setLogs] = useState<string[]>([])
-    const [serverUrl, setServerUrl] = useState("89.28.236.11:3000")
+    const [serverUrl, setServerUrl] = useState("91.98.29.248:3000")
     const [token, setToken] = useState("")
     const ws = useRef<WebSocket | null>(null)
 

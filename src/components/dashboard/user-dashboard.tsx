@@ -10,6 +10,7 @@ import { UserDashboardData } from "@/interfaces/user"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { API_BASE_URL } from "@/utils/urls"
 
 export function UserDashboard() {
     const [user, setUser] = useState<UserDashboardData | null>(null)
@@ -25,7 +26,7 @@ export function UserDashboard() {
             }
 
             try {
-                const apiData = await fetchWithAuth("http://89.28.236.11:3000/api/auth/get-api-key", {
+                const apiData = await fetchWithAuth(`${API_BASE_URL}/api/auth/get-api-key`, {
                     method: "GET"
                 })
 
@@ -70,7 +71,7 @@ export function UserDashboard() {
 
     const handleRenewApiKey = async () => {
         try {
-            const data = await fetchWithAuth("http://89.28.236.11:3000/api/apiKey/renew-api-key", {
+            const data = await fetchWithAuth(`${API_BASE_URL}/api/apiKey/renew-api-key`, {
                 method: "POST"
             })
             if (data?.apiKey) {

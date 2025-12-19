@@ -13,6 +13,7 @@ import { fetchTiers } from "@/lib/fetchTiers"
 import { Tier } from "@/interfaces/stripe-tier"
 import { UserData } from "@/interfaces/user-data"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
+import { API_BASE_URL } from "@/utils/urls"
 
 export default function SubscriptionPlans() {
     const [loading, setLoading] = useState(false)       // Estado geral de carregamento
@@ -40,7 +41,7 @@ export default function SubscriptionPlans() {
             }
 
             try {
-                const apiData = await fetchWithAuth("http://89.28.236.11:3000/api/auth/get-api-key")
+                const apiData = await fetchWithAuth(`${API_BASE_URL}/api/auth/get-api-key`)
 
                 setUser({
                     id: apiData.id,

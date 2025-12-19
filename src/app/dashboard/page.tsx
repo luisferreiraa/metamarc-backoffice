@@ -9,6 +9,7 @@ import axios from "axios"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { MessageCircle } from "lucide-react"
 import { UserStripeProfile } from "@/components/admin/user-stripe-profile"
+import { API_BASE_URL } from "@/utils/urls"
 
 export default function DashboardPage() {
     const { user, isAuthenticated } = useAuth()
@@ -21,7 +22,7 @@ export default function DashboardPage() {
             if (!token) return
 
             try {
-                const res = await axios.get("http://89.28.236.11:3000/api/chat/admin-id", {
+                const res = await axios.get(`${API_BASE_URL}/api/chat/admin-id`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 setAdminId(res.data.id)

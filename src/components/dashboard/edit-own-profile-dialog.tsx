@@ -15,6 +15,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
+import { API_BASE_URL } from "@/utils/urls"
 
 interface EditOwnProfileDialogProps {
     open: boolean
@@ -61,7 +62,7 @@ export function EditOwnProfileDialog({ open, onOpenChange, user, onUserUpdated }
         setError("")
 
         try {
-            await fetchWithAuth(`http://89.28.236.11:3000/api/users/me`, {
+            await fetchWithAuth(`${API_BASE_URL}/api/users/me`, {
                 method: "PUT",
                 body: {
                     name: formData.name,

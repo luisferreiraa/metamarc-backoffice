@@ -8,6 +8,7 @@
 // - Definir interfaces para request/response
 
 import { type NextRequest, NextResponse } from "next/server"
+import { API_BASE_URL } from "@/utils/urls"
 
 // Define uma rota POST para o endpoint /api/login
 export async function POST(request: NextRequest) {
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
         console.log("Tentando fazer login para:", email)
 
         // Fazer uma chamada para a API de autenticação externa
-        const apiResponse = await fetch(`http://91.98.29.248:3000/api/auth/login`, {
+        const apiResponse = await fetch(`${API_BASE_URL}/api/auth/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",     // Indica que estamos a enviar JSON

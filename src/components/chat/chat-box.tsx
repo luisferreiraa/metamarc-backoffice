@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AlertCircle, Wifi, WifiOff, RefreshCw, Send, CheckCircle, Clock } from "lucide-react"
 import { getToken } from "@/lib/actions/log-actions"
+import { API_BASE_URL } from "@/utils/urls"
 
 interface ChatBoxProps {
     withUserId: string
@@ -62,7 +63,7 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
 
         try {
             addDebugLog("📥 Fetching chat history...")
-            const res = await axios.get(`http://89.28.236.11:3000/api/chat/history/${withUserId}`, {
+            const res = await axios.get(`${API_BASE_URL}/api/chat/history/${withUserId}`, {
                 headers: { Authorization: `Bearer ${token}` },
                 timeout: 10000,
             })
@@ -113,7 +114,7 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
 
         try {
             const response = await axios.post(
-                "http://89.28.236.11:3000/api/chat/send",
+                `${API_BASE_URL}/api/chat/send`,
                 {
                     to: withUserId,
                     message: messageText,
@@ -186,7 +187,7 @@ export function ChatBox({ withUserId, withUserName, currentUserId }: ChatBoxProp
 
         try {
             const protocol = window.location.protocol === "https:" ? "wss" : "ws"
-            const wsUrl = `${protocol}://89.28.236.11:3000?token=${encodeURIComponent(token)}`
+            const wsUrl = `${protocol}://91.98.29.248:3000?token=${encodeURIComponent(token)}`
             addDebugLog(`🔌 Connecting to WebSocket: ${wsUrl}`)
 
             const socket = new WebSocket(wsUrl)

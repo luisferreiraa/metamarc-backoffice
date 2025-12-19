@@ -1,5 +1,7 @@
 // app/api/subscription/subscribe/route.ts
+
 import { type NextRequest, NextResponse } from 'next/server'
+import { API_BASE_URL } from '@/utils/urls'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +24,7 @@ export async function POST(request: NextRequest) {
         const { tier } = await request.json()
 
         // Integração com backend
-        const backendUrl = "http://89.28.236.11:3000/api/subscription/subscribe"
+        const backendUrl = `${API_BASE_URL}/api/subscription/subscribe`
 
         const backendResponse = await fetch(backendUrl, {
             method: 'POST',

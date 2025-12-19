@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AlertCircle, Wifi, WifiOff, RefreshCw } from "lucide-react"
+import { API_BASE_URL } from "@/utils/urls"
 
 interface ChatBoxProps {
     withUserId: string
@@ -43,7 +44,7 @@ export function ChatBoxImproved({ withUserId, withUserName, currentUserId }: Cha
     const checkServerHealth = async () => {
         try {
             addDebugLog("Checking server health...")
-            const response = await fetch("http://89.28.236.11:3000/health", {
+            const response = await fetch(`${API_BASE_URL}/health`, {
                 method: "GET",
                 mode: "cors",
                 timeout: 5000,
@@ -72,7 +73,7 @@ export function ChatBoxImproved({ withUserId, withUserName, currentUserId }: Cha
 
         try {
             addDebugLog("Fetching chat history...")
-            const res = await axios.get(`http://89.28.236.11:3000/api/chat/history/${withUserId}`, {
+            const res = await axios.get(`${API_BASE_URL}/api/chat/history/${withUserId}`, {
                 headers: { Authorization: `Bearer ${token}` },
                 timeout: 10000,
             })
@@ -99,7 +100,7 @@ export function ChatBoxImproved({ withUserId, withUserName, currentUserId }: Cha
         try {
             addDebugLog("Sending message...")
             await axios.post(
-                "http://89.28.236.11:3000/api/chat/send",
+                `${API_BASE_URL}/api/chat/send`,
                 {
                     to: withUserId,
                     message: newMessage,
@@ -156,7 +157,7 @@ export function ChatBoxImproved({ withUserId, withUserName, currentUserId }: Cha
 
         try {
             // Usar sempre ws:// para teste (você pode mudar para wss:// se necessário)
-            const wsUrl = `ws://89.28.236.11:3000?token=${encodeURIComponent(token)}`
+            const wsUrl = `ws://91.98.29.248:3000?token=${encodeURIComponent(token)}`
 
             addDebugLog(`Attempting WebSocket connection to: ${wsUrl}`)
 

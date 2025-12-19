@@ -1,11 +1,13 @@
 // app/api/subscription/status/route.ts
+
 import { NextResponse } from 'next/server'
+import { API_BASE_URL } from '@/utils/urls'
 
 // Define o endpoint GET para verificar status de assinatura
 export async function GET(request: Request) {
     try {
         // Configuração da URL do backend
-        const backendUrl = `http://89.28.236.11:3000/api/subscription/status`
+        const backendUrl = `${API_BASE_URL}/api/subscription/status`
 
         // Faz a chamada para a API externa
         const response = await fetch(backendUrl, {

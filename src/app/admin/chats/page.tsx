@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { ChatPanel } from "@/components/chat/chat-panel"
+import { API_BASE_URL } from "@/utils/urls"
 
 interface UserSummary {
     id: string
@@ -28,7 +29,7 @@ export default function ChatManagementPage() {
             if (!token) return
 
             try {
-                const res = await axios.get("http://89.28.236.11:3000/api/chat/active-users", {
+                const res = await axios.get(`${API_BASE_URL}/api/chat/active-users`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 setUsers(res.data)

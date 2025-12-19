@@ -4,6 +4,7 @@
 import { z } from "zod"
 import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
+import { API_BASE_URL } from "@/utils/urls"
 
 // Schema de validação para criar tiers
 const createTierSchema = z.object({
@@ -72,7 +73,7 @@ export async function getTiers(): Promise<Tier[]> {
     try {
 
         const token = getToken()        // Obtém o token JWT do cookie
-        const response = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin/tiers/`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`      // Envia token no cabeçalho para autenticação
@@ -138,7 +139,7 @@ export async function createTier(prevState: CreateTierState, formData: FormData)
         console.log("Sending payload:", payload)
 
         // Faz o pedido POST à API
-        const response = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin/tiers/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -199,7 +200,7 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
         }
 
         // Primeiro, atualiza nome, descrição e features do produto
-        const updateProductResponse = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/${tierId}`, {
+        const updateProductResponse = await fetch(`${API_BASE_URL}/api/admin/tiers/${tierId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -218,7 +219,7 @@ export async function updateTier(prevState: ActionState, formData: FormData): Pr
         }
 
         // Depois, adiciona o novo preço
-        const addPriceResponse = await fetch(`${process.env.API_BASE_URL}/api/admin/tiers/${tierId}/price`, {
+        const addPriceResponse = await fetch(`${API_BASE_URL}/api/admin/tiers/${tierId}/price`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -263,7 +264,7 @@ export async function deleteTier(prevState: ActionState, formData: FormData): Pr
             throw new Error("Authentication token not found")
         }
 
-        const url = `${process.env.API_BASE_URL}/api/admin/tiers/${validatedFields.data.tierId}`
+        const url = `${API_BASE_URL}/api/admin/tiers/${validatedFields.data.tierId}`
         console.log("Making DELETE request to:", url)
 
         const response = await fetch(url, {

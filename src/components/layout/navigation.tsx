@@ -37,7 +37,7 @@ export function Navigation() {
     useEffect(() => {
         if (!user?.id) return
 
-        const socket = new WebSocket("ws://89.28.236.11:3000")
+        const socket = new WebSocket("ws://91.98.29.248:3000")
 
         socket.onopen = () => {
             socket.send(JSON.stringify({

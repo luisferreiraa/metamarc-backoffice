@@ -1,5 +1,7 @@
 // src/app/api/user/renew-api-key/route.ts
+
 import { type NextRequest, NextResponse } from "next/server"
+import { API_BASE_URL } from "@/utils/urls"
 
 export async function POST(request: NextRequest) {
     try {
@@ -16,7 +18,7 @@ export async function POST(request: NextRequest) {
 
         // Chamada para o backend
         // Utiliza variável de ambiente para a URL base
-        const response = await fetch(`${process.env.API_BASE_URL}/apiKey/renew-api-key`, {
+        const response = await fetch(`${API_BASE_URL}/apiKey/renew-api-key`, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${token}`,       // Repassa o token

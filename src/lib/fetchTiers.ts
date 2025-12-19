@@ -1,5 +1,6 @@
 // src/lib/fetchTiers.ts
 import { Tier } from '../interfaces/stripe-tier'
+import { API_BASE_URL } from '@/utils/urls'
 
 // Função que retorna o array de tiers ordenado
 export const fetchTiers = async (): Promise<Tier[] | null> => {
@@ -10,7 +11,7 @@ export const fetchTiers = async (): Promise<Tier[] | null> => {
             return null
         }
 
-        const response = await fetch("http://89.28.236.11:3000/api/admin/tiers", {
+        const response = await fetch(`${API_BASE_URL}/api/admin/tiers`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

@@ -33,6 +33,7 @@ import Link from "next/link"        // For navigation to other admin pages.
 import { LoadingSpinner } from "../layout/loading-spinner"      // Loading indicator component.
 import type { Stats } from "@/interfaces/stats"     // Imports the type definition for statistics data.
 import { fetchWithAuth } from "@/lib/fetchWithAuth"     // Utility for making authenticated API requests.
+import { API_BASE_URL } from "@/utils/urls"
 
 /**
  * @function AdminDashboard
@@ -58,7 +59,7 @@ export function AdminDashboard() {
      */
     const fetchStats = useCallback(async () => {
         try {
-            const data = await fetchWithAuth("http://89.28.236.11:3000/api/admin/users/stats", {
+            const data = await fetchWithAuth(`${API_BASE_URL}/api/admin/users/stats`, {
                 method: "GET",
             })
 

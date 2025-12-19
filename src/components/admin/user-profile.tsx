@@ -20,6 +20,7 @@ import { DashboardLayout } from "../layout/dashboard-layout"        // Main dash
 import Link from "next/link"        // For navigation.
 import { fetchWithAuth } from "@/lib/fetchWithAuth"     // Utility for making authenticated API requests.
 import type { UserProfile as UserProfileType } from "@/interfaces/user"     // Imports the type definition for the user profile data.
+import { API_BASE_URL } from "@/utils/urls"
 
 /**
  * @function UserProfile
@@ -43,7 +44,7 @@ export function UserProfile() {
         const fetchUser = async () => {
             try {
                 // API call to fetch user profile using the authenticated utility.
-                const data = await fetchWithAuth(`http://89.28.236.11:3000/api/admin/users/${id}`, {
+                const data = await fetchWithAuth(`${API_BASE_URL}/api/admin/users/${id}`, {
                     method: "GET",
                 })
                 // Assuming the API returns the user object directly.

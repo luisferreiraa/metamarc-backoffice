@@ -1,3 +1,5 @@
+// src/app/admin/page.tsx
+
 "use client"
 
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
@@ -6,6 +8,7 @@ import { useAuth } from "@/app/hooks/use-auth"
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { LoadingSpinner } from "@/components/layout/loading-spinner"
+import { API_BASE_URL } from "@/utils/urls"
 
 interface UserSummary {
     id: string
@@ -24,7 +27,7 @@ export default function AdminPage() {
             if (!token) return
 
             try {
-                const res = await axios.get("http://89.28.236.11:3000/api/chat/active-users", {
+                const res = await axios.get(`${API_BASE_URL}/api/chat/active-users`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 setUsers(res.data)

@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@/components/layout/loading-spinner'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { AuthGuard } from '@/components/auth/auth-guard'
 import SubscriptionDetails from '@/components/subscription/subscription-details'
+import { API_BASE_URL } from '@/utils/urls'
 
 interface SubscriptionStatus {
     tier: string
@@ -25,7 +26,7 @@ export default function SubscriptionPage() {
             if (!token) return
 
             try {
-                const response = await axios.get('http://89.28.236.11:3000/api/subscription/subscription/status', {
+                const response = await axios.get(`${API_BASE_URL}/api/subscription/subscription/status`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

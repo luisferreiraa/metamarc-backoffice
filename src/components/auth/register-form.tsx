@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Loader2 } from "lucide-react"
+import { API_BASE_URL } from "@/utils/urls"
 
 export function RegisterForm() {
     const [isLoading, setIsLoading] = useState(false)       // Estado para loading
@@ -45,7 +46,7 @@ export function RegisterForm() {
 
         try {
             // Chamada à API de registo
-            const response = await fetch("http://89.28.236.11:3000/api/auth/register", {
+            const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

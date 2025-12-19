@@ -7,6 +7,7 @@
 // - Tipagem Forte
 
 import { type NextRequest, NextResponse } from "next/server"
+import { API_BASE_URL } from "@/utils/urls"
 
 // Define o endpoint POST para registo de users
 export async function POST(request: NextRequest) {
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
         console.log("Trying to register user:", email)       // Log para debug
 
         // Chamada para a API externa de registo
-        const apiResponse = await fetch(`http://89.28.236.11:3000/api/auth/register`, {
+        const apiResponse = await fetch(`${API_BASE_URL}/api/auth/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",     // Define o tipo de conteúdo

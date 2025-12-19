@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AlertCircle, Wifi, WifiOff, RefreshCw, Send, CheckCircle, Clock } from "lucide-react"
+import { API_BASE_URL } from "@/utils/urls"
 
 interface ChatBoxProps {
     withUserId: string
@@ -63,7 +64,7 @@ export function ChatBoxFinal({ withUserId, withUserName, currentUserId }: ChatBo
 
         try {
             addDebugLog("📥 Fetching chat history...")
-            const res = await axios.get(`http://89.28.236.11:3000/api/chat/history/${withUserId}`, {
+            const res = await axios.get(`${API_BASE_URL}/api/chat/history/${withUserId}`, {
                 headers: { Authorization: `Bearer ${token}` },
                 timeout: 10000,
             })
@@ -115,7 +116,7 @@ export function ChatBoxFinal({ withUserId, withUserName, currentUserId }: ChatBo
 
         try {
             const response = await axios.post(
-                "http://89.28.236.11:3000/api/chat/send",
+                `${API_BASE_URL}/api/chat/send`,
                 {
                     to: withUserId,
                     message: messageText,
@@ -188,7 +189,7 @@ export function ChatBoxFinal({ withUserId, withUserName, currentUserId }: ChatBo
         setConnectionError(null)
 
         try {
-            const wsUrl = `ws://89.28.236.11:3000?token=${encodeURIComponent(token)}`
+            const wsUrl = `ws://91.98.29.248:3000?token=${encodeURIComponent(token)}`
             addDebugLog(`🔌 Connecting to WebSocket: ${wsUrl}`)
 
             const socket = new WebSocket(wsUrl)

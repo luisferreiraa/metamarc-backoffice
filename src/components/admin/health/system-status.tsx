@@ -18,6 +18,7 @@ import Link from "next/link"
 import { ArrowLeft, ShieldCheck, RefreshCw } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { getToken } from "@/lib/actions/log-actions"        // Utility function to retrieve the authentication token.
+import { API_BASE_URL } from "@/utils/urls"
 
 /**
  * @function SystemStatusCheck
@@ -54,7 +55,7 @@ export function SystemStatusCheck() {
 
         try {
             // Performs a GET request to the specific health endpoint.
-            const response = await fetch("http://89.28.236.11:3000/api/admin/health", {
+            const response = await fetch(`${API_BASE_URL}/api/admin/health`, {
                 method: "GET",
                 headers: {
                     // Includes the JWT token in the Authorization header.

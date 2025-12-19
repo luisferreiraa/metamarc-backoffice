@@ -16,6 +16,7 @@ import { CreditCard, Mail, CalendarDays, DollarSign, ShieldCheck } from "lucide-
 import { Badge } from "@/components/ui/badge"
 import { StripeData, UserStripeProfileProps } from "@/interfaces/stripe"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
+import { API_BASE_URL } from "@/utils/urls"
 
 export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
     const [stripeData, setStripeData] = useState<StripeData | null>(null)
@@ -45,7 +46,7 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
                     return
                 }
 
-                const data = await fetchWithAuth(`http://89.28.236.11:3000/api/admin/users/stripe/${resolvedId}`, {
+                const data = await fetchWithAuth(`${API_BASE_URL}/api/admin/users/stripe/${resolvedId}`, {
                     method: "GET",
                 })
 

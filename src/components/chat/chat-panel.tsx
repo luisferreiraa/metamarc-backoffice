@@ -6,6 +6,7 @@ import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ArrowDown, MessageSquareText, Loader2 } from "lucide-react"
+import { API_BASE_URL } from "@/utils/urls"
 
 interface ChatPanelProps {
     withUserId: string
@@ -30,7 +31,7 @@ export function ChatPanel({ withUserId, withUserName, currentUserId }: ChatPanel
     useEffect(() => {
         fetchHistory()
 
-        const ws = new WebSocket("ws:/89.28.236.11:3000")
+        const ws = new WebSocket("ws:/91.98.29.248:3000")
 
         ws.onopen = () => {
             console.log("WebSocket connected")
@@ -68,7 +69,7 @@ export function ChatPanel({ withUserId, withUserName, currentUserId }: ChatPanel
         if (!token) return
 
         try {
-            const res = await axios.get(`http://89.28.236.11:3000/api/chat/history/${withUserId}`, {
+            const res = await axios.get(`${API_BASE_URL}/api/chat/history/${withUserId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             setMessages(res.data)
@@ -87,7 +88,7 @@ export function ChatPanel({ withUserId, withUserName, currentUserId }: ChatPanel
 
         setLoading(true)
         try {
-            await axios.post("http://89.28.236.11:3000/api/chat/send", {
+            await axios.post(`${API_BASE_URL}/api/chat/send`, {
                 to: withUserId,
                 message: newMessage
             }, {

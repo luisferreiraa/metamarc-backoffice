@@ -4,6 +4,7 @@
 import { z } from "zod"     // Biblioteca para validação de dados com esquemas
 import { cookies } from "next/headers"      // Para acessar cookies do servidor
 import { revalidatePath } from "next/cache"     // Para revalidar caminhos após mutações
+import { API_BASE_URL } from "@/utils/urls"
 
 // Tipo que representa um registo de Log
 export type Log = {
@@ -119,7 +120,7 @@ export async function getLogs(params: GetLogsParams = {}): Promise<LogsResponse>
         if (ip) searchParams.append("ip", ip)
 
         // Faz a requisição para a API
-        const response = await fetch(`${process.env.API_BASE_URL}/api/admin/logs?${searchParams.toString()}`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin/logs?${searchParams.toString()}`, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
@@ -200,7 +201,7 @@ export async function deleteLog(prevState: ActionState, formData: FormData): Pro
         }
 
         // Requisição para API fazer delete do log
-        const response = await fetch(`${process.env.API_BASE_URL}/api/admin/logs/${validatedFields.data.logId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin/logs/${validatedFields.data.logId}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -270,7 +271,7 @@ export async function bulkDeleteLogsByIds(prevState: ActionState, formData: Form
         console.log("Sending bulk delete request with IDs:", validatedFields.data.ids)
 
         // Requisição para API fazer delete em massa
-        const response = await fetch(`${process.env.API_BASE_URL}/api/admin/logs`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin/logs`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -350,7 +351,7 @@ export async function bulkDeleteLogsByFilter(prevState: ActionState, formData: F
 
         // Requisição para API fazer delete por filtro
         const response = await fetch(
-            `${process.env.API_BASE_URL}/api/admin/logs/bulk-delete-filter?${searchParams.toString()}`,
+            `${API_BASE_URL}/api/admin/logs/bulk-delete-filter?${searchParams.toString()}`,
             {
                 method: "DELETE",
                 headers: {

@@ -4,6 +4,7 @@
 import { z } from "zod"
 import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
+import { API_BASE_URL } from "@/utils/urls"
 
 // Interface para representar os dados do utilizador
 export interface User {
@@ -101,7 +102,7 @@ export async function getUsers(params: GetUsersParams = {}): Promise<UsersRespon
         if (tier && tier != "all") searchParams.append("tier", tier)
         if (isActive && isActive !== "all") searchParams.append("isActive", isActive)
 
-        const response = await fetch(`http://89.28.236.11:3000/api/admin/users?${searchParams.toString()}`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin/users?${searchParams.toString()}`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`      // Envia token no cabeçalho para autenticação
@@ -191,7 +192,7 @@ export async function createUser(prevState: CreateUserState, formData: FormData)
         }
 
         // Faz pedido POST à API
-        const response = await fetch(`${process.env.API_BASE_URL}/api/admin/users`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -251,7 +252,7 @@ export async function updateUser(prevState: ActionState, formData: FormData): Pr
             throw new Error("Authentication token not found")
         }
 
-        const updateUserResponse = await fetch(`${process.env.API_BASE_URL}/api/admin/users/${userId}`, {
+        const updateUserResponse = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -298,7 +299,7 @@ export async function deleteUser(prevState: ActionState, formData: FormData): Pr
             throw new Error("Authentication token not found")
         }
 
-        const url = `${process.env.API_BASE_URL}/api/admin/users/${validatedFields.data.userId}`
+        const url = `${API_BASE_URL}/api/admin/users/${validatedFields.data.userId}`
 
         const response = await fetch(url, {
             method: "DELETE",

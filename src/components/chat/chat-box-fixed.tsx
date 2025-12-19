@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AlertCircle, Wifi, WifiOff, RefreshCw } from "lucide-react"
+import { API_BASE_URL } from "@/utils/urls"
 
 interface ChatBoxProps {
     withUserId: string
@@ -49,7 +50,7 @@ export function ChatBoxFixed({ withUserId, withUserName, currentUserId }: ChatBo
         }
 
         try {
-            const res = await axios.get(`http://89.28.236.11:3000/api/chat/history/${withUserId}`, {
+            const res = await axios.get(`${API_BASE_URL}/api/chat/history/${withUserId}`, {
                 headers: { Authorization: `Bearer ${token}` },
                 timeout: 10000,
             })
@@ -73,7 +74,7 @@ export function ChatBoxFixed({ withUserId, withUserName, currentUserId }: ChatBo
 
         try {
             await axios.post(
-                "http://89.28.236.11:3000/api/chat/send",
+                `${API_BASE_URL}/api/chat/send`,
                 {
                     to: withUserId,
                     message: newMessage.trim(),
@@ -120,7 +121,7 @@ export function ChatBoxFixed({ withUserId, withUserName, currentUserId }: ChatBo
         setConnectionError(null)
 
         try {
-            const wsUrl = `ws://89.28.236.11:3000?token=${encodeURIComponent(token)}`
+            const wsUrl = `ws://91.98.29.248:3000?token=${encodeURIComponent(token)}`
             console.log("Connecting to WebSocket:", wsUrl)
 
             const socket = new WebSocket(wsUrl)
@@ -326,8 +327,8 @@ export function ChatBoxFixed({ withUserId, withUserName, currentUserId }: ChatBo
                                     <div className="max-w-[80%]">
                                         <div
                                             className={`px-3 py-2 rounded-lg text-sm ${msg.from === currentUserId
-                                                    ? "bg-[#66b497] text-black rounded-br-sm"
-                                                    : "bg-white/10 text-white rounded-bl-sm"
+                                                ? "bg-[#66b497] text-black rounded-br-sm"
+                                                : "bg-white/10 text-white rounded-bl-sm"
                                                 }`}
                                         >
                                             {msg.message}
