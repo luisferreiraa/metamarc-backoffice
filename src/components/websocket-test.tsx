@@ -43,7 +43,7 @@ export function WebSocketTest() {
         }
 
         const testToken = token || localStorage.getItem("token") || "test-token"
-        const wsUrl = `ws://${serverUrl}?token=${encodeURIComponent(testToken)}`
+        const wsUrl = `wss://${serverUrl}?token=${encodeURIComponent(testToken)}`
 
         addLog(`Connecting to: ${wsUrl}`)
 

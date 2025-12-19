@@ -157,7 +157,7 @@ export function ChatBoxImproved({ withUserId, withUserName, currentUserId }: Cha
 
         try {
             // Usar sempre ws:// para teste (você pode mudar para wss:// se necessário)
-            const wsUrl = `ws://91.98.29.248:3000?token=${encodeURIComponent(token)}`
+            const wsUrl = `wss://91.98.29.248:3000?token=${encodeURIComponent(token)}`
 
             addDebugLog(`Attempting WebSocket connection to: ${wsUrl}`)
 

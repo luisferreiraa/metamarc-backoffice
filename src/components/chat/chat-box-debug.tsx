@@ -181,7 +181,7 @@ export function ChatBoxDebug({ withUserId, withUserName, currentUserId }: ChatBo
         setConnectionError(null)
 
         try {
-            const wsUrl = `ws://91.98.29.248:3000?token=${encodeURIComponent(token)}`
+            const wsUrl = `wss://91.98.29.248:3000?token=${encodeURIComponent(token)}`
             addDebugLog(`🔌 Connecting to WebSocket: ${wsUrl}`)
 
             const socket = new WebSocket(wsUrl)

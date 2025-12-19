@@ -31,7 +31,7 @@ export function ChatPanel({ withUserId, withUserName, currentUserId }: ChatPanel
     useEffect(() => {
         fetchHistory()
 
-        const ws = new WebSocket("ws:/91.98.29.248:3000")
+        const ws = new WebSocket("wss:/91.98.29.248:3000")
 
         ws.onopen = () => {
             console.log("WebSocket connected")
