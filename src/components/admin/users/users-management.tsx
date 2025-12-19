@@ -1,21 +1,34 @@
-// src/components/admin/users-management.tsx
+// src/components/admin/users/users-management.tsx
+
+/**
+ * @fileoverview This component defines the main interface for managing user accounts
+ * in the Admin dashboard. It handles displaying the users table, pagination, filtering,
+ * and managing the creation of new users. It supports client-side fetching for filtering/pagination
+ * and a full refresh for CRUD operations.
+ */
+
 "use client"
 
 import { Suspense, useCallback, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { Plus, ArrowLeft } from "lucide-react"
+import { Plus, ArrowLeft } from "lucide-react"      // Icons for actions and navigation.
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { CreateUserDialog } from "@/components/admin/users/create-user-dialog"
 import Link from "next/link"
 import { LoadingSpinner } from "../../layout/loading-spinner"
+// Imports the UsersTable component and its associated filter type.
 import { UsersTable, type UserFilters } from "./users-table"
+// Imports the user data type and the client-side fetch function (which wraps a Server Action/API).
 import { getUsersWithSearch, User } from "@/lib/actions/user-actions"
 
-// Tipagem das props que o componente recebe
+/**
+ * @interface UsersManagementProps
+ * @description Defines the props passed to the component, usually initial user data and metadata fetched server-side.
+ */
 interface UsersManagementProps {
-    initialUsers: User[]        // Lista inicial de utilizadores (vinda do servidor na renderização)
-    initialMeta?: {     // Informação adicional de paginação e contagem
+    initialUsers: User[]        // The initial array of user data to display.
+    initialMeta?: {     // Optional metadata for pagination.
         total: number
         page: number
         limit: number
@@ -23,20 +36,32 @@ interface UsersManagementProps {
     }
 }
 
+/**
+ * @function UsersManagement
+ * @description Manages the state and logic for the Admin Users view, including data fetching,
+ * pagination, and dialog visibility.
+ *
+ * @param {UsersManagementProps} props - Initial users data and metadata.
+ * @returns {JSX.Element} The rendered user management interface.
+ */
 export function UsersManagement({ initialUsers, initialMeta }: UsersManagementProps) {
 
-    // Estado que controla se o modal para criar utilizador está aberto
+    // State to control the visibility of the "Create New User" dialog.
     const [showCreateDialog, setShowCreateDialog] = useState(false)
-    // Estado com a lista de utilizadores atual
+
+    // State to hold the current list of users displayed in the table.
     const [users, setUsers] = useState<User[]>(initialUsers)
-    // Estados para controlar loading durante o fetch dos dados
+
+    // State indicators for data fetching processes.
     const [isLoading, setIsLoading] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
 
-    // Estados para controlar a paginação e os filtros
+    // States for pagination metadata.
     const [totalUsers, setTotalUsers] = useState(initialMeta?.total || 0)
     const [currentPage, setCurrentPage] = useState(initialMeta?.page || 1)
     const [totalPages, setTotalPages] = useState(initialMeta?.pages || 1)
+
+    // State to track the currently active filters and pagination settings.
     const [currentFilters, setCurrentFilters] = useState<UserFilters>({
         page: 1,
         limit: 10,
@@ -47,11 +72,20 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
         order: "desc",
     })
 
-    // Função responsável por buscar os utilizadores no servidor, aplicando filtros
+    /**
+     * @async
+     * @function fetchUsers
+     * @description Fetches user data based on the provided filters (for pagination/searching/filtering).
+     * This function is memoized using `useCallback`.
+     *
+     * @param {UserFilters} filters - The pagination, search, and filtering parameters.
+     */
     const fetchUsers = useCallback(async (filters: UserFilters) => {
-        setIsLoading(true)      // Ativa o loading visual
+        setIsLoading(true)
         try {
-            // Prepara os parâmetros para o pedido, apenas envia os filtros que não são "all"
+
+            // Constructs parameters, setting 'undefined' for 'all' selections
+            // to simplify the API/Server Action query logic.
             const params = {
                 page: filters.page,
                 limit: filters.limit,
@@ -62,9 +96,10 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
                 order: filters.order,
             }
 
-            const response = await getUsersWithSearch(params)       // Faz o pedido ao servidor
+            // Calls the function that executes the server-side data fetching logic.
+            const response = await getUsersWithSearch(params)
 
-            // Atualiza o estado com os dados recebidos
+            // Update client state with the new data and metadata.
             setUsers(response.data)
             setTotalUsers(response.meta.total)
             setCurrentPage(response.meta.page)
@@ -74,22 +109,36 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
         } finally {
             setIsLoading(false)
         }
-    }, [])
+    }, [])      // Empty dependency array means this function is created once.
 
-    // Função que lida com a alteração dos filtros (chamada pela tabela)
+    /**
+     * @function handleFiltersChange
+     * @description Handler called by the UsersTable when filters or pagination change.
+     * Updates the current filters state and initiates a new data fetch.
+     * This function is memoized using `useCallback`.
+     *
+     * @param {UserFilters} filters - The new set of filters.
+     */
     const handleFiltersChange = useCallback(
         (filters: UserFilters) => {
             setCurrentFilters(filters)
-            fetchUsers(filters)     // Faz o fetch com os novos filtros
+            fetchUsers(filters)
         },
-        [fetchUsers],       // Garantimos que esta função depende apenas do fetchUsers
+        [fetchUsers],       // Depends on `fetchUsers`
     )
 
-    // Função para atualizar os utilizadores, recarregando a página inteira
+    /**
+     * @async
+     * @function refreshUsers
+     * @description Forces a full reload of the page to re-fetch all server-side props.
+     * Used primarily after successful creation or update/delete of a user,
+     * ensuring the entire component tree and initial data are fresh.
+     */
     const refreshUsers = async () => {
         setIsRefreshing(true)
         try {
-            // Recarrega a página, forçando novo fetch no servidor
+
+            // Forces a hard reload of the page.
             window.location.reload()
         } catch (error) {
             console.error("Error refreshing users:", error)
@@ -98,7 +147,11 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
         }
     }
 
-    // Sempre que os dados iniciais mudarem (por exemplo, renderização no servidor), atualizamos o estado local
+    /**
+     * @hook useEffect
+     * @description Ensures the component state is synchronized with the initial server-side props
+     * upon mounting or if `initialUsers`/`initialMeta` change.
+     */
     useEffect(() => {
         setUsers(initialUsers)
         if (initialMeta) {
@@ -108,27 +161,37 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
         }
     }, [initialUsers, initialMeta])
 
-    // Quando um novo utilizador for criado, fechamos o modal e atualizamos a lista
+    /**
+     * @function handleUserCreated
+     * @description Callback executed after a new user is successfully created.
+     * Closes the dialog and initiates a full page refresh.
+     */
     const handleUserCreated = () => {
         setShowCreateDialog(false)
-        refreshUsers()      // Recarrega para ver o novo utilizador na lista
+        refreshUsers()
     }
 
-    // Quando um utilizador for editado, atualizamos a lista
+    /**
+     * @async
+     * @function handleUserUpdated
+     * @description Callback executed after a user is successfully updated or deleted.
+     * Initiates a full page refresh.
+     */
     const handleUserUpdated = async () => {
         await refreshUsers()
     }
 
+    // --- Component Rendering ---
     return (
         <DashboardLayout>
             <div className="container mx-auto px-4 py-20 space-y-6 font-[family-name:var(--font-poppins)]">
 
-                {/* Cabeçalho da página */}
+                {/* Header, Title, and Actions */}
                 <div className="flex items-center justify-between flex-wrap gap-4">
 
-                    {/* Botão para voltar atrás e título */}
                     <div className="flex items-center gap-4">
                         <Link href="/admin">
+                            {/* Back Button */}
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -139,15 +202,14 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
                             </Button>
                         </Link>
 
-                        {/* Título e subtítulo */}
                         <div>
                             <h1 className="text-3xl lg:text-4xl font-bold text-white">Users Management</h1>
                             <p className="text-white/60 mt-1">Manage Users Information</p>
                         </div>
                     </div>
 
-                    {/* Botão para abrir o modal de criação de utilizador */}
                     <div className="flex items-center gap-2">
+                        {/* Button to open Create New User dialog */}
                         <Button
                             className="bg-[#66b497] text-black hover:bg-[#5aa88b] transition-colors"
                             onClick={() => setShowCreateDialog(true)}
@@ -158,8 +220,9 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
                     </div>
                 </div>
 
-                {/* Caso não existam utilizadores, mostra estado vazio */}
+                {/* Users List or Empty State */}
                 {users.length === 0 ? (
+                    // Empty State UI
                     <div className="text-center py-12">
                         <div className="bg-white/5 border border-white/10 rounded-lg p-8 max-w-md mx-auto">
                             <h3 className="text-xl font-semibold text-white mb-2">No users found</h3>
@@ -171,7 +234,8 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
                         </div>
                     </div>
                 ) : (
-                    /* Se houver utilizadores, mostra a tabela */
+
+                    // Users Table Display
                     <Suspense fallback={<LoadingSpinner message="Loading users..." />}>
                         <UsersTable users={users}
                             totalUsers={totalUsers}
@@ -182,7 +246,7 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
                     </Suspense>
                 )}
 
-                {/* Modal para criar novo utilizador */}
+                {/* Create User Dialog */}
                 <CreateUserDialog
                     open={showCreateDialog}
                     onOpenChange={setShowCreateDialog}
@@ -191,11 +255,4 @@ export function UsersManagement({ initialUsers, initialMeta }: UsersManagementPr
             </div>
         </DashboardLayout>
     )
-
-
-
-
-
-
-
 }

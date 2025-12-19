@@ -1,32 +1,59 @@
-// src/components/admin/tiers/tiers-management.tsx
+// src/components/adming/tiers/tier-management.tsx
+
+/**
+ * @fileoverview This component provides the main interface for managing subscription tiers
+ * in the Admin dashboard. It handles displaying tier statistics, rendering the tiers table,
+ * and managing the creation of new tiers.
+ */
+
 "use client"
 
 import { Suspense, useState, useEffect } from "react"
 import Link from "next/link"
-import { ArrowLeft, Plus, RefreshCw } from "lucide-react"
+import { ArrowLeft, Plus } from "lucide-react"      // Icons for navigation and action.
 
+// Imports UI and layout components.
 import { Button } from "@/components/ui/button"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { LoadingSpinner } from "@/components/layout/loading-spinner"
 
-import type { Tier } from "@/lib/actions/tier-actions"
+import type { Tier } from "@/lib/actions/tier-actions"      // Imports the Tier data structure type.
+// Imports related tier components.
 import { CreateTierDialog } from "../tiers/create-tier-dialog"
 import { TiersTable } from "../tiers/tiers-table"
 
+/**
+ * @interface TiersManagementProps
+ * @description Defines the props passed to the component, usually initial tier data fetched server-side.
+ */
 interface TiersManagementProps {
-    initialTiers: Tier[]
+    initialTiers: Tier[]        // The initial array of subscription tiers to display.
 }
 
+/**
+ * @function TiersManagement
+ * @description Manages the state and logic for the Admin Tiers view.
+ *
+ * @param {TiersManagementProps} props - Initial tiers data.
+ * @returns {JSX.Element} The rendered tier management interface.
+ */
 export function TiersManagement({ initialTiers }: TiersManagementProps) {
     const [showCreateDialog, setShowCreateDialog] = useState(false)
     const [tiers, setTiers] = useState<Tier[]>(initialTiers)
     const [isRefreshing, setIsRefreshing] = useState(false)
 
-    // Função para atualizar a lista de tiers
+    /**
+     * @async
+     * @function refreshTiers
+     * @description Re-fetches the list of tiers after a change (create/update/delete).
+     *
+     * @note In this implementation, refreshing is done by forcing a full page reload (`window.location.reload()`),
+     * which re-runs the Next.js server component fetching logic and updates the client state.
+     */
     const refreshTiers = async () => {
         setIsRefreshing(true)
         try {
-            // Recarrega a página para buscar dados frescos do servidor
+            // Forces a hard reload of the page to get fresh server-side data.
             window.location.reload()
         } catch (error) {
             console.error("Error refreshing tiers:", error)
@@ -35,24 +62,35 @@ export function TiersManagement({ initialTiers }: TiersManagementProps) {
         }
     }
 
-    // Atualiza o estado local quando initialTiers muda
+    /**
+     * @hook useEffect
+     * @description Synchronizes the client state (`tiers`) with the initial data prop
+     * when the component mounts or if `initialTiers` changes externally.
+     */
     useEffect(() => {
         setTiers(initialTiers)
     }, [initialTiers])
 
+    /**
+     * @function handleTierCreated
+     * @description Callback function executed after a new tier is successfully created.
+     * Closes the dialog and triggers a data refresh.
+     */
     const handleTierCreated = () => {
         setShowCreateDialog(false)
-        // Recarrega a página para mostrar o novo tier
+
         refreshTiers()
     }
 
+    // Component Rendering
     return (
         <DashboardLayout>
             <div className="container mx-auto px-4 py-20 space-y-6 font-[family-name:var(--font-poppins)]">
-                {/* Header */}
+                {/* Header, Title, and Actions */}
                 <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
                         <Link href="/admin">
+                            {/* Back Button */}
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -69,6 +107,7 @@ export function TiersManagement({ initialTiers }: TiersManagementProps) {
                     </div>
 
                     <div className="flex items-center gap-2">
+                        {/* Button to open Create New Tier dialog */}
                         <Button
                             className="bg-[#66b497] text-black hover:bg-[#5aa88b] transition-colors"
                             onClick={() => setShowCreateDialog(true)}
@@ -79,23 +118,26 @@ export function TiersManagement({ initialTiers }: TiersManagementProps) {
                     </div>
                 </div>
 
-                {/* Stats */}
+                {/* Dashboard Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    {/* Total Tiers Card */}
                     <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                         <div className="text-2xl font-bold text-white">{tiers.length}</div>
                         <div className="text-white/60 text-sm">Total Tiers</div>
                     </div>
+                    {/* Active Tiers Card (Count based on the `active` property) */}
                     <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                         <div className="text-2xl font-bold text-[#66b497]">{tiers.filter((tier) => tier.active).length}</div>
                         <div className="text-white/60 text-sm">Active Tiers</div>
                     </div>
+                    {/* Inactive Tiers Card */}
                     <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                         <div className="text-2xl font-bold text-red-400">{tiers.filter((tier) => !tier.active).length}</div>
                         <div className="text-white/60 text-sm">Inactive Tiers</div>
                     </div>
                 </div>
 
-                {/* Empty State */}
+                {/* Tiers List or Empty State */}
                 {tiers.length === 0 ? (
                     <div className="text-center py-12">
                         <div className="bg-white/5 border border-white/10 rounded-lg p-8 max-w-md mx-auto">
@@ -108,13 +150,15 @@ export function TiersManagement({ initialTiers }: TiersManagementProps) {
                         </div>
                     </div>
                 ) : (
-                    /* Table */
+
+                    // Tiers Table Display
                     <Suspense fallback={<LoadingSpinner message="Loading tiers..." />}>
+                        {/* Passes the current tiers list and the refresh callback for updates/deletes */}
                         <TiersTable tiers={tiers} onTierUpdated={refreshTiers} />
                     </Suspense>
                 )}
 
-                {/* Create Dialog */}
+                {/* Create Tier Dialog */}
                 <CreateTierDialog
                     open={showCreateDialog}
                     onOpenChange={setShowCreateDialog}

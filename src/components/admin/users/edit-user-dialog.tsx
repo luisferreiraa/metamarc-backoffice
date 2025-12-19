@@ -1,9 +1,17 @@
-// src/components/admin/user/edit-user-dialog.tsx
+// src/components/admin/users/edit-user-dialog.tsx
+
+/**
+ * @fileoverview This component defines a modal dialog used in the Admin interface
+ * for editing the details of an existing user account (name, email, role, and tier).
+ * It uses the `useActionState` hook for form submission with Next.js Server Actions.
+ */
+
 "use client"
 
 import { useActionState, useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 
+// Imports UI components (Shadcn UI or similar).
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,28 +25,44 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+// Imports the User type, the update Server Action function, and the ActionState type.
 import { User, updateUser, type ActionState } from "@/lib/actions/user-actions"
 
 import { toast } from "react-toastify"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-// Tipagem das props que o componente espera receber
+/**
+ * @interface EditUserDialogProps
+ * @description Defines the props required for the EditUserDialog component.
+ */
 interface EditUserDialogProps {
-    open: boolean       // Define se o diálogo está aberto ou fechado
-    onOpenChange: (open: boolean) => void       // Função para alterar o estado de aberto ou fechado
-    user: User
-    onUserUpdated?: () => void      // Função opcional a executar após atualizar
+    open: boolean       // Controls the visibility of the dialog.
+    onOpenChange: (open: boolean) => void       // Handler to close or open the dialog.
+    user: User      // The data object of the user being edited.
+    onUserUpdated?: () => void      // Optional callback function to execute after a user is successfully updated (e.g., to refresh the list).
 }
 
-// Estado inicial para a gestão do feedback da ação (erros, sucesso, etc)
+/**
+ * @constant initialState
+ * @description The initial state for the Server Action response.
+ */
 const initialState: ActionState = {}
 
+/**
+ * @function EditUserDialog
+ * @description A dialog component for editing existing user accounts.
+ *
+ * @param {EditUserDialogProps} props - The component properties.
+ * @returns {JSX.Element} The rendered dialog component.
+ */
 export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: EditUserDialogProps) {
 
-    // useActionState gere o estado da atualização e fornece a função que será associada ao form
+    // 1. Server Action Integration
+    // useActionState hooks up the client form submission to the server-side `updateUser` function.
     const [state, formAction, isPending] = useActionState(updateUser, initialState)
 
-    // Estado local do formulário para armazenar os dados editáveis
+    // 2. Local State for Form Data
+    // This state manages all editable fields and is initialized with the current user data.
     const [formData, setFormData] = useState({
         name: user.name,
         email: user.email,
@@ -46,7 +70,11 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
         tier: user.tier,
     })
 
-    // Sempre que o utilizador passado por prop muda, atualizamos o formData
+    /**
+     * @hook useEffect
+     * @description Re-initializes `formData` whenever the `user` prop changes.
+     * This is crucial when the dialog is reused for different users (i.e., when a new user is selected).
+     */
     useEffect(() => {
         setFormData({
             name: user.name,
@@ -56,47 +84,58 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
         })
     }, [user])
 
-    // Quando a atualização for bem sucedida
+    /**
+     * @hook useEffect
+     * @description Runs side effects when the Server Action state changes.
+     * Triggers the success callback and closes the dialog upon successful user update.
+     */
     useEffect(() => {
         if (state.success) {
-            onUserUpdated?.()       // Executa callback caso exista (para refresh da lista, por exemplo)
-            onOpenChange(false)     // Fecha o Dialog
+            onUserUpdated?.()
+            onOpenChange(false)
         }
     }, [state.success, onUserUpdated, onOpenChange])
 
-    // Função genérica para alterar campos do formulário
+    /**
+     * @function handleChange
+     * @description Generic handler for updating local `formData` state from input and select changes.
+     * This keeps the input fields controlled.
+     *
+     * @param {keyof typeof formData} field - The name of the form field being updated.
+     * @param {string} value - The new value of the field.
+     */
     const handleChange = (field: keyof typeof formData, value: string) => {
         setFormData((prev) => ({
-            ...prev,        // Mantém os outros campos inalterados
-            [field]: value,     // Atualiza o campo modificado
+            ...prev,
+            [field]: value,
         }))
     }
 
+    // Dialog wrapper controls open/close state.
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px] bg-[#0a0a0a] border-white/10 [font-family:var(--font-poppins)]">
-                {/* Cabeçalho do diálogo */}
                 <DialogHeader>
                     <DialogTitle className="text-[#66b497]">Edit User</DialogTitle>
                     <DialogDescription className="text-white/70">Update the user information below</DialogDescription>
                 </DialogHeader>
 
-                {/* Formulário para submissão dos dados */}
+                {/* The form element linked to the Server Action */}
                 <form action={formAction} className="space-y-4">
 
-                    {/* Campos escondidos com dados importantes */}
+                    {/* Hidden inputs to pass non-editable (or state-controlled) essential data */}
                     <input type="hidden" name="userId" value={user.id} />
                     <input type="hidden" name="role" value={formData.role} />
                     <input type="hidden" name="tier" value={formData.tier} />
 
-                    {/* Mostra erro geral caso exista */}
+                    {/* Display general error message from the Server Action state */}
                     {state.error && (
                         <Alert variant="destructive">
                             <AlertDescription>{state.error}</AlertDescription>
                         </Alert>
                     )}
 
-                    {/* Campo do Nome */}
+                    {/* Name Input */}
                     <div className="space-y-2">
                         <Label htmlFor="edit-name" className="text-white">Name</Label>
                         <Input
@@ -109,11 +148,11 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                             required
                             disabled={isPending}
                         />
-                        {/* Mostra erro específico do campo Nome */}
+                        {/* Display field-specific validation errors */}
                         {state.fieldErrors?.name && <p className="text-sm text-red-500">{state.fieldErrors.name[0]}</p>}
                     </div>
 
-                    {/* Campo do Email */}
+                    {/* Email Input */}
                     <div className="space-y-2">
                         <Label htmlFor="edit-email" className="text-white">Email</Label>
                         <Input
@@ -126,14 +165,15 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                             required
                             disabled={isPending}
                         />
-                        {/* Mostra erro específico do campo Email */}
+                        {/* Display field-specific validation errors */}
                         {state.fieldErrors?.email && <p className="text-sm text-red-500">{state.fieldErrors.email[0]}</p>}
                     </div>
 
-                    {/* Dropdown Role (função do utilizador) */}
+                    {/* Role Select Input */}
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right text-white">Role</Label>
                         <Select value={formData.role} onValueChange={(value) => handleChange("role", value)} disabled={isPending}>
+                            {/* Select component manages the `role` part of the `formData` state */}
                             <SelectTrigger className="col-span-3 border border-white/10 bg-[#111111] text-white">
                                 <SelectValue placeholder="Select role" />
                             </SelectTrigger>
@@ -144,9 +184,10 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                         </Select>
                     </div>
 
-                    {/* Dropdown Tier (plano do utilizador) */}
+                    {/* Tier Select Input */}
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right text-white">Tier</Label>
+                        {/* Select component manages the `tier` part of the `formData` state */}
                         <Select value={formData.tier} onValueChange={(value) => handleChange("tier", value)} disabled={isPending}>
                             <SelectTrigger className="col-span-3 border border-white/10 bg-[#111111] text-white">
                                 <SelectValue placeholder="Select tier" />
@@ -160,14 +201,15 @@ export function EditUserDialog({ open, onOpenChange, user, onUserUpdated }: Edit
                         </Select>
                     </div>
 
-                    {/* Área dos botões */}
                     <DialogFooter>
+                        {/* Cancel Button */}
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
                             Cancel
                         </Button>
+                        {/* Submit Button (triggers formAction) */}
                         <Button type="submit" disabled={isPending} className="bg-white text-black hover:bg-white/90">
-                            {/* Ícone animado enquanto o pedido está a ser processado */}
                             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {/* Loading spinner when action is pending */}
                             Update User
                         </Button>
                     </DialogFooter>

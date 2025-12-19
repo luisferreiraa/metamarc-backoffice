@@ -1,9 +1,17 @@
 // src/components/admin/users/delete-user-dialog.tsx
+
+/**
+ * @fileoverview This component defines a modal dialog used in the Admin interface
+ * to confirm and execute the deletion of a single user account.
+ * It leverages the `useActionState` hook for integration with Next.js Server Actions.
+ */
+
 "use client"
 
 import { useActionState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
 
+// Imports UI components.
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,40 +23,57 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 
+// Imports the Server Action function and the ActionState type definition.
 import { deleteUser, type ActionState } from "@/lib/actions/user-actions"
 
-// Tipagem das props que o componente espera receber
+/**
+ * @interface DeleteUserDialogProps
+ * @description Defines the props required for the DeleteUserDialog component.
+ */
 interface DeleteUserDialogProps {
-    open: boolean       // Define se o Dialog está visível ou não
-    onOpenChange: (open: boolean) => void       // Função para abrir ou fechar o Dialog
-    userId: string | null       // ID do utilizador a eliminar (null se não selecionado)
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    userId: string | null
 }
 
-// Estado inicial da ação (nenhum erro, nenhum sucesso ainda)
+/**
+ * @constant initialState
+ * @description The initial state for the Server Action response.
+ */
 const initialState: ActionState = {}
 
+/**
+ * @function DeleteUserDialog
+ * @description A dialog component for confirming and executing the deletion of a user.
+ *
+ * @param {DeleteUserDialogProps} props - The component properties.
+ * @returns {JSX.Element | null} The rendered dialog component, or null if no userId is provided.
+ */
 export function DeleteUserDialog({ open, onOpenChange, userId }: DeleteUserDialogProps) {
 
-    // useActionState gere o estado do processo de eliminação
-    // state = estado atual (erros, sucesso, etc)
-    // formAction = função que será atribuída ao action do form
-    // isPending = booleano que indica se o pedido está a ser processado
+    // 1. Server Action Integration
+    // useActionState hooks up the client component to the server-side function `deleteUser`.
     const [state, formAction, isPending] = useActionState(deleteUser, initialState)
 
-    // useEffect para fechar automaticamente o Dialog se a eliminação for bem sucedida
+    /**
+     * @hook useEffect
+     * @description Runs side effects when the Server Action state changes.
+     * Closes the dialog upon successful deletion.
+     */
     useEffect(() => {
         if (state.success) {
-            onOpenChange(false)     // Fecha o Dialog
+            onOpenChange(false)     // Close the dialog.
+            // A parent component should be responsible for data refetching/re-rendering upon success.
         }
-    }, [state.success, onOpenChange])
+    }, [state.success, onOpenChange])       // Dependencies ensure effects run only when needed.
 
-    // Se não houver utilizador selecionado, o componente não renderiza nada
+    // Guard clause: If no user ID is provided, render nothing.
     if (!userId) return null
 
+    // Guard clause: If no user ID is provided, render nothing.
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px] bg-[#1a1a1a] border border-white/10">
-                {/* Cabeçalho do Diálogo */}
                 <DialogHeader>
                     <DialogTitle className="text-white font-semibold">Confirm Deletion</DialogTitle>
                     <DialogDescription className="text-white/70">
@@ -57,21 +82,19 @@ export function DeleteUserDialog({ open, onOpenChange, userId }: DeleteUserDialo
                     </DialogDescription>
                 </DialogHeader>
 
-                {/* Formulário responsável por submeter o pedido de eliminação */}
+                {/* The form element linked to the Server Action */}
                 <form action={formAction}>
-                    {/* Campo escondido com o ID do utilizador a eliminar */}
                     <input type="hidden" name="userId" value={userId} />
 
-                    {/* Alerta de erro caso a eliminação falhe */}
+                    {/* Display error message from the Server Action state */}
                     {state.error && (
                         <Alert variant="destructive" className="mb-4">
                             <AlertDescription>{state.error}</AlertDescription>
                         </Alert>
                     )}
 
-                    {/* Área dos botões do diálogo */}
                     <DialogFooter className="gap-2">
-                        {/* Botão para cancelar e fechar o diálogo */}
+                        {/* Cancel Button (closes the dialog) */}
                         <Button
                             type="button"
                             variant="outline"
@@ -81,9 +104,9 @@ export function DeleteUserDialog({ open, onOpenChange, userId }: DeleteUserDialo
                         >
                             Cancel
                         </Button>
-                        {/* Botão de confirmação de eliminação */}
+                        {/* Submit Button (triggers the Server Action) */}
                         <Button type="submit" variant="destructive" disabled={isPending} className="bg-red-600 hover:bg-red-700">
-                            {/* Ícone de loading aparece durante o processamento */}
+                            {/* Loading spinner when action is pending */}
                             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Delete User
                         </Button>

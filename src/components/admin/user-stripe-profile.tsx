@@ -1,8 +1,15 @@
 // src/components/admin/user-stripe-profile.tsx
+
+/**
+ * @fileoverview This component is designed to fetch and display detailed Stripe (payment and subscription)
+ * information for a specific user, intended for use within the Admin dashboard. It uses an Accordion
+ * for collapsible content display.
+ */
+
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams } from "next/navigation"     // Hook to access dynamic route parameters (e.g., user ID from URL).
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { LoadingSpinner } from "../layout/loading-spinner"
 import { CreditCard, Mail, CalendarDays, DollarSign, ShieldCheck } from "lucide-react"
@@ -80,7 +87,6 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
                     <AccordionContent>
                         <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/10 p-6 rounded-xl shadow-lg space-y-8 mt-5">
 
-                            {/* Customer Info */}
                             <div className="space-y-4 border-b border-white/10 pb-4">
                                 <h3 className="text-white text-xl font-semibold mb-2">Customer</h3>
                                 {stripeData ? (
@@ -99,7 +105,6 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
                                 )}
                             </div>
 
-                            {/* Subscription */}
                             <div className="space-y-4 border-b border-white/10 pb-4">
                                 <h3 className="text-white text-xl font-semibold mb-2">Subscription</h3>
                                 {activeSubscription ? (
@@ -121,7 +126,6 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
                                 )}
                             </div>
 
-                            {/* Recent Payments */}
                             <div className="space-y-4 border-b border-white/10 pb-4">
                                 <h3 className="text-white text-xl font-semibold mb-2">Recent Payments</h3>
                                 {stripeData?.invoices.length ? (
@@ -152,7 +156,6 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
                                 )}
                             </div>
 
-                            {/* Payment Methods */}
                             <div className="space-y-4">
                                 <h3 className="text-white text-xl font-semibold mb-2">Payment Methods</h3>
                                 {stripeData?.paymentMethods.length ? (
