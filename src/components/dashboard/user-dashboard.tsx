@@ -26,26 +26,32 @@ export function UserDashboard() {
             }
 
             try {
-                const apiData = await fetchWithAuth(`${API_BASE_URL}/api/auth/get-api-key`, {
-                    method: "GET"
+                // 1️⃣ Pega dados principais do user
+                const userResponse = await fetchWithAuth(`${API_BASE_URL}/api/auth/get-api-key`, {
+                    method: "GET",
+                })
+                // 2️⃣ Pega stats do rate limiter
+                const statsResponse = await fetchWithAuth(`${API_BASE_URL}/api/auth/user-stats`, {
+                    method: "GET",
                 })
 
                 setUser({
-                    id: apiData.id,
-                    name: apiData.name,
-                    email: apiData.email,
-                    role: apiData.role,
-                    tier: apiData.tier,
-                    isActive: apiData.isActive,
-                    apiKey: apiData.apiKey,
-                    apiKeyExpiresAt: apiData.apiKeyExpiresAt,
-                    createdAt: apiData.createdAt,
-                    requestsUsed: apiData.requestsUsed,
-                    requestsRemaining: apiData.requestsRemaining,
-                    resetInSeconds: apiData.resetInSeconds
+                    id: userResponse.id,
+                    name: userResponse.name,
+                    email: userResponse.email,
+                    role: userResponse.role,
+                    tier: userResponse.tier,
+                    isActive: userResponse.isActive,
+                    apiKey: userResponse.apiKey,
+                    apiKeyExpiresAt: userResponse.apiKeyExpiresAt,
+                    createdAt: userResponse.createdAt,
+                    // ✅ aqui combinamos os campos do rate limiter
+                    requestsUsed: statsResponse.requestsUsed,
+                    requestsRemaining: statsResponse.requestsRemaining,
+                    resetInSeconds: statsResponse.resetInSeconds,
                 })
             } catch (error) {
-                console.error("Error fetching user data:", error)
+                console.error("Error fetching user data or stats:", error)
             } finally {
                 setIsLoading(false)
             }

@@ -26,7 +26,7 @@ export default function SuccessContent() {
           Thank you for choosing our service. Your subscription has been successfully activated.
         </p>
 
-        <Link href="/dashboard">
+        <Link href="https://metamarc.online/dashboard">
           <Button
             variant="outline"
             size="sm"
