@@ -121,7 +121,7 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
                                         </Badge>
                                         <div className="flex items-center gap-3 text-white">
                                             <CalendarDays className="h-4 w-4 text-[#66b497]" />
-                                            Period ends: {new Date(activeSubscription.current_period_end * 1000).toLocaleDateString()}
+                                            Period ends: {periodEndDate ? periodEndDate.toLocaleDateString() : "N/A"}
                                         </div>
                                         <div className="flex items-center gap-3 text-white">
                                             <ShieldCheck className="h-4 w-4 text-[#66b497]" />
