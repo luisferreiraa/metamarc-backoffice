@@ -75,11 +75,9 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
         (sub) => sub.status === "active" || sub.status === "trialing"
     )
 
-    const periodEndDate = activeSubscription
-        ? new Date(activeSubscription.current_period_end * 1000)
-        : stripeData
-            ? new Date(new Date(stripeData.customer.created).getTime() + 30 * 24 * 60 * 60 * 1000)
-            : null
+    const periodEndDate = activeSubscription?.currentPeriodEnd
+        ? new Date(activeSubscription.currentPeriodEnd * 1000)
+        : null
 
     return (
         <div className="container mx-auto px-4 space-y-8 font-[family-name:var(--font-poppins)]">
@@ -125,7 +123,7 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
                                         </div>
                                         <div className="flex items-center gap-3 text-white">
                                             <ShieldCheck className="h-4 w-4 text-[#66b497]" />
-                                            Cancel at period end: {activeSubscription.cancel_at_period_end ? "Yes" : "No"}
+                                            Cancel at period end: {activeSubscription.cancelAtPeriodEnd ? "Yes" : "No"}
                                         </div>
                                     </div>
                                 ) : (
