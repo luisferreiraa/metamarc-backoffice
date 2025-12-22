@@ -75,6 +75,12 @@ export function UserStripeProfile({ userId, title }: UserStripeProfileProps) {
         (sub) => sub.status === "active" || sub.status === "trialing"
     )
 
+    const periodEndDate = activeSubscription
+        ? new Date(activeSubscription.current_period_end * 1000)
+        : stripeData
+            ? new Date(new Date(stripeData.customer.created).getTime() + 30 * 24 * 60 * 60 * 1000)
+            : null
+
     return (
         <div className="container mx-auto px-4 space-y-8 font-[family-name:var(--font-poppins)]">
             <Accordion type="single" collapsible>

@@ -1,30 +1,54 @@
 // src/components/subscription/subscription-plans.tsx
+
+/**
+ * @fileoverview This component renders a list of available subscription plans (tiers),
+ * displays the user's current plan, and handles the subscription process initiation
+ * by redirecting the user to the Stripe checkout page.
+ */
+
 "use client"
 
 import { useEffect, useState } from "react"
-import axios from 'axios'
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "../ui/button"
+import axios from 'axios'       // Used for making the POST request to initiate Stripe checkout.
+import { useRouter } from "next/navigation"     // Hook for programmatic routing.
+import Link from "next/link"        // For declarative navigation (Back button).
+import { Button } from "../ui/button"       // UI component for action buttons.
+// Imports icons for visual representation of tiers/actions.
 import { ArrowLeft, CheckCircle2, Crown, Rocket, Star } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
-import { LoadingSpinner } from "../layout/loading-spinner"
-import { fetchTiers } from "@/lib/fetchTiers"
-import { Tier } from "@/interfaces/stripe-tier"
-import { UserData } from "@/interfaces/user-data"
-import { fetchWithAuth } from "@/lib/fetchWithAuth"
-import { API_BASE_URL } from "@/utils/urls"
+import { LoadingSpinner } from "../layout/loading-spinner"      // Loading indicator component.
+import { fetchTiers } from "@/lib/fetchTiers"       // Utility function to fetch tier/product data from Stripe.
+import { Tier } from "@/interfaces/stripe-tier"     // Type definition for a single tier object.
+import { UserData } from "@/interfaces/user-data"       // Type definition for basic user data needed here.
+import { fetchWithAuth } from "@/lib/fetchWithAuth"     // Utility for making authenticated API requests.
+import { API_BASE_URL } from "@/utils/urls"     // Base URL constant for API endpoints.
 
+/**
+ * @function SubscriptionPlans
+ * @description Fetches subscription tiers and the current user's plan, then displays them
+ * in a grid layout, allowing the user to initiate a subscription process.
+ *
+ * @returns {JSX.Element} The rendered subscription plans page.
+ */
 export default function SubscriptionPlans() {
-    const [loading, setLoading] = useState(false)       // Estado geral de carregamento
-    const [userLoading, setUserLoading] = useState(true)  // Estado de carregamento dos dados do utilizador
-    const [tiersLoading, setTiersLoading] = useState(true)  // Estado de carregamento dos planos
-    const [selectedTier, setSelectedTier] = useState('')        // Plano selecionado atualmente
-    const [user, setUser] = useState<UserData | null>(null)     // Dados do utilizador
-    const [tiers, setTiers] = useState<Tier[]>([])      // Array de planos disponíveis
-    const router = useRouter()      // Router do Next.js para navegação
+    // State to track if the subscription initiation process is ongoing (for button disabled state).
+    const [loading, setLoading] = useState(false)
+    // State to track if the current user data is being fetched.
+    const [userLoading, setUserLoading] = useState(true)
+    // State to track if the subscription tiers data is being fetched.
+    const [tiersLoading, setTiersLoading] = useState(true)
+    // State to potentially store the currently selected tier (not directly used in `handleSubscribe`).
+    const [selectedTier, setSelectedTier] = useState('')
+    // State to store the current user's relevant data (ID and current tier).
+    const [user, setUser] = useState<UserData | null>(null)
+    // State to store the list of available subscription tiers.
+    const [tiers, setTiers] = useState<Tier[]>([])
+    // Router instance for navigation.
+    const router = useRouter()
 
-    // Busca dados quando o componente é montado
+    /**
+     * @hook useEffect
+     * @description Fetches both the available tiers and the current user's subscription status on mount.
+     */
     useEffect(() => {
         const loadTiers = async () => {
             const tiersData = await fetchTiers()
@@ -32,6 +56,11 @@ export default function SubscriptionPlans() {
             setTiersLoading(false)
         }
 
+        /**
+         * @async
+         * @function fetchUserData
+         * @description Fetches the current user's ID and active tier to identify the current plan.
+         */
         const fetchUserData = async () => {
             const userData = localStorage.getItem("user")
 
@@ -41,6 +70,7 @@ export default function SubscriptionPlans() {
             }
 
             try {
+                // Fetch authenticated user data, including the current tier.
                 const apiData = await fetchWithAuth(`${API_BASE_URL}/api/auth/get-api-key`)
 
                 setUser({
@@ -57,54 +87,64 @@ export default function SubscriptionPlans() {
 
         loadTiers()
         fetchUserData()
-    }, [])
+    }, [])      // Runs only once on component mount.
 
-    // Função para lidar com a assinatura de um plano
+
+    /**
+     * @async
+     * @function handleSubscribe
+     * @description Initiates the subscription checkout process for the specified tier.
+     * It calls the backend API which communicates with Stripe, and then redirects the user
+     * to the Stripe checkout URL.
+     *
+     * @param {string} tier - The name of the subscription tier to subscribe to.
+     */
     const handleSubscribe = async (tier: string) => {
         setLoading(true)
         try {
             const token = localStorage.getItem('token')
 
             if (!token) {
-                throw new Error('Usuário não autenticado')
+                throw new Error('User not authenticated.')
             }
 
-            console.log('Iniciando assinatura para tier:', tier)
+            console.log('Initializing subscription for tier:', tier)
 
-            // Envia requisição para a API de assinatura
+            // API call to the local backend endpoint responsible for creating the Stripe session.
             const response = await axios.post(
                 '/api/subscription/subscribe',
-                { tier },
+                { tier },       // Payload contains the selected tier name.
                 {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`      // Sends the auth token.
                     }
                 }
             )
 
-            console.log('Resposta da API:', response.data)
+            console.log('API response:', response.data)
 
-            // Se a API retornar uma URL, redireciona para o checkout
+            // If successful, the response contains the Stripe checkout URL.
             if (response.data.url) {
+                // Redirects the user to the Stripe hosted checkout page.
                 window.location.href = response.data.url
             } else {
-                throw new Error('URL de checkout não recebida')
+                throw new Error('Checkout URL not received.')
             }
         } catch (error) {
-            console.error('Erro na subscrição:', error)
+            console.error('Error in subscription:', error)
             if (axios.isAxiosError(error) && error.response?.status === 401) {
-                alert('Sessão expirada. Por favor, faça login novamente.')
+                alert('Session expired. Please log in again.')
                 router.push('/login')
             } else {
-                alert(error instanceof Error ? error.message : 'Erro ao processar pagamento')
+                alert(error instanceof Error ? error.message : 'Error processing payment.')
             }
         } finally {
             setLoading(false)
         }
     }
 
-    // Enquanto dados não estiverem prontos
+    // Display loading spinner while either user data or tiers data is being fetched.
     if (userLoading || tiersLoading) {
         return (
             <LoadingSpinner message="Loading..." />
@@ -115,11 +155,11 @@ export default function SubscriptionPlans() {
         <div className="min-h-screen bg-black">
             <div className="container mx-auto px-4 py-20 space-y-6 [font-family:var(--font-poppins)] bg-black">
 
-                {/* Cabeçalho */}
+                {/* Header Section */}
                 <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
                         <Link href="/dashboard">
-                            {/* Botão para voltar ao dashboard */}
+                            {/* Back button */}
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -135,11 +175,12 @@ export default function SubscriptionPlans() {
                     </div>
                 </div>
 
-                {/* Grid dos planos */}
+                {/* Subscription Plans Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {tiers.map((tierObj) => {
                         const product = tierObj.product
                         const price = tierObj.prices[0]
+                        // Check if this plan matches the user's current tier.
                         const isCurrentPlan = user?.tier === product.name
 
                         return (
@@ -148,7 +189,7 @@ export default function SubscriptionPlans() {
                                 className="flex flex-col justify-between bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/10 hover:border-[#66b497]/50 rounded-xl p-6 space-y-4 transition-all duration-300"
                             >
                                 <div>
-                                    {/* Ícone por tipo de plano */}
+                                    {/* Display different icons based on the product name */}
                                     {product.name === "PRO" && (
                                         <Rocket className="h-10 w-10 text-[#66b497]" />
                                     )}
@@ -159,11 +200,11 @@ export default function SubscriptionPlans() {
                                         <Crown className="h-10 w-10 text-[#66b497]" />
                                     )}
 
-                                    {/* Nome do plano e badge */}
                                     <div className="flex items-center mt-5">
                                         <h2 className="text-xl text-white font-semibold [font-family:var(--font-poppins)]">
                                             {product.name}
                                         </h2>
+                                        {/* Badge indicating the current active plan */}
                                         {isCurrentPlan && (
                                             <span className="ml-auto bg-[#66b497]/10 text-[#66b497] text-xs border border-[#66b497]/50 px-2 py-0.5 rounded">
                                                 Your Plan
@@ -171,12 +212,13 @@ export default function SubscriptionPlans() {
                                         )}
                                     </div>
 
-                                    {/* Preço */}
+                                    {/* Price Display */}
                                     <div className="text-3xl font-bold text-[#66b497] mb-4 [font-family:var(--font-poppins)]">
+                                        {/* Price is converted from cents to Euros/dollars */}
                                         {price ? `€${(price.unit_amount / 100).toFixed(2)}/mo` : "No price"}
                                     </div>
 
-                                    {/* Features */}
+                                    {/* Features List */}
                                     <ul className="space-y-3 my-4">
                                         {product.metadata?.features
                                             ? product.metadata.features.split(";").map((feature, idx) => (
@@ -190,8 +232,7 @@ export default function SubscriptionPlans() {
                                     </ul>
                                 </div>
 
-
-                                {/* Botão de Subscrição */}
+                                {/* Subscription Action Button */}
                                 <Button
                                     onClick={() => handleSubscribe(product.name)}
                                     disabled={loading || isCurrentPlan}
@@ -200,6 +241,7 @@ export default function SubscriptionPlans() {
                                         : "bg-[#66b497] text-black hover:bg-[#5aa88b] disabled:bg-white/20"
                                         }`}
                                 >
+                                    {/* Dynamic button text based on state and tier name */}
                                     {loading
                                         ? "Processing..."
                                         : isCurrentPlan

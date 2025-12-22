@@ -1,6 +1,7 @@
 interface StripeCustomer {
     email: string
     name: string
+    created: number
 }
 
 interface Subscription {
