@@ -1,84 +1,114 @@
-// src/components/auth/login-form.tsx
+// src/ components/auth/login-form.tsx
 
-// Sugestões:
-// - Validar email antes do submit
-// - Usar cookies HttpOnly em vez de localStorage
+/**
+ * @fileoverview This component renders the client-side login form, handles form submission,
+ * communicates with the authentication API, stores the authentication token and user data
+ * in local storage upon success, and redirects the user based on their role.
+ */
 
 "use client"
 
 import type React from "react"
 
 import { useState } from "react"
-import Link from "next/link"
+import Link from "next/link"        // For navigation to the registration page.
+// Imports various UI components (shadcn/ui style).
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+// Imports icons for loading and error states.
 import { AlertCircle, Loader2 } from "lucide-react"
 
+/**
+ * @function LoginForm
+ * @description Handles user login via email and password submission.
+ *
+ * @returns {JSX.Element} The rendered login form card.
+ */
 export function LoginForm() {
-    const [isLoading, setIsLoading] = useState(false)       // Estado para indicar se está a carregar
-    const [error, setError] = useState("")      // Estado para armazenar mensagens de erro
-    const [formData, setFormData] = useState({      // Estado do form (email e password)
+    // State to track if the submission is in progress.
+    const [isLoading, setIsLoading] = useState(false)
+    // State to store and display error messages.
+    const [error, setError] = useState("")
+    // State to store form input values (email and password).
+    const [formData, setFormData] = useState({
         email: "",
         password: "",
     })
 
-    // Função chamada quando o form é submetido
+    /**
+     * @async
+     * @function handleSubmit
+     * @description Handles the form submission event, sends credentials to the API,
+     * processes the response, and manages local storage/redirection.
+     *
+     * @param {React.FormEvent} e - The form event object.
+     */
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()      // Evita recarregamento da página
-        setIsLoading(true)      // Ativa estado de loading
-        setError("")        // Limpa erros anteriores
+        e.preventDefault()      // Prevents default form submission behavior (page reload).
+        setIsLoading(true)
+        setError("")
 
         try {
-            // Envia requisição POST para a tora de login da API
+
+            // 1. API Call to Login Endpoint
             const response = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(formData),     // Envia email e password
+                body: JSON.stringify(formData),     // Sends email and password.
             })
 
+            // 2. Handle Successful Login (HTTP status 200-299)
             if (response.ok) {
                 const data = await response.json()
 
-                // Armazenar token e dados do utilizador no localStorage
+                // Store token and user data (including role) securely in local storage.
                 localStorage.setItem("token", data.token)
                 localStorage.setItem("user", JSON.stringify(data.user))
 
-                // Redireciona com base no role
+                // Redirect based on user role.
                 if (data.user.role === "ADMIN") {
-                    window.location.href = "/admin"
+                    window.location.href = "/admin"     // Redirect to admin dashboard.
                 } else {
-                    window.location.href = "/dashboard"
+                    window.location.href = "/dashboard"     // Redirect to client dashboard.
                 }
             } else {
-                // Caso haja erro, tenta obter a mensagem personalizada
+
+                // 3. Handle Login Failure (e.g., 401 Unauthorized, 400 Bad Request)
+                // Attempts to parse error message from the response body, falling back to a generic message.
                 const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
                 setError(errorData.message || "Login error")
             }
         } catch (err) {
-            // Erro de rede ou falha na ligação
+
+            // 4. Handle Network/Connection Errors (e.g., server unreachable)
             console.error("Connection error:", err)
             setError("Connection error. Please check if the server is running and try again.")
         } finally {
-            setIsLoading(false)
+            setIsLoading(false)     // Stops the loading indicator.
         }
     }
 
-    // Atualiza o estado do form sempre que o utilizador escreve no input
+    /**
+     * @function handleChange
+     * @description Updates the `formData` state whenever an input field changes.
+     *
+     * @param {React.ChangeEvent<HTMLInputElement>} e - The change event object.
+     */
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData((prev) => ({
             ...prev,
-            [e.target.name]: e.target.value,
+            [e.target.name]: e.target.value,        // Uses input's `name` attribute to update the corresponding state key.
         }))
     }
 
+    // --- Component Rendering ---
     return (
         <Card className="bg-[#1a1a1a] border border-white/10 w-full max-w-md text-white [font-family:var(--font-poppins)] shadow-xl">
-            {/* Cabeçalho do cartão */}
             <CardHeader className="space-y-1 text-center">
                 <CardTitle className="text-3xl font-semibold text-[#66b497]">Login</CardTitle>
                 <CardDescription className="text-sm text-white/70">
@@ -86,7 +116,6 @@ export function LoginForm() {
                 </CardDescription>
             </CardHeader>
 
-            {/* Formulário */}
             <form onSubmit={handleSubmit}>
                 <CardContent className="space-y-5">
                     {error && (
@@ -96,7 +125,6 @@ export function LoginForm() {
                         </Alert>
                     )}
 
-                    {/* Campo de email */}
                     <div className="space-y-2">
                         <Label htmlFor="email" className="text-white">Email</Label>
                         <Input
@@ -111,7 +139,6 @@ export function LoginForm() {
                         />
                     </div>
 
-                    {/* Campo de password */}
                     <div className="space-y-2">
                         <Label htmlFor="password" className="text-white">Password</Label>
                         <Input
@@ -126,19 +153,16 @@ export function LoginForm() {
                     </div>
                 </CardContent>
 
-                {/* Rodapé do cartão (botão e link) */}
                 <CardFooter className="flex flex-col space-y-5 mt-4">
                     <Button
                         type="submit"
                         disabled={isLoading}
                         className="w-full bg-[#66b497] hover:bg-[#5aa287] text-black font-semibold transition-colors"
                     >
-                        {/* Mostra spinner enquanto carrega */}
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Login
                     </Button>
 
-                    {/* Link para a página de registo */}
                     <p className="text-sm text-center text-white/70">
                         Don't have an account?{" "}
                         <Link href="/register" className="text-[#66b497] hover:underline hover:text-[#80cbb1] transition-colors">

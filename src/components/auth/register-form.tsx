@@ -1,11 +1,5 @@
 // src/components/auth/register-form.tsx
 
-// Sugestões:
-// - Adicionar validação de força da password
-// - Mostrar regras (mínimo 8 caracteres, número, etc)
-// - Habilitar feedback em tempo real ao escrever
-// - Evitar múltiplos registos com o mesmo email
-
 "use client"
 
 import type React from "react"
@@ -21,23 +15,23 @@ import { AlertCircle, Loader2 } from "lucide-react"
 import { API_BASE_URL } from "@/utils/urls"
 
 export function RegisterForm() {
-    const [isLoading, setIsLoading] = useState(false)       // Estado para loading
-    const [error, setError] = useState("")      // Estado para mensagens de erro
-    const [success, setSuccess] = useState(false)       // Estado para confirmação de sucesso
-    const [formData, setFormData] = useState({      // Estado do form
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState("")
+    const [success, setSuccess] = useState(false)
+    const [formData, setFormData] = useState({
         name: "",
         email: "",
         password: "",
         confirmPassword: "",
     })
 
-    // Função que trata o submit do form
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()      // Previne reload da página
-        setIsLoading(true)
-        setError("")        // Limpa erros anteriores
 
-        // Validação simples de passwords
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setIsLoading(true)
+        setError("")
+
+
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords don't match")
             setIsLoading(false)
@@ -45,13 +39,13 @@ export function RegisterForm() {
         }
 
         try {
-            // Chamada à API de registo
+
             const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                // Envia apenas os campos necessários para o backend
+
                 body: JSON.stringify({
                     name: formData.name,
                     email: formData.email,
@@ -60,22 +54,22 @@ export function RegisterForm() {
             })
 
             if (response.ok) {
-                // Se correr bem, mostra mensagem de sucesso
+
                 setSuccess(true)
             } else {
-                // Caso contrário, tenta extrair a mensagem de erro
+
                 const errorData = await response.json()
                 setError(errorData.message || "Error creating account")
             }
         } catch (err) {
-            // Erros de rede
+
             setError("Connection error. Try again.")
         } finally {
             setIsLoading(false)
         }
     }
 
-    // Atualiza o estado do formulário à medida que o utilizador escreve
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData((prev) => ({
             ...prev,
@@ -83,7 +77,7 @@ export function RegisterForm() {
         }))
     }
 
-    // Se a criação da conta foi bem sucedida, mostra cartão de confirmação
+
     if (success) {
         return (
             <Card className="w-full max-w-md [font-family:var(--font-poppins)]">
@@ -100,10 +94,9 @@ export function RegisterForm() {
         )
     }
 
-    // Formulário de registo
+
     return (
         <Card className="bg-[#1a1a1a] border border-white/10 w-full max-w-md text-white [font-family:var(--font-poppins)] shadow-xl">
-            {/* Cabeçalho com título e descrição */}
             <CardHeader className="space-y-1 text-center">
                 <CardTitle className="text-3xl font-semibold text-[#66b497]">Create Account</CardTitle>
                 <CardDescription className="text-sm text-white/70">Fill in the details to create your account</CardDescription>
@@ -117,7 +110,6 @@ export function RegisterForm() {
                         </Alert>
                     )}
 
-                    {/* Campo: Nome */}
                     <div className="space-y-2">
                         <Label htmlFor="name" className="text-white">Name</Label>
                         <Input
@@ -132,7 +124,6 @@ export function RegisterForm() {
                         />
                     </div>
 
-                    {/* Campo: Email */}
                     <div className="space-y-2">
                         <Label htmlFor="email" className="text-white">Email</Label>
                         <Input
@@ -147,7 +138,6 @@ export function RegisterForm() {
                         />
                     </div>
 
-                    {/* Campo: Password */}
                     <div className="space-y-2">
                         <Label htmlFor="password" className="text-white">Password</Label>
                         <Input
@@ -161,7 +151,6 @@ export function RegisterForm() {
                         />
                     </div>
 
-                    {/* Campo: Confirmar Password */}
                     <div className="space-y-2">
                         <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
                         <Input
@@ -176,7 +165,6 @@ export function RegisterForm() {
                     </div>
                 </CardContent>
 
-                {/* Rodapé com botão e link para login */}
                 <CardFooter className="flex flex-col space-y-5 mt-4">
                     <Button type="submit" className="w-full bg-[#66b497] hover:bg-[#5aa287] text-black font-semibold transition-colors" disabled={isLoading}>
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
