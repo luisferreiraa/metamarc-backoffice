@@ -39,9 +39,6 @@ export function Footer() {
                             <li>
                                 <a href="#pricing" className="hover:text-[#66b497] transition-colors">Pricing</a>
                             </li>
-                            <li>
-                                <a href="#" className="hover:text-[#66b497] transition-colors">Status</a>
-                            </li>
                         </ul>
                     </div>
 
