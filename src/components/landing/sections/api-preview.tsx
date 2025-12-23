@@ -35,7 +35,7 @@ export function ApiPreview() {
                                 size="icon"
                                 className="text-white/60 hover:text-white"
                                 onClick={() =>
-                                    copyToClipboard("curl -X GET 'https://api.unimarc.dev/fields/245'")
+                                    copyToClipboard("curl -X GET 'https://api.metamarc.online/api/definitions/controlFieldDefinition/001'")
                                 }
                             >
                                 <Copy className="h-4 w-4" />
@@ -43,7 +43,7 @@ export function ApiPreview() {
                         </div>
                         <pre className="text-[#66b497] whitespace-pre-wrap text-sm leading-relaxed">
                             {`curl -X GET \\
-  'https://api.unimarc.dev/fields/245'`}
+  'https://api.metamarc.online/api/definitions/controlFieldDefinition/001'`}
                         </pre>
                     </div>
 
@@ -62,22 +62,18 @@ export function ApiPreview() {
                                 className="text-white/60 hover:text-white"
                                 onClick={() =>
                                     copyToClipboard(`{
-  "tag": "245",
-  "name": "Title and Statement of Responsibility",
+  "tag": "001",
+  "name": "RECORD IDENTIFIER",
   "repeatable": false,
   "mandatory": true,
-  "subfields": [
+  "translations": [
     {
-      "code": "a",
-      "name": "Title",
-      "repeatable": false,
-      "mandatory": true
-    },
-    {
-      "code": "b",
-      "name": "Remainder of title",
-      "repeatable": false,
-      "mandatory": false
+      "language": "en",
+      "name": "RECORD IDENTIFIER",
+      "tips": [
+        "This field contains characters exclusively associated with the record...",
+        "According to ISO 2709, this field contains no subfields."
+      ]
     }
   ]
 }`)}
@@ -87,22 +83,18 @@ export function ApiPreview() {
                         </div>
                         <pre className="whitespace-pre-wrap text-white text-sm leading-relaxed">
                             {`{
-  "tag": "245",
-  "name": "Title and Statement of Responsibility",
+  "tag": "001",
+  "name": "RECORD IDENTIFIER",
   "repeatable": false,
   "mandatory": true,
-  "subfields": [
+  "translations": [
     {
-      "code": "a",
-      "name": "Title",
-      "repeatable": false,
-      "mandatory": true
-    },
-    {
-      "code": "b",
-      "name": "Remainder of title",
-      "repeatable": false,
-      "mandatory": false
+      "language": "en",
+      "name": "RECORD IDENTIFIER",
+      "tips": [
+        "This field contains characters exclusively associated with the record...",
+        "According to ISO 2709, this field contains no subfields."
+      ]
     }
   ]
 }`}
