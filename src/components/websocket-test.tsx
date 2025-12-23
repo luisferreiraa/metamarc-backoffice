@@ -148,7 +148,7 @@ export function WebSocketTest() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium mb-1">Server URL</label>
-                        <Input value={serverUrl} onChange={(e) => setServerUrl(e.target.value)} placeholder="89.28.236.11:3000" />
+                        <Input value={serverUrl} onChange={(e) => setServerUrl(e.target.value)} placeholder="https://api.metamarc.online" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">Token (optional)</label>

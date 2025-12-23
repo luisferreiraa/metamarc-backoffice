@@ -34,7 +34,7 @@ export function Hero() {
                                     Try free
                                 </Button>
                             </Link>
-                            <Link href="http://89.28.236.11:3000/api-docs/">
+                            <Link href="https://api.metamarc.online/api-docs/">
                                 <Button variant="outline" className="px-8 py-6 [font-family:var(--font-poppins)]">
                                     View Docs
                                 </Button>
